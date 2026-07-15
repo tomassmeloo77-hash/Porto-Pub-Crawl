@@ -2291,6 +2291,15 @@ try{
     }
   }
 
+  document.querySelectorAll('.js-book-crawl, .js-book-pack').forEach(function(el){
+    // fires the instant a finger/cursor even approaches the button — by the
+    // time someone actually opens the modal, picks a date and hits "Continue
+    // to payment", Stripe.js has had the maximum possible head start
+    el.addEventListener('mouseenter', loadStripeJs, {passive:true, once:true});
+    el.addEventListener('touchstart', loadStripeJs, {passive:true, once:true});
+    el.addEventListener('focus', loadStripeJs, {once:true});
+  });
+
   document.querySelectorAll('.js-book-crawl').forEach(function(el){
     el.addEventListener('click', function(e){ e.preventDefault(); openBookModal('crawl', el); });
   });
@@ -2373,16 +2382,11 @@ try{
       redirectToPaymentLink();
       return;
     }
-    loadStripeJs().then(function(){
-      if(typeof Stripe === 'undefined'){ redirectToPaymentLink(); return; }
-      runEmbeddedCheckout();
-    });
-  }
 
-  function runEmbeddedCheckout(){
-    const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-
-    fetch('/api/create-checkout-session', {
+    // run both in parallel — no reason to wait for Stripe.js to finish
+    // downloading before we even ask our own server for the session
+    const stripeReady = loadStripeJs();
+    const sessionReady = fetch('/api/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -2391,8 +2395,7 @@ try{
         date: state.date,
         quantity: state.qty
       })
-    })
-    .then(function(res){
+    }).then(function(res){
       if(!res.ok){
         return res.json().catch(function(){ return {}; }).then(function(errBody){
           console.error('create-checkout-session failed:', res.status, errBody);
@@ -2400,32 +2403,37 @@ try{
         });
       }
       return res.json();
-    })
-    .then(function(data){
-      if(!data.clientSecret) throw new Error('no client secret');
-
-      selectStep.style.display = 'none';
-      checkoutStep.style.display = '';
-
-      stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret })
-        .then(function(checkout){
-          embeddedCheckout = checkout;
-          checkout.mount('#checkoutMount');
-          checkoutLoading.classList.add('hide');
-        })
-        .catch(function(err){
-          // embedding failed even though the backend responded — fall back
-          console.error('initEmbeddedCheckout failed:', err);
-          resetToSelectStep();
-          redirectToPaymentLink();
-        });
-    })
-    .catch(function(err){
-      // no backend available on this deployment (e.g. static-only hosting)
-      // — fall back to the hosted Payment Link so booking still works.
-      console.error('Embedded checkout unavailable, falling back:', err);
-      redirectToPaymentLink();
     });
+
+    Promise.all([stripeReady, sessionReady])
+      .then(function(results){
+        const data = results[1];
+        if(typeof Stripe === 'undefined') throw new Error('Stripe.js failed to load');
+        if(!data.clientSecret) throw new Error('no client secret');
+
+        const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+        selectStep.style.display = 'none';
+        checkoutStep.style.display = '';
+
+        return stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret })
+          .then(function(checkout){
+            embeddedCheckout = checkout;
+            checkout.mount('#checkoutMount');
+            checkoutLoading.classList.add('hide');
+          })
+          .catch(function(err){
+            // embedding failed even though everything else responded — fall back
+            console.error('initEmbeddedCheckout failed:', err);
+            resetToSelectStep();
+            redirectToPaymentLink();
+          });
+      })
+      .catch(function(err){
+        // Stripe.js or our backend unavailable — fall back to the hosted
+        // Payment Link so booking still works either way.
+        console.error('Embedded checkout unavailable, falling back:', err);
+        redirectToPaymentLink();
+      });
   }
 
   bookSubmit.addEventListener('click', function(){
