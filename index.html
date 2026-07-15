@@ -1640,9 +1640,13 @@ if(track){
   originalSlides.forEach(s => track.appendChild(s.cloneNode(true)));
 
   const speed = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.65;
+  // cache the scroll width instead of reading it every animation frame —
+  // reading a layout property right after a style mutation forces a
+  // synchronous reflow, and this loop runs up to 60x/second
+  let halfWidth = track.scrollWidth / 2;
+  window.addEventListener('resize', function(){ halfWidth = track.scrollWidth / 2; }, {passive:true});
   function autoLoop(){
     if(speed > 0 && Date.now() > pausedUntil){
-      const halfWidth = track.scrollWidth / 2;
       if(halfWidth > 1){
         track.scrollLeft += speed;
         if(track.scrollLeft >= halfWidth) track.scrollLeft -= halfWidth;
@@ -1661,10 +1665,15 @@ const nav = document.getElementById('nav');
 const stickyCta = document.getElementById('stickyCta');
 const floatCta = document.getElementById('floatCta');
 const hero = document.querySelector('.hero');
+// cache hero height instead of reading offsetHeight on every scroll event
+// (scroll fires dozens of times per second — reading layout geometry that
+// often forces the browser to recompute layout synchronously each time)
+let heroHeight = hero.offsetHeight;
+window.addEventListener('resize', function(){ heroHeight = hero.offsetHeight; }, {passive:true});
 function onScroll(){
   const y = window.scrollY;
   nav.classList.toggle('scrolled', y > 40);
-  const pastHero = y > hero.offsetHeight * 0.7;
+  const pastHero = y > heroHeight * 0.7;
   stickyCta.classList.toggle('show', pastHero);
   if(floatCta) floatCta.classList.toggle('show', pastHero);
 }
@@ -1965,10 +1974,10 @@ setInterval(()=>{
     pos = 0;
   }
 
+  const reviewsSpeed = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.65;
   function frame(){
-    const speed = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.65;
-    if(speed > 0 && itemWidth > 0){
-      pos -= speed;
+    if(reviewsSpeed > 0 && itemWidth > 0){
+      pos -= reviewsSpeed;
       // as soon as we've scrolled past exactly one item's width, snap back by that
       // same amount — since every clone is identical, this is visually seamless
       if(Math.abs(pos) >= itemWidth){ pos += itemWidth; }
