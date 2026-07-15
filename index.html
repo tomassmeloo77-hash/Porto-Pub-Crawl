@@ -1501,6 +1501,12 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
       <div id="checkoutMount"></div>
       <div id="checkoutLoading" class="checkout-loading"><span class="cl-spin"></span>Loading secure payment…</div>
     </div>
+
+    <div id="bookSuccessStep" style="display:none;text-align:center;padding:20px 0;">
+      <div style="font-size:44px;margin-bottom:14px;">🎉</div>
+      <h3>You're on the list!</h3>
+      <p class="book-sub">Check your email for your confirmation and Saturday's meeting point. See you on the crawl!</p>
+    </div>
   </div>
 </div>
 
@@ -2075,6 +2081,7 @@ try{
   const panel = document.getElementById('bookPanel');
   const selectStep = document.getElementById('bookSelectStep');
   const checkoutStep = document.getElementById('bookCheckoutStep');
+  const successStep = document.getElementById('bookSuccessStep');
   const checkoutMount = document.getElementById('checkoutMount');
   const checkoutLoading = document.getElementById('checkoutLoading');
   const dateScroller = document.getElementById('dateScroller');
@@ -2150,6 +2157,7 @@ try{
   function resetToSelectStep(){
     selectStep.style.display = '';
     checkoutStep.style.display = 'none';
+    successStep.style.display = 'none';
     checkoutMount.innerHTML = '';
     checkoutLoading.classList.remove('hide');
     if(embeddedCheckout){ try{ embeddedCheckout.destroy(); }catch(e){} embeddedCheckout = null; }
@@ -2330,12 +2338,13 @@ try{
   const params = new URLSearchParams(window.location.search);
   if(params.get('booking') === 'success'){
     openBookModal('crawl');
-    panel.innerHTML =
-      '<div style="text-align:center;padding:20px 0;">' +
-        '<div style="font-size:44px;margin-bottom:14px;">🎉</div>' +
-        '<h3>You\'re on the list!</h3>' +
-        '<p class="book-sub">Check your email for your confirmation and Saturday\'s meeting point. See you on the crawl!</p>' +
-      '</div>';
+    selectStep.style.display = 'none';
+    checkoutStep.style.display = 'none';
+    successStep.style.display = '';
+    // strip the query params so refreshing or reopening the modal later
+    // doesn't show this message again for an unrelated new booking
+    const cleanUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
   }
 }catch(err){
   console.error('Booking modal failed to initialize, falling back to direct payment links:', err);
