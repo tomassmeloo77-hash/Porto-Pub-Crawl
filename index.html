@@ -1569,7 +1569,14 @@ function loadStoredSpots(){
     const storedWeekKey = localStorage.getItem('projectp_weekKey');
     const storedSpots = localStorage.getItem('projectp_spotsLeft');
     if(storedWeekKey === weekKey && storedSpots !== null){
-      return parseInt(storedSpots, 10);
+      const parsed = parseInt(storedSpots, 10);
+      // self-heal: never show fewer than 7, even if an old browser session
+      // (or earlier version of this script) had stored a lower number
+      if(parsed < 7){
+        localStorage.setItem('projectp_spotsLeft', '7');
+        return 7;
+      }
+      return parsed;
     }
     const start = randomStart();
     localStorage.setItem('projectp_weekKey', weekKey);
