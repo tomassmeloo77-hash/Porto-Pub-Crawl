@@ -42,21 +42,20 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "TouristAttraction",
+  "@type": "Product",
   "name": "Project P Pub Crawl",
   "description": "Porto's highest-rated pub crawl: free shots, drinks, VIP no-queue entry to bars and a nightclub, drinking games, and professional photography.",
   "url": "https://www.porto-pubcrawl.com/",
-  "telephone": "+351910694984",
   "image": "https://www.porto-pubcrawl.com/assets/hero-share.jpg",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Praça de Carlos Alberto",
-    "addressLocality": "Porto",
-    "postalCode": "4050-157",
-    "addressCountry": "PT"
+  "brand": { "@type": "Organization", "name": "Project P" },
+  "offers": {
+    "@type": "AggregateOffer",
+    "priceCurrency": "EUR",
+    "lowPrice": "17",
+    "highPrice": "44",
+    "availability": "https://schema.org/InStock",
+    "url": "https://www.porto-pubcrawl.com/"
   },
-  "geo": { "@type": "GeoCoordinates", "latitude": 41.1477, "longitude": -8.6146 },
-  "priceRange": "€17-€44",
   "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "1327", "bestRating": "5" },
   "review": [
     {"@type":"Review","author":{"@type":"Person","name":"Marta S."},"reviewRating":{"@type":"Rating","ratingValue":"5"},"reviewBody":"Solo first night in Porto and left with a group chat of nine people. Wild, safe, and genuinely so much fun."},
