@@ -94,7 +94,7 @@ exports.handler = async (event) => {
           }
         },
         quantity: 1,
-        adjustable_quantity: { enabled: false }
+        adjustable_quantity: { enabled: true, minimum: 0, maximum: 1 }
       }],
       metadata: { package: pkg, event_date: date, quantity: String(qty) },
       return_url: siteUrl + '/?booking=success&session_id={CHECKOUT_SESSION_ID}'

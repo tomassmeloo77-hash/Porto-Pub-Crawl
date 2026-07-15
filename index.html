@@ -2282,7 +2282,12 @@ try{
       })
     })
     .then(function(res){
-      if(!res.ok) throw new Error('backend unavailable');
+      if(!res.ok){
+        return res.json().catch(function(){ return {}; }).then(function(errBody){
+          console.error('create-checkout-session failed:', res.status, errBody);
+          throw new Error('backend unavailable');
+        });
+      }
       return res.json();
     })
     .then(function(data){
@@ -2297,15 +2302,17 @@ try{
           checkout.mount('#checkoutMount');
           checkoutLoading.classList.add('hide');
         })
-        .catch(function(){
+        .catch(function(err){
           // embedding failed even though the backend responded — fall back
+          console.error('initEmbeddedCheckout failed:', err);
           resetToSelectStep();
           redirectToPaymentLink();
         });
     })
-    .catch(function(){
+    .catch(function(err){
       // no backend available on this deployment (e.g. static-only hosting)
       // — fall back to the hosted Payment Link so booking still works.
+      console.error('Embedded checkout unavailable, falling back:', err);
       redirectToPaymentLink();
     });
   }
