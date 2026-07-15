@@ -27,6 +27,7 @@
 <meta name="twitter:title" content="Project P — Porto's Legendary Night Out">
 <meta name="twitter:description" content="Free shots, 4 bars, 1 VIP club, no queues. Rated 4.9★ by 1,327+ crawlers.">
 <meta name="twitter:image" content="https://www.porto-pubcrawl.com/assets/hero-share.jpg">
+<link rel="preload" as="image" href="assets/hero-photo.webp" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://api.fontshare.com">
@@ -1220,7 +1221,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
     <div class="carousel-track" id="carouselTrack">
       <div class="c-slide"><img src="assets/photo-shots-friends.webp" alt="Friends laughing together on the Porto Pub Crawl" loading="lazy"></div>
       <div class="c-slide">
-        <video id="reelVideoEl" src="assets/video-reel.mp4" autoplay muted loop playsinline preload="auto"></video>
+        <video id="reelVideoEl" data-src="assets/video-reel.mp4" muted loop playsinline preload="none" class="lazy-video"></video>
         <div class="c-tag" style="display:flex;align-items:center;gap:14px;left:18px;right:18px;">
           <span style="display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>1.4M</span>
           <span style="display:flex;align-items:center;gap:5px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-8-4.5-8-11a4.5 4.5 0 0 1 8-3 4.5 4.5 0 0 1 8 3c0 6.5-8 11-8 11z"/></svg>83.4K</span>
@@ -1230,7 +1231,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
       <div class="c-slide"><img src="assets/photo-clubfloor.webp" alt="Crowd dancing under lasers at the VIP club" loading="lazy"></div>
       <div class="c-slide"><img src="assets/photo-megaphone.webp" alt="Host hyping up the crowd with a megaphone" loading="lazy"></div>
       <div class="c-slide">
-        <video id="clubfloorVideoEl" src="assets/video-clubfloor.mp4" poster="assets/clubfloor-poster.webp" autoplay muted loop playsinline preload="auto"></video>
+        <video id="clubfloorVideoEl" data-src="assets/video-clubfloor.mp4" poster="assets/clubfloor-poster.webp" muted loop playsinline preload="none" class="lazy-video"></video>
       </div>
       <div class="c-slide"><img src="assets/photo-vodka.webp" alt="Group of friends who met on the crawl" loading="lazy"></div>
       <div class="c-slide"><img src="assets/photo-kiss.webp" alt="Crawler at a Porto sports bar" loading="lazy"></div>
@@ -1895,7 +1896,9 @@ function animateParticles(){
 resizeCanvas(); initParticles(); animateParticles();
 }
 
-// ===== gallery video: force autoplay on mobile / in-app browsers (WhatsApp, Instagram, etc.) =====
+// ===== gallery video: lazy-load (only start downloading once near viewport, =====
+// ===== so these don't compete with the hero image for bandwidth on load),   =====
+// ===== then force autoplay on mobile / in-app browsers (WhatsApp, Instagram) =====
 ['clubfloorVideoEl','reelVideoEl'].forEach(function(videoId){
 (function(){
   const heroVideo = document.getElementById(videoId);
@@ -1910,9 +1913,32 @@ resizeCanvas(); initParticles(); animateParticles();
       playPromise.catch(()=>{ /* blocked — will retry on first user interaction below */ });
     }
   }
-  tryPlay();
-  document.addEventListener('loadedmetadata', tryPlay, true);
-  heroVideo.addEventListener('loadeddata', tryPlay);
+
+  function startLoadingAndPlaying(){
+    if(heroVideo.dataset.src){
+      heroVideo.src = heroVideo.dataset.src;
+      heroVideo.removeAttribute('data-src');
+      heroVideo.setAttribute('autoplay', '');
+      heroVideo.load();
+    }
+    tryPlay();
+    document.addEventListener('loadedmetadata', tryPlay, true);
+    heroVideo.addEventListener('loadeddata', tryPlay);
+  }
+
+  if('IntersectionObserver' in window){
+    const io = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if(entry.isIntersecting){
+          startLoadingAndPlaying();
+          io.unobserve(heroVideo);
+        }
+      });
+    }, { rootMargin: '400px 0px' }); // start loading a bit before it scrolls into view
+    io.observe(heroVideo);
+  } else {
+    startLoadingAndPlaying(); // very old browsers: fall back to loading immediately
+  }
 
   // many in-app browsers (WhatsApp, Instagram, etc.) only allow video playback
   // after a real user gesture — retry once on the first tap/scroll/click
