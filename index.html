@@ -1071,6 +1071,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', 'AW-18071337739');
+  gtag('config', 'G-Y3WT4XFE3F');
 </script>
 </head>
 <body>
@@ -2271,6 +2272,7 @@ try{
   function openBookModal(pkg, triggerEl){
     loadStripeJs();
     if(window.posthog) posthog.capture('Book Modal Opened', { package: pkg || 'crawl' });
+    if(typeof gtag === 'function') gtag('event', 'book_modal_opened', { package: pkg || 'crawl' });
     lastFocusedTrigger = triggerEl || document.activeElement;
     state.pkg = pkg || 'crawl';
     state.qty = 1;
@@ -2449,6 +2451,7 @@ try{
     if(!state.date){ showError('Please pick a Saturday.'); return; }
 
     if(window.posthog) posthog.capture('Checkout Started', { package: state.pkg, date: state.date, quantity: state.qty });
+    if(typeof gtag === 'function') gtag('event', 'begin_checkout', { package: state.pkg, date: state.date, quantity: state.qty });
     bookSubmit.disabled = true;
     bookSubmitLabel.textContent = 'Loading secure payment…';
     startEmbeddedCheckout();
@@ -2465,8 +2468,8 @@ try{
     setTimeout(function(){ document.getElementById('bookClose').focus(); }, 50);
     if(window.posthog) posthog.capture('Booking Completed');
 
-    // Google Ads conversion — look up the real amount paid (includes any
-    // add-ons the customer chose) so the campaign optimizes on actual value
+    // Google Ads conversion + GA4 purchase event — look up the real amount
+    // paid (includes any add-ons the customer chose) so both report actual value
     const sessionId = params.get('session_id');
     if(sessionId){
       fetch('/api/get-session-amount?session_id=' + encodeURIComponent(sessionId))
@@ -2478,6 +2481,11 @@ try{
               'value': data.amount,
               'currency': data.currency || 'EUR',
               'transaction_id': sessionId
+            });
+            gtag('event', 'purchase', {
+              'transaction_id': sessionId,
+              'value': data.amount,
+              'currency': data.currency || 'EUR'
             });
           }
         })
