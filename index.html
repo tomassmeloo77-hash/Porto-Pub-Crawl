@@ -31,8 +31,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Anton&family=Sekuya&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Sekuya&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<link rel="preload" as="style" href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap">
+<link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Sekuya&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
+</noscript>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -1047,7 +1053,6 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 }
 @media(min-width:769px){ .sticky-cta{display:none;} }
 </style>
-<script src="https://js.stripe.com/v3/" async></script>
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
@@ -2238,8 +2243,25 @@ try{
   }
 
   let lastFocusedTrigger = null;
+  let stripeJsLoading = null;
+
+  // load Stripe.js only when someone actually opens the booking modal —
+  // most visitors never do, so this keeps ~200KB+ off every page load
+  function loadStripeJs(){
+    if(typeof Stripe !== 'undefined') return Promise.resolve();
+    if(stripeJsLoading) return stripeJsLoading;
+    stripeJsLoading = new Promise(function(resolve){
+      const s = document.createElement('script');
+      s.src = 'https://js.stripe.com/v3/';
+      s.onload = resolve;
+      s.onerror = resolve; // fail open — startEmbeddedCheckout() falls back to Payment Links anyway
+      document.head.appendChild(s);
+    });
+    return stripeJsLoading;
+  }
 
   function openBookModal(pkg, triggerEl){
+    loadStripeJs();
     if(window.posthog) posthog.capture('Book Modal Opened', { package: pkg || 'crawl' });
     lastFocusedTrigger = triggerEl || document.activeElement;
     state.pkg = pkg || 'crawl';
@@ -2347,10 +2369,17 @@ try{
   }
 
   function startEmbeddedCheckout(){
-    if(!USE_EMBEDDED_CHECKOUT || typeof Stripe === 'undefined' || STRIPE_PUBLISHABLE_KEY.indexOf('XXXX') !== -1){
+    if(!USE_EMBEDDED_CHECKOUT || STRIPE_PUBLISHABLE_KEY.indexOf('XXXX') !== -1){
       redirectToPaymentLink();
       return;
     }
+    loadStripeJs().then(function(){
+      if(typeof Stripe === 'undefined'){ redirectToPaymentLink(); return; }
+      runEmbeddedCheckout();
+    });
+  }
+
+  function runEmbeddedCheckout(){
     const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
 
     fetch('/api/create-checkout-session', {
