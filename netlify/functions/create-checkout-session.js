@@ -8622,8 +8622,8 @@ exports.handler = async (event) => {
             unit_amount: 190,
             tax_behavior: "exclusive",
             product_data: {
-              name: "\u2B50 Book with Confidence (Recommended)",
-              description: "Change your date or cancel up to 3 hours before the event, no questions asked. Included by default \u2014 set quantity to 0 below to remove it."
+              name: "Book with Confidence (Recommended)",
+              description: "Cancel or reschedule up to 3 hours before the event. No questions asked."
             }
           },
           quantity: 1,
