@@ -19,7 +19,6 @@ const Stripe = require('stripe');
 
 const PRICES_EUR = { crawl: 17, pack: 44 };
 const MAX_QTY = 100;
-const CONFIDENCE_ADDON_EUR = 1.90;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -60,18 +59,6 @@ module.exports = async (req, res) => {
           }
         },
         quantity: qty
-      }],
-      optional_items: [{
-        price_data: {
-          currency: 'eur',
-          unit_amount: Math.round(CONFIDENCE_ADDON_EUR * 100),
-          product_data: {
-            name: 'Book with Confidence',
-            description: 'Change your date or cancel up to 3 hours before the event. Enjoy complete flexibility.'
-          }
-        },
-        quantity: 1,
-        adjustable_quantity: { enabled: true, minimum: 0, maximum: 1 }
       }],
       metadata: { package: pkg, event_date: date, quantity: String(qty) },
       return_url: siteUrl + '/?booking=success&session_id={CHECKOUT_SESSION_ID}'
