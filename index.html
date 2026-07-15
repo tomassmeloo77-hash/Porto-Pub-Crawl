@@ -846,21 +846,33 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .book-overlay{
   position:fixed;inset:0;z-index:320;background:rgba(6,5,7,0.82);backdrop-filter:blur(6px);
   display:flex;align-items:center;justify-content:center;padding:20px;
+  padding-top:max(20px, env(safe-area-inset-top));
+  padding-bottom:max(20px, env(safe-area-inset-bottom));
   opacity:0;pointer-events:none;transition:opacity .35s var(--ease);
 }
 .book-overlay.show{opacity:1;pointer-events:auto;}
 .book-panel{
-  position:relative;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;border-radius:26px;padding:36px 32px;
+  position:relative;max-width:480px;width:100%;max-height:min(90vh,90dvh);overflow-y:auto;border-radius:26px;padding:36px 32px;
   background:linear-gradient(160deg,var(--surface-2),var(--surface));border:1px solid var(--line-strong);
   transform:translateY(24px) scale(.96);opacity:0;transition:all .4s var(--ease-spring);
   box-shadow:0 40px 100px -20px rgba(255,23,63,0.35);
+  -webkit-overflow-scrolling:touch;
 }
 .book-overlay.show .book-panel{transform:translateY(0) scale(1);opacity:1;}
+@media(max-width:480px){
+  .book-overlay{padding:0;align-items:flex-end;}
+  .book-panel{
+    max-width:none;max-height:92dvh;border-radius:24px 24px 0 0;padding:28px 20px calc(24px + env(safe-area-inset-bottom));
+    transform:translateY(100%);
+  }
+  .book-overlay.show .book-panel{transform:translateY(0);}
+}
 .book-close{
-  position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;
+  position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:50%;
   background:rgba(255,255,255,0.05);border:1px solid var(--line-strong);color:var(--muted);
   display:flex;align-items:center;justify-content:center;font-size:16px;z-index:2;
 }
+.book-close:hover, .book-close:focus-visible{background:rgba(255,23,63,0.12);border-color:var(--pink);color:var(--cream);}
 .book-panel h3{font-size:24px;color:var(--cream);margin-bottom:4px;text-transform:none;font-family:'Manrope';font-weight:800;}
 .book-panel .book-sub{color:var(--muted);font-size:13.5px;line-height:1.5;margin-bottom:22px;}
 
@@ -870,27 +882,29 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .pkg-toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .pkg-opt{
   position:relative;cursor:pointer;padding:14px 12px;border-radius:14px;border:1.5px solid var(--line-strong);
-  background:rgba(255,255,255,0.02);transition:all .2s var(--ease);text-align:left;
+  background:rgba(255,255,255,0.02);transition:all .2s var(--ease);text-align:left;min-height:44px;
 }
+.pkg-opt:focus-within{border-color:var(--pink);box-shadow:0 0 0 2px rgba(255,23,63,0.35);}
 .pkg-opt input{position:absolute;opacity:0;pointer-events:none;}
 .pkg-opt .pkg-name{font-size:13px;font-weight:800;color:var(--cream);}
 .pkg-opt .pkg-price{font-size:17px;font-weight:800;color:var(--pink-soft);font-family:'Space Mono',monospace;margin-top:4px;}
 .pkg-opt.active{border-color:var(--pink);background:rgba(255,23,63,0.08);box-shadow:0 0 0 1px var(--pink) inset;}
 
-.date-scroller{display:flex;gap:9px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;scroll-behavior:smooth;}
+.date-scroller{display:flex;gap:9px;overflow-x:auto;padding:2px 2px 6px;scrollbar-width:none;scroll-behavior:smooth;}
 .date-scroller::-webkit-scrollbar{display:none;}
 .date-scroll-wrap{position:relative;display:flex;align-items:center;gap:10px;}
 .date-arrow{
-  flex-shrink:0;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.04);
+  flex-shrink:0;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,0.04);
   border:1px solid var(--line-strong);color:var(--cream);display:none;align-items:center;justify-content:center;
   transition:all .25s var(--ease-spring);
 }
-.date-arrow:hover{background:var(--pink);border-color:var(--pink);transform:scale(1.08);}
+.date-arrow:hover, .date-arrow:focus-visible{background:var(--pink);border-color:var(--pink);transform:scale(1.08);}
 @media(min-width:769px){ .date-arrow{display:flex;} }
 .date-pill{
-  flex:0 0 auto;cursor:pointer;padding:11px 16px;border-radius:13px;border:1.5px solid var(--line-strong);
-  background:rgba(255,255,255,0.02);text-align:center;min-width:64px;transition:all .2s var(--ease);
+  flex:0 0 auto;cursor:pointer;padding:12px 16px;border-radius:13px;border:1.5px solid var(--line-strong);
+  background:rgba(255,255,255,0.02);text-align:center;min-width:64px;min-height:44px;transition:all .2s var(--ease);
 }
+.date-pill:focus-visible{outline:2px solid var(--pink);outline-offset:2px;}
 .date-pill .dp-dow{display:block;font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted-2);}
 .date-pill .dp-day{display:block;font-size:17px;font-weight:800;color:var(--cream);font-family:'Space Mono',monospace;margin-top:2px;}
 .date-pill .dp-mon{display:block;font-size:10px;color:var(--muted-2);}
@@ -899,19 +913,20 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 
 .qty-row{display:flex;align-items:center;gap:16px;}
 .qty-btn{
-  width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line-strong);background:rgba(255,255,255,0.03);
+  width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line-strong);background:rgba(255,255,255,0.03);
   color:var(--cream);font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }
 .qty-btn:active{background:rgba(255,23,63,0.12);border-color:var(--pink);}
+.qty-btn:focus-visible{outline:2px solid var(--pink);outline-offset:2px;}
 .qty-num{font-size:19px;font-weight:800;color:var(--cream);font-family:'Space Mono',monospace;min-width:26px;text-align:center;}
 
 .book-input{
   width:100%;padding:13px 16px;border-radius:12px;border:1.5px solid var(--line-strong);
-  background:rgba(255,255,255,0.03);color:var(--cream);font-size:14.5px;font-family:inherit;
+  background:rgba(255,255,255,0.03);color:var(--cream);font-size:16px;font-family:inherit;min-height:44px;
   transition:border-color .2s;
 }
 .book-input::placeholder{color:var(--muted-2);}
-.book-input:focus{outline:none;border-color:var(--pink);}
+.book-input:focus-visible{outline:none;border-color:var(--pink);box-shadow:0 0 0 2px rgba(255,23,63,0.25);}
 
 .book-total{
   display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-radius:14px;
@@ -924,8 +939,10 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .book-panel .pay-row{justify-content:center;margin-top:18px;}
 .book-back{
   display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--muted);
-  font-size:13px;font-weight:700;margin-bottom:14px;padding:0;cursor:pointer;
+  min-height:44px;padding:0 4px;
+  font-size:13px;font-weight:700;margin-bottom:14px;cursor:pointer;
 }
+.book-back:focus-visible{outline:2px solid var(--pink);outline-offset:2px;border-radius:4px;}
 .book-back:hover{color:var(--pink-soft);}
 #checkoutMount{min-height:280px;}
 #checkoutMount .StripeElement, #checkoutMount iframe{border-radius:14px !important;}
@@ -1414,17 +1431,17 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
   </div>
 </div>
 
-<div class="book-overlay" id="bookOverlay">
+<div class="book-overlay" id="bookOverlay" role="dialog" aria-modal="true" aria-labelledby="bookModalTitle">
   <div class="book-panel" id="bookPanel">
-    <button class="book-close" id="bookClose" aria-label="Close">✕</button>
+    <button class="book-close" id="bookClose" aria-label="Close booking dialog">✕</button>
 
     <div id="bookSelectStep">
-      <h3>Reserve your spot</h3>
+      <h3 id="bookModalTitle">Reserve your spot</h3>
       <p class="book-sub">Choose your package and Saturday — payment is secure, instant, and confirmed straight to your email.</p>
 
       <div class="book-field">
         <label>Package</label>
-        <div class="pkg-toggle">
+        <div class="pkg-toggle" role="radiogroup" aria-label="Package">
           <label class="pkg-opt active" data-pkg="crawl" data-price="17">
             <input type="radio" name="pkg" value="crawl" checked>
             <span class="pkg-name">Pub Crawl</span>
@@ -1450,9 +1467,9 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
       <div class="book-field">
         <label>Spots</label>
         <div class="qty-row">
-          <button type="button" class="qty-btn" id="qtyMinus">−</button>
-          <span class="qty-num" id="qtyNum">1</span>
-          <button type="button" class="qty-btn" id="qtyPlus">+</button>
+          <button type="button" class="qty-btn" id="qtyMinus" aria-label="Decrease number of spots">−</button>
+          <span class="qty-num" id="qtyNum" aria-live="polite" aria-atomic="true">1</span>
+          <button type="button" class="qty-btn" id="qtyPlus" aria-label="Increase number of spots">+</button>
         </div>
       </div>
 
@@ -1461,7 +1478,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
         <span class="bt-amount" id="bookTotal">€17</span>
       </div>
 
-      <p class="book-error" id="bookError"></p>
+      <p class="book-error" id="bookError" role="alert" aria-live="polite"></p>
 
       <button type="button" class="btn btn-primary btn-block magnetic" id="bookSubmit"><span class="shine"></span><span id="bookSubmitLabel">Continue to payment</span></button>
 
@@ -2140,7 +2157,10 @@ try{
     bookSubmitLabel.textContent = 'Continue to payment';
   }
 
-  function openBookModal(pkg){
+  let lastFocusedTrigger = null;
+
+  function openBookModal(pkg, triggerEl){
+    lastFocusedTrigger = triggerEl || document.activeElement;
     state.pkg = pkg || 'crawl';
     state.qty = 1;
     qtyNum.textContent = '1';
@@ -2155,19 +2175,24 @@ try{
     resetToSelectStep();
     overlay.classList.add('show');
     document.body.style.overflow = 'hidden';
+    // move focus into the dialog for keyboard & screen-reader users
+    setTimeout(function(){ document.getElementById('bookClose').focus(); }, 50);
   }
 
   function closeBookModal(){
     overlay.classList.remove('show');
     document.body.style.overflow = '';
     resetToSelectStep();
+    if(lastFocusedTrigger && typeof lastFocusedTrigger.focus === 'function'){
+      lastFocusedTrigger.focus();
+    }
   }
 
   document.querySelectorAll('.js-book-crawl').forEach(function(el){
-    el.addEventListener('click', function(e){ e.preventDefault(); openBookModal('crawl'); });
+    el.addEventListener('click', function(e){ e.preventDefault(); openBookModal('crawl', el); });
   });
   document.querySelectorAll('.js-book-pack').forEach(function(el){
-    el.addEventListener('click', function(e){ e.preventDefault(); openBookModal('pack'); });
+    el.addEventListener('click', function(e){ e.preventDefault(); openBookModal('pack', el); });
   });
 
   document.getElementById('bookClose').addEventListener('click', closeBookModal);
@@ -2175,6 +2200,19 @@ try{
   if(dateArrowRight) dateArrowRight.addEventListener('click', function(){ dateScroller.scrollBy({left:220, behavior:'smooth'}); });
   overlay.addEventListener('click', function(e){ if(e.target === overlay) closeBookModal(); });
   if(bookBack) bookBack.addEventListener('click', resetToSelectStep);
+
+  // Escape closes the modal; Tab is trapped inside it while open
+  document.addEventListener('keydown', function(e){
+    if(!overlay.classList.contains('show')) return;
+    if(e.key === 'Escape'){ closeBookModal(); return; }
+    if(e.key === 'Tab'){
+      const focusable = panel.querySelectorAll('button:not([disabled]), [href], input, [tabindex]:not([tabindex="-1"])');
+      if(!focusable.length) return;
+      const first = focusable[0], last = focusable[focusable.length-1];
+      if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+  });
 
   document.querySelectorAll('.pkg-opt').forEach(function(opt){
     opt.addEventListener('click', function(){
