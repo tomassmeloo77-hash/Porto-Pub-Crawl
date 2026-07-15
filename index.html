@@ -2105,10 +2105,9 @@ try{
 
   // Your publishable key (safe to expose in the browser — it's public by
   // design, unlike the secret key). Stripe dashboard → Developers → API keys.
-  // Set this to true once you've upgraded your hosting plan (the kind that
-  // gives you serverless functions + environment variables) and filled in
-  // STRIPE_PUBLISHABLE_KEY below. Until then, this stays false and booking
-  // goes straight to your Payment Links — reliable, zero extra cost.
+  // The embedded checkout is live and working (backed by /api/create-checkout-session).
+  // If that backend is ever unreachable, checkout automatically falls back
+  // to the Payment Links below instead — booking never breaks either way.
   const USE_EMBEDDED_CHECKOUT = true;
   const STRIPE_PUBLISHABLE_KEY = 'pk_test_51TBx6cRv5AOf2Qm1d7GCsAKWF4qePbPxnJ4PpteGaHF5XCnxAbKBtfXtLuf12DuhF9HWYcRSBFzLKLFsKE5iWOal00AkNTPBwr';
 
@@ -2293,6 +2292,7 @@ try{
     }
     const reference = state.date + ' | ' + state.qty + ' spot(s)';
     const finalUrl = link + '?client_reference_id=' + encodeURIComponent(reference);
+    bookSubmitLabel.textContent = 'Redirecting to payment…';
 
     try{
       window.location.href = finalUrl;
@@ -2370,17 +2370,19 @@ try{
 
     if(window.posthog) posthog.capture('Checkout Started', { package: state.pkg, date: state.date, quantity: state.qty });
     bookSubmit.disabled = true;
-    bookSubmitLabel.textContent = 'Redirecting to payment…';
+    bookSubmitLabel.textContent = 'Loading secure payment…';
     startEmbeddedCheckout();
   });
 
   // ----- reopen modal + show a thank-you state if we're back from Stripe success -----
   const params = new URLSearchParams(window.location.search);
   if(params.get('booking') === 'success'){
-    openBookModal('crawl');
+    overlay.classList.add('show');
+    document.body.style.overflow = 'hidden';
     selectStep.style.display = 'none';
     checkoutStep.style.display = 'none';
     successStep.style.display = '';
+    setTimeout(function(){ document.getElementById('bookClose').focus(); }, 50);
     if(window.posthog) posthog.capture('Booking Completed');
     // strip the query params so refreshing or reopening the modal later
     // doesn't show this message again for an unrelated new booking
