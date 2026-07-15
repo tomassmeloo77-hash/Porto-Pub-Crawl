@@ -98,6 +98,42 @@ function buildEmailHtml({ name, packageName, niceDate, qty }) {
   </div>`;
 }
 
+function buildAdminNotificationHtml({ name, email, packageName, niceDate, qty, amount, currency, sessionId, purchasedAt }) {
+  const row = (label, value) => `
+    <tr>
+      <td style="padding:11px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;white-space:nowrap;">${label}</td>
+      <td style="padding:11px 0 11px 16px;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14.5px;text-align:right;font-weight:700;">${value}</td>
+    </tr>`;
+  return `
+  <div style="background:#08070a;padding:40px 20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <div style="max-width:480px;margin:0 auto;background:#131314;border-radius:20px;overflow:hidden;border:1px solid #232325;box-shadow:0 30px 80px -20px rgba(34,255,122,0.18);">
+      <div style="background:linear-gradient(135deg,#1a1a1c,#232325);padding:26px 28px;text-align:center;border-bottom:2px solid #22ff7a;">
+        <img src="https://www.porto-pubcrawl.com/assets/logo-email.png" alt="Project P" width="140" style="display:block;margin:0 auto 12px;height:auto;">
+        <div style="display:inline-block;background:rgba(34,255,122,0.14);border-radius:100px;padding:7px 16px;">
+          <span style="font-size:13px;font-weight:800;color:#22ff7a;">💰 New booking received</span>
+        </div>
+      </div>
+      <div style="padding:28px;">
+        <table style="width:100%;border-collapse:collapse;margin-bottom:6px;">
+          ${row('Customer', name || '—')}
+          ${row('Email', `<a href="mailto:${email}" style="color:#ff5468;text-decoration:none;">${email}</a>`)}
+          ${row('Package', packageName)}
+          ${row('Crawl date', niceDate)}
+          ${row('Spots', qty)}
+          ${row('Amount paid', `${amount}`)}
+          ${row('Purchased', purchasedAt)}
+        </table>
+        <p style="color:#7e7b7c;font-size:11.5px;line-height:1.6;margin:20px 0 0;word-break:break-all;">
+          Stripe session: ${sessionId}
+        </p>
+      </div>
+      <div style="padding:18px 28px;background:#0d0d0e;text-align:center;border-top:1px solid #232325;">
+        <p style="color:#7e7b7c;font-size:11px;margin:0;">Internal notification · Porto Pub Crawl bookings</p>
+      </div>
+    </div>
+  </div>`;
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     res.status(405).send('Method not allowed');
@@ -137,7 +173,12 @@ module.exports = async (req, res) => {
           weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'
         });
       }
+      const amount = ((session.amount_total || 0) / 100).toFixed(2) + ' ' + (session.currency || 'eur').toUpperCase();
+      const purchasedAt = new Date().toLocaleString('en-GB', {
+        dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Lisbon'
+      }) + ' (Lisbon time)';
 
+      // 1) confirmation email to the customer
       try {
         const resendRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
@@ -148,17 +189,39 @@ module.exports = async (req, res) => {
           body: JSON.stringify({
             from: 'Porto Pub Crawl <bookings@porto-pubcrawl.com>',
             to: email,
-            bcc: 'contact@porto-pubcrawl.com',
             subject: `You're on the list! Saturday, ${niceDate}`,
             html: buildEmailHtml({ name, packageName, niceDate, qty })
           })
         });
         if (!resendRes.ok) {
           const errBody = await resendRes.text();
-          console.error('Resend send failed:', resendRes.status, errBody);
+          console.error('Resend send failed (customer email):', resendRes.status, errBody);
         }
       } catch (err) {
         console.error('Error sending confirmation email:', err);
+      }
+
+      // 2) internal sale notification to your personal inbox
+      try {
+        const adminRes = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            from: 'Porto Pub Crawl <bookings@porto-pubcrawl.com>',
+            to: 'tomasmelo002@gmail.com',
+            subject: `💰 New booking — ${packageName} — ${amount}`,
+            html: buildAdminNotificationHtml({ name, email, packageName, niceDate, qty, amount, sessionId: session.id, purchasedAt })
+          })
+        });
+        if (!adminRes.ok) {
+          const errBody = await adminRes.text();
+          console.error('Resend send failed (admin notification):', adminRes.status, errBody);
+        }
+      } catch (err) {
+        console.error('Error sending admin notification email:', err);
       }
     }
   }
