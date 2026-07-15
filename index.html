@@ -1047,6 +1047,10 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 @media(min-width:769px){ .sticky-cta{display:none;} }
 </style>
 <script src="https://js.stripe.com/v3/" async></script>
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -2195,6 +2199,7 @@ try{
   let lastFocusedTrigger = null;
 
   function openBookModal(pkg, triggerEl){
+    if(window.va) va('event', { name: 'Book Modal Opened', data: { package: pkg || 'crawl' } });
     lastFocusedTrigger = triggerEl || document.activeElement;
     state.pkg = pkg || 'crawl';
     state.qty = 1;
@@ -2356,6 +2361,7 @@ try{
     bookError.classList.remove('show');
     if(!state.date){ showError('Please pick a Saturday.'); return; }
 
+    if(window.va) va('event', { name: 'Checkout Started', data: { package: state.pkg, date: state.date, quantity: state.qty } });
     bookSubmit.disabled = true;
     bookSubmitLabel.textContent = 'Redirecting to payment…';
     startEmbeddedCheckout();
@@ -2368,6 +2374,7 @@ try{
     selectStep.style.display = 'none';
     checkoutStep.style.display = 'none';
     successStep.style.display = '';
+    if(window.va) va('event', { name: 'Booking Completed' });
     // strip the query params so refreshing or reopening the modal later
     // doesn't show this message again for an unrelated new booking
     const cleanUrl = window.location.origin + window.location.pathname;
