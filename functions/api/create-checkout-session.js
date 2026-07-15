@@ -65,8 +65,8 @@ export async function onRequestPost({ request, env }) {
             unit_amount: 190,
             tax_behavior: 'exclusive',
             product_data: {
-              name: 'Book with Confidence',
-              description: 'Change your date or cancel up to 3 hours before the event. Enjoy complete flexibility.'
+              name: '⭐ Book with Confidence (Recommended)',
+              description: 'Change your date or cancel up to 3 hours before the event, no questions asked. Included by default — set quantity to 0 below to remove it.'
             }
           },
           quantity: 1,
