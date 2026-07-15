@@ -937,6 +937,12 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .book-error{display:none;color:var(--pink-soft);font-size:13px;margin-bottom:14px;text-align:center;}
 .book-error.show{display:block;}
 .book-panel .pay-row{justify-content:center;margin-top:18px;}
+.stripe-trust-badge{
+  display:flex;align-items:center;justify-content:center;gap:7px;margin-top:14px;
+  color:var(--muted);font-size:11.5px;
+}
+.stripe-trust-badge svg:first-child{color:var(--lime);flex-shrink:0;}
+.stripe-trust-badge svg:last-child{color:var(--muted);opacity:.85;flex-shrink:0;}
 .book-back{
   display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:var(--muted);
   min-height:44px;padding:0 4px;
@@ -1489,10 +1495,24 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
         <span class="pay-chip" aria-label="Mastercard">
           <svg width="34" height="22" viewBox="0 0 40 26" xmlns="http://www.w3.org/2000/svg"><circle cx="15" cy="13" r="11" fill="#EB001B"/><circle cx="25" cy="13" r="11" fill="#F79E1B"/><path d="M20 4.5a11 11 0 010 17 11 11 0 010-17z" fill="#FF5F00"/></svg>
         </span>
-        <span class="pay-chip dark" aria-label="Stripe">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11z"/></svg>
-          Secured by Stripe
+        <span class="pay-chip" aria-label="Apple Pay">
+          <svg width="13" height="17" viewBox="7.43 1.38 12.4 15.95" xmlns="http://www.w3.org/2000/svg" style="display:block;transform:translateY(-1.5px);"><path d="M16.365 1.43c0 1.14-.462 2.05-1.04 2.73-.62.73-1.65 1.29-2.6 1.22-.13-1.09.42-2.24 1.02-2.9.65-.73 1.75-1.28 2.62-1.05zm3.06 5.9c-.1.06-1.62.94-1.6 2.83.02 2.28 1.98 3.04 2 3.05-.02.05-.32 1.11-1.05 2.2-.63.94-1.29 1.87-2.33 1.89-1.02.02-1.35-.6-2.52-.6-1.17 0-1.53.58-2.5.62-1 .04-1.76-1.02-2.4-1.95-1.3-1.9-2.3-5.35-.96-7.68.66-1.16 1.85-1.9 3.14-1.92 1-.02 1.94.67 2.55.67.6 0 1.75-.83 2.95-.71.5.02 1.92.2 2.82 1.5z" fill="#000"/></svg>
+          <span style="font-family:Arial, sans-serif;font-weight:600;font-size:14px;color:#000;line-height:1;transform:translateY(-0.5px);display:inline-block;">Pay</span>
         </span>
+        <span class="pay-chip" aria-label="Google Pay">
+          <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+            <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+            <path fill="#FBBC05" d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.348 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z"/>
+            <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+          </svg>
+          <span style="font-family:Arial, sans-serif;font-weight:500;font-size:13px;color:#3c4043;line-height:1;">Pay</span>
+        </span>
+      </div>
+      <div class="stripe-trust-badge">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11z"/><path d="M9 12l2 2 4-4"/></svg>
+        <span>Payments secured &amp; encrypted by</span>
+        <svg width="42" height="18" viewBox="0 0 468 222" xmlns="http://www.w3.org/2000/svg" aria-label="Stripe"><path fill="currentColor" d="M414 113.4c0-25.6-12.4-45.8-36.1-45.8-23.8 0-38.2 20.2-38.2 45.6 0 30.1 17 45.3 41.4 45.3 11.9 0 20.9-2.7 27.7-6.5v-20c-6.8 3.4-14.6 5.5-24.5 5.5-9.7 0-18.3-3.4-19.4-15.2h48.9c0-1.3.2-6.5.2-8.9zm-49.4-9.5c0-11.3 6.9-16 13.2-16 6.1 0 12.6 4.7 12.6 16h-25.8zM301.1 67.6c-9.8 0-16.1 4.6-19.6 7.8l-1.3-6.2h-22v116.6l25-5.3.1-28.3c3.6 2.6 8.9 6.3 17.7 6.3 17.9 0 34.2-14.4 34.2-46.1-.1-29-16.6-44.8-34.1-44.8zm-6 68.9c-5.9 0-9.4-2.1-11.8-4.7l-.1-37.1c2.6-2.9 6.2-4.9 11.9-4.9 9.1 0 15.4 10.2 15.4 23.3 0 13.4-6.2 23.4-15.4 23.4zM223.8 61.7l25.1-5.4V36l-25.1 5.3v20.4zM223.8 69.3h25.1v87.5h-25.1zM196.9 76.7l-1.6-7.4h-21.6v87.5h25V97.5c5.9-7.7 15.9-6.3 19-5.2v-23c-3.2-1.2-14.9-3.4-20.8 7.4zM146.9 47.6l-24.4 5.2-.1 80.1c0 14.8 11.1 25.7 25.9 25.7 8.2 0 14.2-1.5 17.5-3.3v-20.3c-3.2 1.3-19 5.9-19-8.9V90.6h19V69.3h-19l.1-21.7zM79.3 94.7c0-3.9 3.2-5.4 8.5-5.4 7.6 0 17.2 2.3 24.8 6.4V72.2c-8.3-3.3-16.5-4.6-24.8-4.6C67.5 67.6 54 78.2 54 95.9c0 27.6 38.1 23.2 38.1 35.1 0 4.6-4 6.1-9.6 6.1-8.3 0-18.9-3.4-27.3-8v23.8c9.3 4 18.7 5.7 27.3 5.7 20.8 0 35.1-10.3 35.1-28.2-.1-29.8-38.3-24.5-38.3-35.7z"/></svg>
       </div>
     </div>
 
