@@ -45,47 +45,53 @@ const PACKAGE_NAMES = {
 };
 
 function buildEmailHtml({ name, packageName, niceDate, qty }) {
+  const MAPS_LINK = 'https://maps.app.goo.gl/gw6wz2S7iKU7eybL7';
   return `
-  <div style="background:#08070a;padding:40px 20px;font-family:Arial,Helvetica,sans-serif;">
-    <div style="max-width:480px;margin:0 auto;background:#131314;border-radius:20px;overflow:hidden;border:1px solid #232325;">
-      <div style="background:linear-gradient(135deg,#ff173f,#ff5a8f 45%,#3c0512);padding:32px 28px;text-align:center;">
-        <div style="font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.85);font-weight:700;">Project P</div>
-        <div style="font-size:26px;font-weight:800;color:#fff;margin-top:6px;">You're on the list! 🎉</div>
+  <div style="background:#08070a;padding:40px 20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <div style="max-width:480px;margin:0 auto;background:#131314;border-radius:20px;overflow:hidden;border:1px solid #232325;box-shadow:0 30px 80px -20px rgba(255,23,63,0.25);">
+      <div style="background:linear-gradient(135deg,#ff173f,#ff5a8f 45%,#3c0512);padding:36px 28px 30px;text-align:center;">
+        <img src="https://www.porto-pubcrawl.com/assets/logo-email.png" alt="Project P" width="180" style="display:block;margin:0 auto 18px;height:auto;">
+        <div style="display:inline-block;background:rgba(255,255,255,0.16);border-radius:100px;padding:8px 18px;">
+          <span style="font-size:15px;font-weight:800;color:#fff;">You're on the list! 🎉</span>
+        </div>
       </div>
-      <div style="padding:28px;">
-        <p style="color:#f5f4f2;font-size:15px;line-height:1.6;margin:0 0 22px;">
+      <div style="padding:32px 28px 28px;">
+        <p style="color:#f5f4f2;font-size:15px;line-height:1.6;margin:0 0 24px;">
           ${name ? 'Hey ' + name + ',' : 'Hey,'} your spot on the Porto Pub Crawl is confirmed. Here's everything you need for Saturday:
         </p>
-        <table style="width:100%;border-collapse:collapse;margin-bottom:22px;">
+        <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
           <tr>
-            <td style="padding:10px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:12px;text-transform:uppercase;letter-spacing:.04em;">Package</td>
-            <td style="padding:10px 0;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14px;text-align:right;font-weight:700;">${packageName}</td>
+            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Package</td>
+            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14.5px;text-align:right;font-weight:700;">${packageName}</td>
           </tr>
           <tr>
-            <td style="padding:10px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:12px;text-transform:uppercase;letter-spacing:.04em;">Date</td>
-            <td style="padding:10px 0;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14px;text-align:right;font-weight:700;">${niceDate}</td>
+            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Date</td>
+            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14.5px;text-align:right;font-weight:700;">${niceDate}</td>
           </tr>
           <tr>
-            <td style="padding:10px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:12px;text-transform:uppercase;letter-spacing:.04em;">Spots</td>
-            <td style="padding:10px 0;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14px;text-align:right;font-weight:700;">${qty}</td>
+            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Spots</td>
+            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14.5px;text-align:right;font-weight:700;">${qty}</td>
           </tr>
           <tr>
-            <td style="padding:10px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:12px;text-transform:uppercase;letter-spacing:.04em;">Meeting point</td>
-            <td style="padding:10px 0;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14px;text-align:right;font-weight:700;">Praça de Carlos Alberto</td>
+            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Meeting point</td>
+            <td style="padding:12px 0;border-bottom:1px solid #232325;text-align:right;">
+              <a href="${MAPS_LINK}" style="color:#ff5468;font-size:14.5px;font-weight:700;text-decoration:none;">📍 Praça de Carlos Alberto</a>
+            </td>
           </tr>
           <tr>
-            <td style="padding:10px 0;color:#a3a0a1;font-size:12px;text-transform:uppercase;letter-spacing:.04em;">Time</td>
-            <td style="padding:10px 0;color:#f5f4f2;font-size:14px;text-align:right;font-weight:700;">22:30 — look for the pink umbrellas</td>
+            <td style="padding:12px 0;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Time</td>
+            <td style="padding:12px 0;color:#f5f4f2;font-size:14.5px;text-align:right;font-weight:700;">22:30 — look for the pink umbrellas</td>
           </tr>
         </table>
+        <a href="${MAPS_LINK}" style="display:block;text-align:center;background:linear-gradient(135deg,#ff173f,#ff5a8f);color:#fff;font-size:14px;font-weight:800;text-decoration:none;padding:14px 20px;border-radius:100px;margin-bottom:24px;">📍 Open meeting point in Maps</a>
         <p style="color:#a3a0a1;font-size:13px;line-height:1.6;margin:0 0 6px;">
           Questions before Saturday? Message us on WhatsApp: <a href="https://wa.me/351910694984" style="color:#ff5468;">+351 910 694 984</a>
         </p>
-        <p style="color:#7e7b7c;font-size:12px;line-height:1.6;margin:22px 0 0;">
+        <p style="color:#7e7b7c;font-size:12px;line-height:1.6;margin:20px 0 0;">
           Free cancellation up to 24h before your start time — just reply to this email or WhatsApp us.
         </p>
       </div>
-      <div style="padding:18px 28px;background:#0d0d0e;text-align:center;">
+      <div style="padding:20px 28px;background:#0d0d0e;text-align:center;border-top:1px solid #232325;">
         <p style="color:#7e7b7c;font-size:11px;margin:0;">Project P · Porto's most talked-about night out, every Saturday since 2025.</p>
       </div>
     </div>
