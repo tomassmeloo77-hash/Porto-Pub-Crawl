@@ -1710,8 +1710,6 @@ function syncSpotsEverywhere(){
 const track = document.getElementById('carouselTrack');
 if(track){
 onIdle(function(){
-  let paused = false;
-
   // three copies of the slide set — [before][original][after] — so there's
   // always a full screen's worth of real content on *either* side of
   // wherever the user is looking, whether they scroll forward, drag
@@ -1750,34 +1748,15 @@ onIdle(function(){
     }
   }, {passive:true});
 
+  // never pauses — keeps auto-advancing continuously regardless of hover or
+  // touch; the before/after clones above just mean a manual drag in either
+  // direction still has real content to show instead of hitting a wall
   const speed = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.65;
   function autoLoop(){
-    if(speed > 0 && !paused) track.scrollLeft += speed;
+    if(speed > 0) track.scrollLeft += speed;
     requestAnimationFrame(autoLoop);
   }
   requestAnimationFrame(autoLoop);
-
-  // pause-on-hover is a desktop-mouse affordance only — on touch devices,
-  // browsers can fire a synthetic mouseenter on tap with no matching
-  // mouseleave (nothing to "hover away" from with a finger), which would
-  // pause the carousel on first touch and never resume it.
-  if(window.matchMedia('(hover: hover)').matches){
-    track.addEventListener('mouseenter', ()=> paused = true);
-    track.addEventListener('mouseleave', ()=> paused = false);
-  }
-
-  // don't fight a manual swipe/drag — pause the auto-advance for as long as
-  // a touch is down, plus a short grace period after release, so both
-  // directions feel like they're actually responding to the user
-  let resumeTimer;
-  track.addEventListener('touchstart', function(){
-    paused = true;
-    clearTimeout(resumeTimer);
-  }, {passive:true});
-  track.addEventListener('touchend', function(){
-    clearTimeout(resumeTimer);
-    resumeTimer = setTimeout(()=> paused = false, 2500);
-  }, {passive:true});
 });
 }
 
