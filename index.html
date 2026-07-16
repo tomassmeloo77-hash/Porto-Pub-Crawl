@@ -2226,6 +2226,11 @@ try{
   const PRICES = { crawl: 17, pack: 44 };
   const NAMES = { crawl: 'Porto Pub Crawl', pack: 'Party Boat + Pub Crawl Pack' };
 
+  // Last bookable Saturday shown in the date picker — bump this every few
+  // months. If this date passes without being updated, the picker shows a
+  // "no dates available" message instead of breaking (see renderDates()).
+  const LAST_BOOKABLE_DATE = '2026-12-19';
+
   const overlay = document.getElementById('bookOverlay');
   const panel = document.getElementById('bookPanel');
   const selectStep = document.getElementById('bookSelectStep');
@@ -2282,13 +2287,21 @@ try{
   }
 
   function renderDates(){
-    // rolling 6-month window from today, instead of a fixed calendar date —
-    // a hardcoded cutoff would eventually leave nextSaturdays() with nothing
-    // to return, crashing this function the next time someone opens the modal
-    const untilDate = new Date();
-    untilDate.setMonth(untilDate.getMonth() + 6);
-    const dates = nextSaturdays(toLocalISODate(untilDate));
+    const dates = nextSaturdays(LAST_BOOKABLE_DATE);
     dateScroller.innerHTML = '';
+
+    // LAST_BOOKABLE_DATE has passed without being bumped — show this instead
+    // of leaving the picker empty (or, worse, crashing on dates[0] below)
+    if(!dates.length){
+      state.date = null;
+      const notice = document.createElement('p');
+      notice.className = 'date-empty-notice';
+      notice.style.cssText = 'color:var(--muted);font-size:13.5px;line-height:1.5;padding:6px 2px;';
+      notice.textContent = 'No dates open for booking right now — WhatsApp us and we\'ll sort you out.';
+      dateScroller.appendChild(notice);
+      return;
+    }
+
     dates.forEach(function(d, i){
       const pill = document.createElement('div');
       pill.className = 'date-pill' + (i===0 ? ' active' : '');
@@ -2301,9 +2314,7 @@ try{
       });
       dateScroller.appendChild(pill);
     });
-    // defensive: dates should never be empty with a 6-month rolling window,
-    // but never leave state.date silently undefined if it somehow is
-    if(dates[0]) state.date = dates[0].iso;
+    state.date = dates[0].iso;
   }
 
   function updateTotal(){
@@ -2518,7 +2529,11 @@ try{
 
   bookSubmit.addEventListener('click', function(){
     bookError.classList.remove('show');
-    if(!state.date){ showError('Please pick a Saturday.'); return; }
+    if(!state.date){
+      const noDatesShown = !dateScroller.querySelector('.date-pill');
+      showError(noDatesShown ? 'No dates open for booking right now — please WhatsApp us.' : 'Please pick a Saturday.');
+      return;
+    }
 
     if(window.posthog) posthog.capture('Checkout Started', { package: state.pkg, date: state.date, quantity: state.qty });
     if(typeof gtag === 'function') gtag('event', 'begin_checkout', { package: state.pkg, date: state.date, quantity: state.qty });
