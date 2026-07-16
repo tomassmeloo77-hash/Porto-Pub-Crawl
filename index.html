@@ -2282,7 +2282,12 @@ try{
   }
 
   function renderDates(){
-    const dates = nextSaturdays('2026-12-19');
+    // rolling 6-month window from today, instead of a fixed calendar date —
+    // a hardcoded cutoff would eventually leave nextSaturdays() with nothing
+    // to return, crashing this function the next time someone opens the modal
+    const untilDate = new Date();
+    untilDate.setMonth(untilDate.getMonth() + 6);
+    const dates = nextSaturdays(toLocalISODate(untilDate));
     dateScroller.innerHTML = '';
     dates.forEach(function(d, i){
       const pill = document.createElement('div');
@@ -2296,7 +2301,9 @@ try{
       });
       dateScroller.appendChild(pill);
     });
-    state.date = dates[0].iso;
+    // defensive: dates should never be empty with a 6-month rolling window,
+    // but never leave state.date silently undefined if it somehow is
+    if(dates[0]) state.date = dates[0].iso;
   }
 
   function updateTotal(){
