@@ -1721,6 +1721,14 @@ onIdle(function(){
   track.insertBefore(beforeCopy, track.firstChild);
   originalSlides.forEach(s => track.appendChild(s.cloneNode(true)));
 
+  // cloneNode() duplicates the <video> tags too, but never their JS-attached
+  // lazy-load/autoplay setup — wire each cloned copy up independently
+  // (setupLazyVideo skips anything already set up, so the two original
+  // videos found earlier are left alone).
+  if(typeof setupLazyVideo === 'function'){
+    track.querySelectorAll('.lazy-video').forEach(setupLazyVideo);
+  }
+
   // cache scrollWidth instead of reading it every animation frame/scroll
   // event — reading a layout property right after a mutation forces a
   // synchronous reflow, and these run up to 60x/second
@@ -2022,10 +2030,22 @@ resizeCanvas(); initParticles(); animateParticles();
 // ===== gallery video: lazy-load (only start downloading once near viewport, =====
 // ===== so these don't compete with the hero image for bandwidth on load),   =====
 // ===== then force autoplay on mobile / in-app browsers (WhatsApp, Instagram) =====
-['clubfloorVideoEl','reelVideoEl'].forEach(function(videoId){
-(function(){
-  const heroVideo = document.getElementById(videoId);
-  if(!heroVideo) return;
+//
+// The gallery carousel clones its slides (for the infinite-loop illusion),
+// which duplicates these <video> elements — cloneNode() copies attributes
+// like data-src, but never copies JS-attached listeners or observers. So
+// every clone needs this same setup run on it individually, or 2 of every
+// 3 visual copies of each video would just sit there as a dead, empty
+// <video> tag with nothing wired up — which looks exactly like "the video
+// randomly freezes" as the carousel auto-scrolls past those copies.
+// wiredVideos (in JS memory, not a DOM attribute) tracks which elements
+// already got set up, so cloneNode() can never make a clone look
+// "already done" just by copying an attribute.
+const wiredVideos = new WeakSet();
+function setupLazyVideo(heroVideo){
+  if(!heroVideo || wiredVideos.has(heroVideo)) return;
+  wiredVideos.add(heroVideo);
+
   heroVideo.muted = true;
   heroVideo.defaultMuted = true;
   heroVideo.setAttribute('muted', '');
@@ -2074,7 +2094,9 @@ resizeCanvas(); initParticles(); animateParticles();
   window.addEventListener('touchstart', retryOnGesture, {passive:true});
   window.addEventListener('click', retryOnGesture);
   window.addEventListener('scroll', retryOnGesture, {passive:true});
-})();
+}
+['clubfloorVideoEl','reelVideoEl'].forEach(function(videoId){
+  setupLazyVideo(document.getElementById(videoId));
 });
 window.addEventListener('resize', ()=>{ if(canvas){ resizeCanvas(); initParticles(); } });
 
