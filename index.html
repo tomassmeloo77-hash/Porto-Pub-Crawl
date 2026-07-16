@@ -1710,7 +1710,7 @@ function syncSpotsEverywhere(){
 const track = document.getElementById('carouselTrack');
 if(track){
 onIdle(function(){
-  let pausedUntil = 0;
+  let paused = false;
 
   // duplicate the slide set once so we can loop seamlessly in a single direction
   const originalSlides = [...track.children];
@@ -1723,7 +1723,7 @@ onIdle(function(){
   let halfWidth = track.scrollWidth / 2;
   window.addEventListener('resize', function(){ halfWidth = track.scrollWidth / 2; }, {passive:true});
   function autoLoop(){
-    if(speed > 0 && Date.now() > pausedUntil){
+    if(speed > 0 && !paused){
       if(halfWidth > 1){
         track.scrollLeft += speed;
         if(track.scrollLeft >= halfWidth) track.scrollLeft -= halfWidth;
@@ -1733,8 +1733,15 @@ onIdle(function(){
   }
   requestAnimationFrame(autoLoop);
 
-  track.addEventListener('mouseenter', ()=> pausedUntil = 999999999999);
-  track.addEventListener('mouseleave', ()=> pausedUntil = 0);
+  // pause-on-hover is a desktop-mouse affordance only — on touch devices,
+  // browsers can fire a synthetic mouseenter on tap with no matching
+  // mouseleave (nothing to "hover away" from with a finger), which would
+  // pause the carousel on first touch and never resume it. Gating this on
+  // a real hover-capable pointer keeps the loop genuinely infinite on mobile.
+  if(window.matchMedia('(hover: hover)').matches){
+    track.addEventListener('mouseenter', ()=> paused = true);
+    track.addEventListener('mouseleave', ()=> paused = false);
+  }
 });
 }
 
