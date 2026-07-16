@@ -7,7 +7,7 @@
 // SETUP (Vercel dashboard, one-time):
 // 1. Project → Settings → Environment Variables
 // 2. Add STRIPE_SECRET_KEY = sk_live_xxxxxxxx (use sk_test_xxxxxxxx to test)
-// 3. Add SITE_URL = https://porto-pubcrawl.com (no trailing slash)
+// 3. Add SITE_URL = https://www.porto-pubcrawl.com (no trailing slash)
 // 4. Redeploy after saving (env vars are only picked up on a new deploy)
 //
 // If this function isn't reachable (e.g. deployed on plain static
@@ -41,7 +41,7 @@ module.exports = async (req, res) => {
     if (!qty || qty < 1 || qty > MAX_QTY) { res.status(400).json({ error: 'Invalid quantity.' }); return; }
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { res.status(400).json({ error: 'Invalid date.' }); return; }
 
-    const siteUrl = process.env.SITE_URL || 'https://porto-pubcrawl.com';
+    const siteUrl = process.env.SITE_URL || 'https://www.porto-pubcrawl.com';
     const niceDate = new Date(date + 'T00:00:00Z').toLocaleDateString('en-GB', {
       weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'
     });

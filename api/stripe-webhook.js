@@ -179,12 +179,17 @@ module.exports = async (req, res) => {
       }) + ' (Lisbon time)';
 
       // 1) confirmation email to the customer
+      // Idempotency-Key: Stripe can and does redeliver the same webhook event
+      // (e.g. if our response is slow or a network blip drops the ack), so we
+      // key on the session id — Resend dedupes retries of the same key within
+      // 24h instead of sending the customer two confirmation emails.
       try {
         const resendRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Idempotency-Key': `booking-confirmation-${session.id}`
           },
           body: JSON.stringify({
             from: 'Porto Pub Crawl <bookings@porto-pubcrawl.com>',
@@ -207,7 +212,8 @@ module.exports = async (req, res) => {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Idempotency-Key': `booking-admin-notice-${session.id}`
           },
           body: JSON.stringify({
             from: 'Porto Pub Crawl <bookings@porto-pubcrawl.com>',

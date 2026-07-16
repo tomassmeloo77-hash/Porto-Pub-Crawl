@@ -89,16 +89,16 @@
   "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
-    {"@type":"Question","name":"Where and when do we meet?","acceptedAnswer":{"@type":"Answer","text":"Every Saturday at 22:30 at Praça de Carlos Alberto, Porto. Look for hosts holding pink umbrellas near the statue."}},
-    {"@type":"Question","name":"Do you run every night, or just Saturdays?","acceptedAnswer":{"@type":"Answer","text":"Just Saturdays, one night a week."}},
-    {"@type":"Question","name":"What's included in the crawl?","acceptedAnswer":{"@type":"Answer","text":"9 drinks total, free welcome shots, beer and sangria, VIP entry to 4 bars and 1 nightclub, photos and video, drink deals, and non-stop wild games throughout the night."}},
-    {"@type":"Question","name":"How long does the night last?","acceptedAnswer":{"@type":"Answer","text":"Around 4 hours, finishing around 2:30am, though the party often continues after."}},
+    {"@type":"Question","name":"Where and when do we meet?","acceptedAnswer":{"@type":"Answer","text":"Every Saturday at 22:30, at Praça de Carlos Alberto — look for our guides holding pink umbrellas near the statue. Doors close 15 minutes after start, so don't be fashionably late."}},
+    {"@type":"Question","name":"Do you run every night, or just Saturdays?","acceptedAnswer":{"@type":"Answer","text":"Just Saturdays — one night a week, done properly, rather than a rushed version every night. That's also why spots are genuinely limited: there's only one crawl to book into each week."}},
+    {"@type":"Question","name":"What's actually included?","acceptedAnswer":{"@type":"Answer","text":"9 drinks total across the night, free welcome shots, beer and sangria, VIP entry to 4 bars plus one late-night club, photos and video, drink deals, and non-stop wild games."}},
+    {"@type":"Question","name":"How long does the night run?","acceptedAnswer":{"@type":"Answer","text":"Around 4 hours, wrapping around 02:30 — though most crews keep the party going long after we officially call it."}},
     {"@type":"Question","name":"I'm coming alone — is that weird?","acceptedAnswer":{"@type":"Answer","text":"Not even a little. Most of our crawlers show up solo. The whole night is built around meeting people, so you'll never be standing alone for long."}},
     {"@type":"Question","name":"Can I cancel if plans change?","acceptedAnswer":{"@type":"Answer","text":"Yes — full refund if you cancel at least 24 hours before your start time. No questions, no hassle."}}
   ]
 }
 </script>
-<script type="application/ld+json">
+<script type="application/ld+json" id="event-jsonld">
 {
   "@context": "https://schema.org",
   "@type": "Event",
@@ -152,6 +152,52 @@
   ],
   "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "1327", "bestRating": "5" }
 }
+</script>
+<script>
+// The crawl runs every Saturday, but schema.org Event wants one concrete
+// occurrence's startDate/endDate — so we rewrite the hardcoded placeholder
+// dates above to the upcoming Saturday on every page load, instead of
+// letting them go stale (and eventually describe a Saturday that's already
+// passed, which Search Console flags as an error and can cost the rich result).
+(function(){
+  try{
+    var el = document.getElementById('event-jsonld');
+    var data = JSON.parse(el.textContent);
+
+    var now = new Date();
+    var daysUntilSat = (6 - now.getDay() + 7) % 7;
+    var pastTonightsStart = now.getDay() === 6 && (now.getHours() > 22 || (now.getHours() === 22 && now.getMinutes() >= 30));
+    if(daysUntilSat === 0 && pastTonightsStart){ daysUntilSat = 7; }
+    var start = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilSat);
+    var y = start.getFullYear(), m = start.getMonth() + 1, d = start.getDate();
+
+    var end = new Date(y, m - 1, d + 1);
+    var ey = end.getFullYear(), em = end.getMonth() + 1, ed = end.getDate();
+
+    // Lisbon is on WEST (UTC+1) between the last Sundays of March and October,
+    // WET (UTC+0) otherwise — a fixed EU-wide rule, so this doesn't depend on
+    // the visitor's own timezone.
+    function lastSundayUTC(year, month){ // month is 1-indexed
+      var last = new Date(Date.UTC(year, month, 0));
+      last.setUTCDate(last.getUTCDate() - last.getUTCDay());
+      return last;
+    }
+    function lisbonOffset(year, month, day){
+      var noon = new Date(Date.UTC(year, month - 1, day, 12));
+      var dstStart = lastSundayUTC(year, 3);
+      var dstEnd = lastSundayUTC(year, 10);
+      return (noon >= dstStart && noon < dstEnd) ? '+01:00' : '+00:00';
+    }
+    function pad(n){ return String(n).padStart(2, '0'); }
+
+    data.startDate = y + '-' + pad(m) + '-' + pad(d) + 'T22:30:00' + lisbonOffset(y, m, d);
+    data.endDate = ey + '-' + pad(em) + '-' + pad(ed) + 'T02:30:00' + lisbonOffset(ey, em, ed);
+
+    el.textContent = JSON.stringify(data);
+  } catch(e){
+    console.error('Could not refresh Event structured data dates:', e);
+  }
+})();
 </script>
 <style>
 
@@ -1269,20 +1315,20 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
   <div class="marquee-wrap reveal">
     <div class="marquee" id="marquee">
       <!-- set A -->
-      <div class="tcard"><span class="stars">★★★★★</span><p>"Absolutely perfect night out, great choice of bars and clubs, the vibe was fun and friendly, guides made sure everyone had a great time."</p><div class="who"><img src="assets/avatar-matheus.webp" alt="" loading="lazy"><div><div class="name">Marco</div><div class="loc">Germany</div></div></div></div>
+      <div class="tcard"><span class="stars">★★★★★</span><p>"Absolutely perfect night out, great choice of bars and clubs, the vibe was fun and friendly, guides made sure everyone had a great time."</p><div class="who"><img src="assets/avatar-marco.webp" alt="" loading="lazy"><div><div class="name">Marco</div><div class="loc">Germany</div></div></div></div>
       <div class="tcard"><span class="stars">★★★★★</span><p>"I've done this pub crawl twice and it's always amazing! Great vibe, awesome people, and so much fun every time. I'll definitely keep doing it!"</p><div class="who"><img src="assets/avatar-xavimeneres.webp" alt="" loading="lazy"><div><div class="name">Xavi</div><div class="loc">Portugal</div></div></div></div>
       <div class="tcard"><span class="stars">★★★★★</span><p>"This pub crawl is maaddddd Best night of my life thank you guys &lt;3"</p><div class="who"><img src="assets/avatar-haley.webp" alt="" loading="lazy"><div><div class="name">Haley</div><div class="loc">Australia</div></div></div></div>
-      <div class="tcard"><span class="stars">★★★★★</span><p>"10/10 great nights craic, great company, guides showed us the nightlife of Porto which is also 10/10… ended up very drunk 🤣"</p><div class="who"><img src="assets/avatar-angelique.webp" alt="" loading="lazy"><div><div class="name">Pauline</div><div class="loc">United Kingdom</div></div></div></div>
-      <div class="tcard"><span class="stars">★★★★★</span><p>"I didn't know where to go out in Porto so I decided to join the pub crawl, and it was the best decision ever! Can't wait to come back and do it again. ❤️"</p><div class="who"><img src="assets/avatar-pauline.webp" alt="" loading="lazy"><div><div class="name">Angelique</div><div class="loc">France</div></div></div></div>
-      <div class="tcard"><span class="stars">★★★★★</span><p>"BOLOLO thist pub crawl during my solo trip to Porto and it was great!! Made so many friends and such a good time"</p><div class="who"><img src="assets/avatar-marco.webp" alt="" loading="lazy"><div><div class="name">Matheus</div><div class="loc">Brazil</div></div></div></div>
+      <div class="tcard"><span class="stars">★★★★★</span><p>"10/10 great nights craic, great company, guides showed us the nightlife of Porto which is also 10/10… ended up very drunk 🤣"</p><div class="who"><img src="assets/avatar-pauline.webp" alt="" loading="lazy"><div><div class="name">Pauline</div><div class="loc">United Kingdom</div></div></div></div>
+      <div class="tcard"><span class="stars">★★★★★</span><p>"I didn't know where to go out in Porto so I decided to join the pub crawl, and it was the best decision ever! Can't wait to come back and do it again. ❤️"</p><div class="who"><img src="assets/avatar-angelique.webp" alt="" loading="lazy"><div><div class="name">Angelique</div><div class="loc">France</div></div></div></div>
+      <div class="tcard"><span class="stars">★★★★★</span><p>"BOLOLO thist pub crawl during my solo trip to Porto and it was great!! Made so many friends and such a good time"</p><div class="who"><img src="assets/avatar-matheus.webp" alt="" loading="lazy"><div><div class="name">Matheus</div><div class="loc">Brazil</div></div></div></div>
       <div class="tcard"><span class="stars">★★★★★</span><p>"Very nice way to get to know the Porto nightlife, definitely got the money's worth in alcohol and memories. Super fun, and everyone was very nice and open to talk to you."</p><div class="who"><img src="assets/avatar-aleksandra.webp" alt="" loading="lazy"><div><div class="name">Aleksandra</div><div class="loc">Poland</div></div></div></div>
       <!-- set B duplicate for seamless loop -->
-      <div class="tcard"><span class="stars">★★★★★</span><p>"Absolutely perfect night out, great choice of bars and clubs, the vibe was fun and friendly, guides made sure everyone had a great time."</p><div class="who"><img src="assets/avatar-matheus.webp" alt="" loading="lazy"><div><div class="name">Marco</div><div class="loc">Germany</div></div></div></div>
+      <div class="tcard"><span class="stars">★★★★★</span><p>"Absolutely perfect night out, great choice of bars and clubs, the vibe was fun and friendly, guides made sure everyone had a great time."</p><div class="who"><img src="assets/avatar-marco.webp" alt="" loading="lazy"><div><div class="name">Marco</div><div class="loc">Germany</div></div></div></div>
       <div class="tcard"><span class="stars">★★★★★</span><p>"I've done this pub crawl twice and it's always amazing! Great vibe, awesome people, and so much fun every time. I'll definitely keep doing it!"</p><div class="who"><img src="assets/avatar-xavimeneres.webp" alt="" loading="lazy"><div><div class="name">Xavi</div><div class="loc">Portugal</div></div></div></div>
       <div class="tcard"><span class="stars">★★★★★</span><p>"This pub crawl is maaddddd Best night of my life thank you guys &lt;3"</p><div class="who"><img src="assets/avatar-haley.webp" alt="" loading="lazy"><div><div class="name">Haley</div><div class="loc">Australia</div></div></div></div>
-      <div class="tcard"><span class="stars">★★★★★</span><p>"10/10 great nights craic, great company, guides showed us the nightlife of Porto which is also 10/10… ended up very drunk 🤣"</p><div class="who"><img src="assets/avatar-angelique.webp" alt="" loading="lazy"><div><div class="name">Pauline</div><div class="loc">United Kingdom</div></div></div></div>
-      <div class="tcard"><span class="stars">★★★★★</span><p>"I didn't know where to go out in Porto so I decided to join the pub crawl, and it was the best decision ever! Can't wait to come back and do it again. ❤️"</p><div class="who"><img src="assets/avatar-pauline.webp" alt="" loading="lazy"><div><div class="name">Angelique</div><div class="loc">France</div></div></div></div>
-      <div class="tcard"><span class="stars">★★★★★</span><p>"BOLOLO thist pub crawl during my solo trip to Porto and it was great!! Made so many friends and such a good time"</p><div class="who"><img src="assets/avatar-marco.webp" alt="" loading="lazy"><div><div class="name">Matheus</div><div class="loc">Brazil</div></div></div></div>
+      <div class="tcard"><span class="stars">★★★★★</span><p>"10/10 great nights craic, great company, guides showed us the nightlife of Porto which is also 10/10… ended up very drunk 🤣"</p><div class="who"><img src="assets/avatar-pauline.webp" alt="" loading="lazy"><div><div class="name">Pauline</div><div class="loc">United Kingdom</div></div></div></div>
+      <div class="tcard"><span class="stars">★★★★★</span><p>"I didn't know where to go out in Porto so I decided to join the pub crawl, and it was the best decision ever! Can't wait to come back and do it again. ❤️"</p><div class="who"><img src="assets/avatar-angelique.webp" alt="" loading="lazy"><div><div class="name">Angelique</div><div class="loc">France</div></div></div></div>
+      <div class="tcard"><span class="stars">★★★★★</span><p>"BOLOLO thist pub crawl during my solo trip to Porto and it was great!! Made so many friends and such a good time"</p><div class="who"><img src="assets/avatar-matheus.webp" alt="" loading="lazy"><div><div class="name">Matheus</div><div class="loc">Brazil</div></div></div></div>
       <div class="tcard"><span class="stars">★★★★★</span><p>"Very nice way to get to know the Porto nightlife, definitely got the money's worth in alcohol and memories. Super fun, and everyone was very nice and open to talk to you."</p><div class="who"><img src="assets/avatar-aleksandra.webp" alt="" loading="lazy"><div><div class="name">Aleksandra</div><div class="loc">Poland</div></div></div></div>
     </div>
   </div>
