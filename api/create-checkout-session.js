@@ -40,6 +40,11 @@ module.exports = async (req, res) => {
     const qty = parseInt(quantity, 10);
     if (!qty || qty < 1 || qty > MAX_QTY) { res.status(400).json({ error: 'Invalid quantity.' }); return; }
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { res.status(400).json({ error: 'Invalid date.' }); return; }
+    const parsedDate = new Date(date + 'T00:00:00Z');
+    if (isNaN(parsedDate.getTime())) { res.status(400).json({ error: 'Invalid date.' }); return; }
+    const todayUTC = new Date(); todayUTC.setUTCHours(0, 0, 0, 0);
+    if (parsedDate < todayUTC) { res.status(400).json({ error: 'That date has already passed.' }); return; }
+    if (parsedDate.getUTCDay() !== 6) { res.status(400).json({ error: 'The crawl only runs on Saturdays.' }); return; }
 
     const siteUrl = process.env.SITE_URL || 'https://www.porto-pubcrawl.com';
     const niceDate = new Date(date + 'T00:00:00Z').toLocaleDateString('en-GB', {
