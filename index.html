@@ -1617,6 +1617,15 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 </div>
 
 <script>
+// runs fn once the main thread is free (falls back to a short timeout on
+// browsers without requestIdleCallback, e.g. Safari) — used below to push
+// below-the-fold, purely decorative setup work out of the initial script
+// execution, so it doesn't add to the page's Total Blocking Time.
+function onIdle(fn){
+  if(typeof requestIdleCallback === 'function') requestIdleCallback(fn, {timeout: 2000});
+  else setTimeout(fn, 1);
+}
+
 // ===== SINGLE SOURCE OF TRUTH for all dynamic numbers on the site =====
 // Every place that shows "spots left" or "already booked" reads from here,
 // so changing SITE.spotsLeft updates every mention across the whole page.
@@ -1692,8 +1701,11 @@ function syncSpotsEverywhere(){
 }
 
 // ===== carousel (pure auto-scroll, one direction, seamless infinite loop) =====
+// gallery is well below the fold, so this setup (DOM cloning + a scrollWidth
+// read, which forces a layout) is deferred instead of adding to page-load TBT
 const track = document.getElementById('carouselTrack');
 if(track){
+onIdle(function(){
   let pausedUntil = 0;
 
   // duplicate the slide set once so we can loop seamlessly in a single direction
@@ -1719,6 +1731,7 @@ if(track){
 
   track.addEventListener('mouseenter', ()=> pausedUntil = 999999999999);
   track.addEventListener('mouseleave', ()=> pausedUntil = 0);
+});
 }
 
 // ===== nav scroll state =====
@@ -2123,11 +2136,15 @@ lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) closeLightbo
 document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeLightbox(); });
 
 // ===== verified badge on each review card =====
-document.querySelectorAll('.tcard .who').forEach(who=>{
-  const tag = document.createElement('div');
-  tag.className = 'verified-tag';
-  tag.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="color:#4db8ff;"><path d="M12 2l2.6 1.5 3-.4 1 2.9 2.9 1-.4 3L23 12l-1.9 2 .4 3-2.9 1-1 2.9-3-.4L12 22l-2.6-1.5-3 .4-1-2.9-2.9-1 .4-3L1 12l1.9-2-.4-3 2.9-1 1-2.9 3 .4z"/><path d="M9 12l2 2 4-4" stroke="#08070a" stroke-width="2" fill="none"/></svg> Verified booking';
-  who.parentElement.insertBefore(tag, null);
+// reviews are well below the fold — deferred so this DOM insertion loop
+// doesn't add to page-load TBT
+onIdle(function(){
+  document.querySelectorAll('.tcard .who').forEach(who=>{
+    const tag = document.createElement('div');
+    tag.className = 'verified-tag';
+    tag.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="color:#4db8ff;"><path d="M12 2l2.6 1.5 3-.4 1 2.9 2.9 1-.4 3L23 12l-1.9 2 .4 3-2.9 1-1 2.9-3-.4L12 22l-2.6-1.5-3 .4-1-2.9-2.9-1 .4-3L1 12l1.9-2-.4-3 2.9-1 1-2.9 3 .4z"/><path d="M9 12l2 2 4-4" stroke="#08070a" stroke-width="2" fill="none"/></svg> Verified booking';
+    who.parentElement.insertBefore(tag, null);
+  });
 });
 
 // ===== live "people viewing" counter =====
