@@ -1733,19 +1733,27 @@ onIdle(function(){
   }, {passive:true});
 
   // recentre onto the middle copy well before the user could ever scroll
-  // (or fling) far enough to see a seam, in either direction
+  // (or fling) far enough to see a seam, in either direction. This is
+  // debounced to run only once scrolling has actually settled — setting
+  // scrollLeft while a touch-momentum fling is still decelerating makes
+  // some browsers cancel that momentum outright, which felt like the
+  // carousel randomly stopping dead on a slide mid-drag.
   let recentring = false;
+  let recentreTimer;
   track.addEventListener('scroll', function(){
     if(recentring || setWidth < 1) return;
-    if(track.scrollLeft < setWidth * 0.5){
-      recentring = true;
-      track.scrollLeft += setWidth;
-      recentring = false;
-    } else if(track.scrollLeft > setWidth * 2.5){
-      recentring = true;
-      track.scrollLeft -= setWidth;
-      recentring = false;
-    }
+    clearTimeout(recentreTimer);
+    recentreTimer = setTimeout(function(){
+      if(track.scrollLeft < setWidth * 0.5){
+        recentring = true;
+        track.scrollLeft += setWidth;
+        recentring = false;
+      } else if(track.scrollLeft > setWidth * 2.5){
+        recentring = true;
+        track.scrollLeft -= setWidth;
+        recentring = false;
+      }
+    }, 150);
   }, {passive:true});
 
   // never pauses — keeps auto-advancing continuously regardless of hover or
