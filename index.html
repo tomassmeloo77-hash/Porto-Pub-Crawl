@@ -1733,27 +1733,43 @@ onIdle(function(){
   }, {passive:true});
 
   // recentre onto the middle copy well before the user could ever scroll
-  // (or fling) far enough to see a seam, in either direction. This is
-  // debounced to run only once scrolling has actually settled — setting
-  // scrollLeft while a touch-momentum fling is still decelerating makes
-  // some browsers cancel that momentum outright, which felt like the
-  // carousel randomly stopping dead on a slide mid-drag.
+  // (or fling) far enough to see a seam, in either direction.
+  //
+  // While a finger is actually down, the browser is following it directly —
+  // no momentum animation exists yet — so it's safe to recentre the instant
+  // a threshold is crossed. That matters because a single long drag can
+  // otherwise cross the whole buffer and hit the real scrollLeft edge
+  // (position 0) *before* it ever stops moving, which felt like the
+  // carousel slamming to a stop. Once the finger lifts, momentum kicks in,
+  // and setting scrollLeft mid-fling makes some browsers cancel that
+  // momentum outright — so after release, the same check is debounced to
+  // only run once scrolling has genuinely settled.
+  let isTouching = false;
+  track.addEventListener('touchstart', function(){ isTouching = true; }, {passive:true});
+  track.addEventListener('touchend', function(){ isTouching = false; }, {passive:true});
+  track.addEventListener('touchcancel', function(){ isTouching = false; }, {passive:true});
+
   let recentring = false;
   let recentreTimer;
+  function recentre(){
+    if(track.scrollLeft < setWidth * 0.5){
+      recentring = true;
+      track.scrollLeft += setWidth;
+      recentring = false;
+    } else if(track.scrollLeft > setWidth * 2.5){
+      recentring = true;
+      track.scrollLeft -= setWidth;
+      recentring = false;
+    }
+  }
   track.addEventListener('scroll', function(){
     if(recentring || setWidth < 1) return;
-    clearTimeout(recentreTimer);
-    recentreTimer = setTimeout(function(){
-      if(track.scrollLeft < setWidth * 0.5){
-        recentring = true;
-        track.scrollLeft += setWidth;
-        recentring = false;
-      } else if(track.scrollLeft > setWidth * 2.5){
-        recentring = true;
-        track.scrollLeft -= setWidth;
-        recentring = false;
-      }
-    }, 150);
+    if(isTouching){
+      recentre();
+    } else {
+      clearTimeout(recentreTimer);
+      recentreTimer = setTimeout(recentre, 150);
+    }
   }, {passive:true});
 
   // never pauses — keeps auto-advancing continuously regardless of hover or
