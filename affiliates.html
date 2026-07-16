@@ -36,7 +36,7 @@
 .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:56px;}
 .step-card{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:20px;padding:30px 26px;}
 .step-card .num{font-family:'Anton',sans-serif;font-size:40px;color:var(--pink);line-height:1;margin-bottom:14px;}
-.step-card h3{font-family:'Manrope';font-weight:800;font-size:18px;text-transform:none;color:var(--cream);margin-bottom:8px;}
+.step-card h2{font-family:'Manrope';font-weight:800;font-size:18px;text-transform:none;color:var(--cream);margin-bottom:8px;}
 .step-card p{color:var(--muted);font-size:14.5px;line-height:1.6;}
 .earn-banner{
   background:linear-gradient(150deg,var(--surface-2),var(--surface));border:1px solid var(--line-strong);
@@ -46,7 +46,7 @@
 .earn-banner .amt{font-family:'Anton',sans-serif;font-size:clamp(56px,9vw,96px);color:var(--lime);position:relative;z-index:1;line-height:1;}
 .earn-banner p{color:var(--muted);font-size:16px;margin-top:8px;position:relative;z-index:1;}
 .form-wrap{max-width:640px;margin:70px auto 0;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:24px;padding:44px;}
-.form-wrap h3{font-size:26px;color:var(--cream);margin-bottom:8px;text-transform:none;font-family:'Manrope';font-weight:800;}
+.form-wrap h2{font-size:26px;color:var(--cream);margin-bottom:8px;text-transform:none;font-family:'Manrope';font-weight:800;}
 .form-wrap .sub{color:var(--muted);font-size:14.5px;margin-bottom:32px;}
 .f-row{margin-bottom:20px;}
 .f-row label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;}
@@ -60,7 +60,7 @@
 .form-msg{display:none;text-align:center;padding:40px 20px;}
 .form-msg.show{display:block;}
 .form-msg .em{font-size:44px;margin-bottom:14px;}
-.form-msg h3{font-size:24px;color:var(--cream);margin-bottom:8px;}
+.form-msg h2{font-size:24px;color:var(--cream);margin-bottom:8px;}
 .form-msg p{color:var(--muted);font-size:14.5px;}
 @media(max-width:768px){
   .steps-grid{grid-template-columns:1fr;}
@@ -125,24 +125,24 @@
     <div class="steps-grid stagger">
       <div class="step-card reveal">
         <div class="num">1</div>
-        <h3>Sign up below</h3>
+        <h2>Sign up below</h2>
         <p>Takes two minutes. Tell us who you are and how you'll be sharing Project P.</p>
       </div>
       <div class="step-card reveal">
         <div class="num">2</div>
-        <h3>Get your code</h3>
+        <h2>Get your code</h2>
         <p>We'll set you up with a personal promo code and send it over by email or WhatsApp.</p>
       </div>
       <div class="step-card reveal">
         <div class="num">3</div>
-        <h3>Share & earn</h3>
+        <h2>Share & earn</h2>
         <p>Every booking made with your code earns you €5, paid out monthly.</p>
       </div>
     </div>
 
     <div class="form-wrap reveal-scale" id="formWrap">
       <div id="formDefault">
-        <h3>Apply to become a partner</h3>
+        <h2>Apply to become a partner</h2>
         <p class="sub">Fill this in and we'll be in touch within 48 hours.</p>
         <form action="https://api.web3forms.com/submit" method="POST" id="affForm">
           <input type="hidden" name="access_key" value="f0ae965a-4a26-4a17-aced-f0e91bc981f3">
@@ -182,7 +182,7 @@
       </div>
       <div class="form-msg" id="formSuccess">
         <div class="em">🤝</div>
-        <h3>You're in!</h3>
+        <h2>You're in!</h2>
         <p>Thanks for applying — we'll email or WhatsApp you your promo code within 48 hours.</p>
       </div>
     </div>
@@ -197,10 +197,10 @@
         <p style="max-width:280px;color:var(--muted);font-size:14px;margin-top:16px;line-height:1.6;">Porto's most talked-about night out, every Saturday since 2025.</p>
       </div>
       <div class="footer-links">
-        <div class="footer-col"><h4>Explore</h4><a href="index.html#experiences">Experiences</a><a href="index.html#gallery">Gallery</a><a href="index.html#reviews">Reviews</a></div>
-        <div class="footer-col"><h4>Work with us</h4><a href="affiliates.html">Become a Partner</a><a href="guides.html">Become a Guide</a></div>
-        <div class="footer-col"><h4>Book</h4><a href="index.html#book">Porto Pub Crawl — €17</a></div>
-        <div class="footer-col"><h4>Support</h4><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms</a></div>
+        <div class="footer-col"><h3>Explore</h3><a href="index.html#experiences">Experiences</a><a href="index.html#gallery">Gallery</a><a href="index.html#reviews">Reviews</a></div>
+        <div class="footer-col"><h3>Work with us</h3><a href="affiliates.html">Become a Partner</a><a href="guides.html">Become a Guide</a></div>
+        <div class="footer-col"><h3>Book</h3><a href="index.html#book">Porto Pub Crawl — €17</a></div>
+        <div class="footer-col"><h3>Support</h3><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms</a></div>
       </div>
     </div>
     <div class="footer-bottom">

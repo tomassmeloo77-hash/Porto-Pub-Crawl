@@ -36,13 +36,13 @@
 .perks-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-top:56px;}
 .perk-card{background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:18px;padding:24px;display:flex;gap:14px;align-items:flex-start;}
 .perk-card .ic{width:40px;height:40px;border-radius:10px;background:rgba(255,23,63,0.12);display:flex;align-items:center;justify-content:center;color:var(--pink);flex-shrink:0;}
-.perk-card h3{font-family:'Manrope';font-weight:800;font-size:15.5px;text-transform:none;color:var(--cream);margin-bottom:4px;}
+.perk-card h2{font-family:'Manrope';font-weight:800;font-size:15.5px;text-transform:none;color:var(--cream);margin-bottom:4px;}
 .perk-card p{color:var(--muted);font-size:13.5px;line-height:1.55;}
 .req-list{list-style:none;display:flex;flex-direction:column;gap:14px;margin-top:24px;}
 .req-list li{display:flex;align-items:center;gap:12px;font-size:15px;color:var(--muted);}
 .req-list li svg{flex-shrink:0;color:var(--pink);}
 .form-wrap{max-width:640px;margin:70px auto 0;background:rgba(255,255,255,0.03);border:1px solid var(--line);border-radius:24px;padding:44px;}
-.form-wrap h3{font-size:26px;color:var(--cream);margin-bottom:8px;text-transform:none;font-family:'Manrope';font-weight:800;}
+.form-wrap h2{font-size:26px;color:var(--cream);margin-bottom:8px;text-transform:none;font-family:'Manrope';font-weight:800;}
 .form-wrap .sub{color:var(--muted);font-size:14.5px;margin-bottom:32px;}
 .f-row{margin-bottom:20px;}
 .f-row label{display:block;font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em;}
@@ -56,7 +56,7 @@
 .form-msg{display:none;text-align:center;padding:40px 20px;}
 .form-msg.show{display:block;}
 .form-msg .em{font-size:44px;margin-bottom:14px;}
-.form-msg h3{font-size:24px;color:var(--cream);margin-bottom:8px;}
+.form-msg h2{font-size:24px;color:var(--cream);margin-bottom:8px;}
 .form-msg p{color:var(--muted);font-size:14.5px;}
 @media(max-width:768px){
   .perks-grid{grid-template-columns:1fr;}
@@ -116,19 +116,19 @@
     <div class="perks-grid stagger">
       <div class="perk-card reveal">
         <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-        <div><h3>Paid per shift</h3><p>Every Saturday you host, you get paid — on top of tips.</p></div>
+        <div><h2>Paid per shift</h2><p>Every Saturday you host, you get paid — on top of tips.</p></div>
       </div>
       <div class="perk-card reveal">
         <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4.5 8-11V5l-8-3-8 3v6c0 6.5 8 11 8 11z"/></svg></div>
-        <div><h3>Free entry, every night</h3><p>VIP access to every bar and club on the route, on us.</p></div>
+        <div><h2>Free entry, every night</h2><p>VIP access to every bar and club on the route, on us.</p></div>
       </div>
       <div class="perk-card reveal">
         <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
-        <div><h3>Meet people from everywhere</h3><p>New crowd every week, from all over the world.</p></div>
+        <div><h2>Meet people from everywhere</h2><p>New crowd every week, from all over the world.</p></div>
       </div>
       <div class="perk-card reveal">
         <div class="ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M8 3v4M16 3v4M4 11h16M6 7h12a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2V9a2 2 0 012-2z"/></svg></div>
-        <div><h3>Flexible, one night a week</h3><p>We only run Saturdays — easy to fit around a job or studies.</p></div>
+        <div><h2>Flexible, one night a week</h2><p>We only run Saturdays — easy to fit around a job or studies.</p></div>
       </div>
     </div>
 
@@ -145,7 +145,7 @@
 
     <div class="form-wrap reveal-scale" id="formWrap">
       <div id="formDefault">
-        <h3>Apply to become a guide</h3>
+        <h2>Apply to become a guide</h2>
         <p class="sub">Takes five minutes. We'll get back to you within a few days.</p>
         <form action="https://api.web3forms.com/submit" method="POST" id="guideForm">
           <input type="hidden" name="access_key" value="f0ae965a-4a26-4a17-aced-f0e91bc981f3">
@@ -189,7 +189,7 @@
       </div>
       <div class="form-msg" id="formSuccess">
         <div class="em">🎉</div>
-        <h3>Application sent!</h3>
+        <h2>Application sent!</h2>
         <p>Thanks for applying — we review every application and will reach out within a few days if it's a good fit.</p>
       </div>
     </div>
@@ -204,10 +204,10 @@
         <p style="max-width:280px;color:var(--muted);font-size:14px;margin-top:16px;line-height:1.6;">Porto's most talked-about night out, every Saturday since 2025.</p>
       </div>
       <div class="footer-links">
-        <div class="footer-col"><h4>Explore</h4><a href="index.html#experiences">Experiences</a><a href="index.html#gallery">Gallery</a><a href="index.html#reviews">Reviews</a></div>
-        <div class="footer-col"><h4>Work with us</h4><a href="affiliates.html">Become a Partner</a><a href="guides.html">Become a Guide</a></div>
-        <div class="footer-col"><h4>Book</h4><a href="index.html#book">Porto Pub Crawl — €17</a></div>
-        <div class="footer-col"><h4>Support</h4><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms</a></div>
+        <div class="footer-col"><h3>Explore</h3><a href="index.html#experiences">Experiences</a><a href="index.html#gallery">Gallery</a><a href="index.html#reviews">Reviews</a></div>
+        <div class="footer-col"><h3>Work with us</h3><a href="affiliates.html">Become a Partner</a><a href="guides.html">Become a Guide</a></div>
+        <div class="footer-col"><h3>Book</h3><a href="index.html#book">Porto Pub Crawl — €17</a></div>
+        <div class="footer-col"><h3>Support</h3><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms</a></div>
       </div>
     </div>
     <div class="footer-bottom">
