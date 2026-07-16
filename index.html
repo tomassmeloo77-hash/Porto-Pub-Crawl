@@ -1704,31 +1704,55 @@ function syncSpotsEverywhere(){
   renderAvailTiles();
 }
 
-// ===== carousel (pure auto-scroll, one direction, seamless infinite loop) =====
-// gallery is well below the fold, so this setup (DOM cloning + a scrollWidth
-// read, which forces a layout) is deferred instead of adding to page-load TBT
+// ===== carousel (auto-scroll + free drag either direction, seamless infinite loop) =====
+// gallery is well below the fold, so this setup (DOM cloning + layout reads)
+// is deferred instead of adding to page-load TBT
 const track = document.getElementById('carouselTrack');
 if(track){
 onIdle(function(){
   let paused = false;
 
-  // duplicate the slide set once so we can loop seamlessly in a single direction
+  // three copies of the slide set — [before][original][after] — so there's
+  // always a full screen's worth of real content on *either* side of
+  // wherever the user is looking, whether they scroll forward, drag
+  // backward, or fling it with momentum. One clone only covers the forward
+  // direction; dragging backward past the start would just hit a wall.
   const originalSlides = [...track.children];
+  const beforeCopy = document.createDocumentFragment();
+  originalSlides.forEach(s => beforeCopy.appendChild(s.cloneNode(true)));
+  track.insertBefore(beforeCopy, track.firstChild);
   originalSlides.forEach(s => track.appendChild(s.cloneNode(true)));
 
-  const speed = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.65;
-  // cache the scroll width instead of reading it every animation frame —
-  // reading a layout property right after a style mutation forces a
-  // synchronous reflow, and this loop runs up to 60x/second
-  let halfWidth = track.scrollWidth / 2;
-  window.addEventListener('resize', function(){ halfWidth = track.scrollWidth / 2; }, {passive:true});
-  function autoLoop(){
-    if(speed > 0 && !paused){
-      if(halfWidth > 1){
-        track.scrollLeft += speed;
-        if(track.scrollLeft >= halfWidth) track.scrollLeft -= halfWidth;
-      }
+  // cache scrollWidth instead of reading it every animation frame/scroll
+  // event — reading a layout property right after a mutation forces a
+  // synchronous reflow, and these run up to 60x/second
+  let setWidth = track.scrollWidth / 3;
+  track.scrollLeft = setWidth; // start on the middle (real, un-cloned) copy
+  window.addEventListener('resize', function(){
+    const ratio = track.scrollLeft / (setWidth * 3);
+    setWidth = track.scrollWidth / 3;
+    track.scrollLeft = setWidth * 3 * ratio; // keep relative position on resize
+  }, {passive:true});
+
+  // recentre onto the middle copy well before the user could ever scroll
+  // (or fling) far enough to see a seam, in either direction
+  let recentring = false;
+  track.addEventListener('scroll', function(){
+    if(recentring || setWidth < 1) return;
+    if(track.scrollLeft < setWidth * 0.5){
+      recentring = true;
+      track.scrollLeft += setWidth;
+      recentring = false;
+    } else if(track.scrollLeft > setWidth * 2.5){
+      recentring = true;
+      track.scrollLeft -= setWidth;
+      recentring = false;
     }
+  }, {passive:true});
+
+  const speed = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.65;
+  function autoLoop(){
+    if(speed > 0 && !paused) track.scrollLeft += speed;
     requestAnimationFrame(autoLoop);
   }
   requestAnimationFrame(autoLoop);
@@ -1736,12 +1760,24 @@ onIdle(function(){
   // pause-on-hover is a desktop-mouse affordance only — on touch devices,
   // browsers can fire a synthetic mouseenter on tap with no matching
   // mouseleave (nothing to "hover away" from with a finger), which would
-  // pause the carousel on first touch and never resume it. Gating this on
-  // a real hover-capable pointer keeps the loop genuinely infinite on mobile.
+  // pause the carousel on first touch and never resume it.
   if(window.matchMedia('(hover: hover)').matches){
     track.addEventListener('mouseenter', ()=> paused = true);
     track.addEventListener('mouseleave', ()=> paused = false);
   }
+
+  // don't fight a manual swipe/drag — pause the auto-advance for as long as
+  // a touch is down, plus a short grace period after release, so both
+  // directions feel like they're actually responding to the user
+  let resumeTimer;
+  track.addEventListener('touchstart', function(){
+    paused = true;
+    clearTimeout(resumeTimer);
+  }, {passive:true});
+  track.addEventListener('touchend', function(){
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(()=> paused = false, 2500);
+  }, {passive:true});
 });
 }
 
