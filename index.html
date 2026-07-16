@@ -1704,91 +1704,40 @@ function syncSpotsEverywhere(){
   renderAvailTiles();
 }
 
-// ===== carousel (auto-scroll + free drag either direction, seamless infinite loop) =====
-// gallery is well below the fold, so this setup (DOM cloning + layout reads)
-// is deferred instead of adding to page-load TBT
+// ===== carousel (pure auto-scroll, one direction, seamless infinite loop) =====
+// gallery is well below the fold, so this setup (DOM cloning + a scrollWidth
+// read, which forces a layout) is deferred instead of adding to page-load TBT
 const track = document.getElementById('carouselTrack');
 if(track){
 onIdle(function(){
-  // three copies of the slide set — [before][original][after] — so there's
-  // always a full screen's worth of real content on *either* side of
-  // wherever the user is looking, whether they scroll forward, drag
-  // backward, or fling it with momentum. One clone only covers the forward
-  // direction; dragging backward past the start would just hit a wall.
+  // duplicate the slide set once so we can loop seamlessly in a single direction
   const originalSlides = [...track.children];
-  const beforeCopy = document.createDocumentFragment();
-  originalSlides.forEach(s => beforeCopy.appendChild(s.cloneNode(true)));
-  track.insertBefore(beforeCopy, track.firstChild);
   originalSlides.forEach(s => track.appendChild(s.cloneNode(true)));
 
   // cloneNode() duplicates the <video> tags too, but never their JS-attached
-  // lazy-load/autoplay setup — wire each cloned copy up independently
-  // (setupLazyVideo skips anything already set up, so the two original
-  // videos found earlier are left alone).
+  // lazy-load/autoplay setup — wire the cloned copy up independently
+  // (setupLazyVideo skips anything already set up, so the originals are left alone).
   if(typeof setupLazyVideo === 'function'){
     track.querySelectorAll('.lazy-video').forEach(setupLazyVideo);
   }
 
-  // cache scrollWidth instead of reading it every animation frame/scroll
-  // event — reading a layout property right after a mutation forces a
-  // synchronous reflow, and these run up to 60x/second
-  let setWidth = track.scrollWidth / 3;
-  track.scrollLeft = setWidth; // start on the middle (real, un-cloned) copy
-  window.addEventListener('resize', function(){
-    const ratio = track.scrollLeft / (setWidth * 3);
-    setWidth = track.scrollWidth / 3;
-    track.scrollLeft = setWidth * 3 * ratio; // keep relative position on resize
-  }, {passive:true});
-
-  // recentre onto the middle copy well before the user could ever scroll
-  // (or fling) far enough to see a seam, in either direction.
-  //
-  // While a finger is actually down, the browser is following it directly —
-  // no momentum animation exists yet — so it's safe to recentre the instant
-  // a threshold is crossed. That matters because a single long drag can
-  // otherwise cross the whole buffer and hit the real scrollLeft edge
-  // (position 0) *before* it ever stops moving, which felt like the
-  // carousel slamming to a stop. Once the finger lifts, momentum kicks in,
-  // and setting scrollLeft mid-fling makes some browsers cancel that
-  // momentum outright — so after release, the same check is debounced to
-  // only run once scrolling has genuinely settled.
-  let isTouching = false;
-  track.addEventListener('touchstart', function(){ isTouching = true; }, {passive:true});
-  track.addEventListener('touchend', function(){ isTouching = false; }, {passive:true});
-  track.addEventListener('touchcancel', function(){ isTouching = false; }, {passive:true});
-
-  let recentring = false;
-  let recentreTimer;
-  function recentre(){
-    if(track.scrollLeft < setWidth * 0.5){
-      recentring = true;
-      track.scrollLeft += setWidth;
-      recentring = false;
-    } else if(track.scrollLeft > setWidth * 2.5){
-      recentring = true;
-      track.scrollLeft -= setWidth;
-      recentring = false;
-    }
-  }
-  track.addEventListener('scroll', function(){
-    if(recentring || setWidth < 1) return;
-    if(isTouching){
-      recentre();
-    } else {
-      clearTimeout(recentreTimer);
-      recentreTimer = setTimeout(recentre, 150);
-    }
-  }, {passive:true});
-
-  // never pauses — keeps auto-advancing continuously regardless of hover or
-  // touch; the before/after clones above just mean a manual drag in either
-  // direction still has real content to show instead of hitting a wall
   const speed = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 0.65;
+  // cache the scroll width instead of reading it every animation frame —
+  // reading a layout property right after a style mutation forces a
+  // synchronous reflow, and this loop runs up to 60x/second
+  let halfWidth = track.scrollWidth / 2;
+  window.addEventListener('resize', function(){ halfWidth = track.scrollWidth / 2; }, {passive:true});
   function autoLoop(){
-    if(speed > 0) track.scrollLeft += speed;
+    if(speed > 0){
+      if(halfWidth > 1){
+        track.scrollLeft += speed;
+        if(track.scrollLeft >= halfWidth) track.scrollLeft -= halfWidth;
+      }
+    }
     requestAnimationFrame(autoLoop);
   }
   requestAnimationFrame(autoLoop);
+  // never pauses — no hover or touch pausing on desktop or mobile
 });
 }
 
