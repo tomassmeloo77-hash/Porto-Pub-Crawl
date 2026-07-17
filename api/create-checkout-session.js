@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const { package: pkg, packageName, date, quantity } = body;
+    const { package: pkg, packageName, date, quantity, flex, fbp, fbc, event_source_url } = body;
 
     if (!PRICES_EUR[pkg]) { res.status(400).json({ error: 'Invalid package.' }); return; }
     const qty = parseInt(quantity, 10);
@@ -51,38 +51,61 @@ module.exports = async (req, res) => {
       weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'
     });
 
+    // Base ticket line item — always present.
+    const lineItems = [
+      {
+        price_data: {
+          currency: 'eur',
+          unit_amount: PRICES_EUR[pkg] * 100,
+          tax_behavior: 'exclusive',
+          product_data: {
+            name: (packageName || pkg) + ' — ' + niceDate,
+            description: 'Porto Pub Crawl · Praça de Carlos Alberto · 22:30–02:30'
+          }
+        },
+        quantity: qty
+      }
+    ];
+
+    // "Book with Confidence" is now an explicit opt-in on the booking modal — we
+    // only add it here when the customer ticked it, so the Stripe total always
+    // matches the total they saw in the modal (no surprise add-on at payment).
+    // Offered on the Pub Crawl only, never on the Party Boat + Pub Crawl pack.
+    if (flex === true && pkg === 'crawl') {
+      lineItems.push({
+        price_data: {
+          currency: 'eur',
+          unit_amount: 190,
+          tax_behavior: 'exclusive',
+          product_data: {
+            name: 'Book with Confidence',
+            description: 'Cancel or reschedule up to 3 hours before the event. No questions asked.'
+          }
+        },
+        quantity: qty
+      });
+    }
+
     const session = await stripe.checkout.sessions.create({
       ui_mode: 'embedded',
       payment_method_types: ['card'],
       mode: 'payment',
-      line_items: [
-        {
-          price_data: {
-            currency: 'eur',
-            unit_amount: PRICES_EUR[pkg] * 100,
-            tax_behavior: 'exclusive',
-            product_data: {
-              name: (packageName || pkg) + ' — ' + niceDate,
-              description: 'Porto Pub Crawl · Praça de Carlos Alberto · 22:30–02:30'
-            }
-          },
-          quantity: qty
-        },
-        {
-          price_data: {
-            currency: 'eur',
-            unit_amount: 190,
-            tax_behavior: 'exclusive',
-            product_data: {
-              name: 'Book with Confidence (Recommended)',
-              description: 'Cancel or reschedule up to 3 hours before the event. No questions asked.'
-            }
-          },
-          quantity: qty,
-          adjustable_quantity: { enabled: true, minimum: 0, maximum: MAX_QTY }
-        }
-      ],
-      metadata: { package: pkg, event_date: date, quantity: String(qty) },
+      line_items: lineItems,
+      // We stash Meta's match identifiers (fbp/fbc) plus the visitor's IP and
+      // user-agent here so the Stripe webhook can fire a server-side Meta
+      // Conversions API "Purchase" event that Meta can attribute back to the ad.
+      // Stripe caps each metadata value at 500 chars — the user-agent is sliced
+      // to stay safely under that.
+      metadata: {
+        package: pkg,
+        event_date: date,
+        quantity: String(qty),
+        fbp: fbp || '',
+        fbc: fbc || '',
+        event_source_url: event_source_url || '',
+        client_ip: (req.headers['x-forwarded-for'] || '').split(',')[0].trim(),
+        client_ua: (req.headers['user-agent'] || '').slice(0, 480)
+      },
       return_url: siteUrl + '/?booking=success&session_id={CHECKOUT_SESSION_ID}'
     });
 
