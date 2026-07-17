@@ -1,7 +1,17 @@
 // /api/stripe-webhook.js
 // Vercel serverless function — Stripe calls this automatically the instant a
-// payment succeeds. We verify it's really Stripe (via a signing secret),
-// then send a branded confirmation email to the customer through Resend.
+// payment succeeds. We verify it's really Stripe (via a signing secret), then:
+//   1. send a branded confirmation email to the customer (via Resend),
+//   2. send an internal sale notification to our inbox, and
+//   3. fire a server-side "Purchase" event to the Meta Conversions API so Meta
+//      Ads campaigns can actually see and optimise for real bookings.
+//
+// Why the server-side Purchase matters: the browser Pixel's Purchase only fires
+// if the buyer lands back on /?booking=success — which fails on ad-blockers,
+// iOS/Safari tracking prevention, or if they close the tab after paying. The
+// webhook always runs, so this is the reliable source of truth. Both carry the
+// same event_id (the Stripe session id), so Meta deduplicates them and never
+// double-counts a sale.
 //
 // SETUP (do this once):
 //
@@ -19,12 +29,90 @@
 //    After creating it, Stripe shows a "Signing secret" (starts whsec_) —
 //    copy it and add to Vercel env vars as:
 //      STRIPE_WEBHOOK_SECRET = whsec_xxxxxxxx
-// 6. Redeploy so the new env vars are picked up.
+// 6. For the Meta Conversions API, in Meta Events Manager → your Pixel
+//    (1729899044988200) → Settings → Conversions API → "Generate access token",
+//    then add to Vercel env vars:
+//      META_CAPI_ACCESS_TOKEN = EAAxxxxxxxx
+//    (optional) META_PIXEL_ID  = 1729899044988200  — only if the Pixel changes.
+//    Without META_CAPI_ACCESS_TOKEN the webhook still works; it just skips the
+//    server-side Purchase event and logs a warning.
+// 7. Redeploy so the new env vars are picked up.
 //
 // Do this once in test mode first (use a test-mode webhook + test Resend
 // send) before repeating steps 5 for live mode with your live keys.
 
 const Stripe = require('stripe');
+const crypto = require('crypto');
+
+// Meta Pixel this site loads in index.html. Kept in sync so the browser Pixel
+// and the server-side Conversions API report to the same asset.
+const META_PIXEL_ID = process.env.META_PIXEL_ID || '1729899044988200';
+const META_GRAPH_VERSION = 'v19.0';
+
+// Meta requires PII (email) to be SHA-256 hashed, normalised to lowercase and
+// trimmed first. fbp/fbc, IP and user-agent are sent raw (not hashed).
+function hashSha256(value) {
+  return crypto.createHash('sha256').update(String(value).trim().toLowerCase()).digest('hex');
+}
+
+// Fire a server-side "Purchase" to the Meta Conversions API. Never throws — a
+// tracking failure must not break the webhook (Stripe would just retry it and
+// the customer would get a duplicate email), so all errors are logged only.
+async function sendMetaPurchaseEvent(session) {
+  const token = process.env.META_CAPI_ACCESS_TOKEN;
+  if (!token) {
+    console.warn('META_CAPI_ACCESS_TOKEN not set — skipping server-side Meta Purchase event');
+    return;
+  }
+
+  const meta = session.metadata || {};
+  const email = session.customer_details && session.customer_details.email;
+  const name = session.customer_details && session.customer_details.name;
+  const value = (session.amount_total || 0) / 100;
+
+  // Match keys — the more we send, the better Meta attributes the sale.
+  const userData = {};
+  if (email) userData.em = [hashSha256(email)];
+  if (name) userData.fn = [hashSha256(name.split(' ')[0])];
+  if (meta.fbp) userData.fbp = meta.fbp;
+  if (meta.fbc) userData.fbc = meta.fbc;
+  if (meta.client_ip) userData.client_ip_address = meta.client_ip;
+  if (meta.client_ua) userData.client_user_agent = meta.client_ua;
+
+  const payload = {
+    data: [{
+      event_name: 'Purchase',
+      event_time: Math.floor(Date.now() / 1000),
+      // Same id the browser Pixel sends as `eventID` → Meta dedupes the two.
+      event_id: session.id,
+      action_source: 'website',
+      event_source_url: meta.event_source_url || 'https://www.porto-pubcrawl.com/',
+      user_data: userData,
+      custom_data: {
+        currency: (session.currency || 'eur').toUpperCase(),
+        value: value,
+        content_name: PACKAGE_NAMES[meta.package] || 'Porto Pub Crawl',
+        content_type: 'product',
+        num_items: parseInt(meta.quantity, 10) || 1
+      }
+    }]
+  };
+
+  try {
+    const url = `https://graph.facebook.com/${META_GRAPH_VERSION}/${META_PIXEL_ID}/events?access_token=${encodeURIComponent(token)}`;
+    const capiRes = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!capiRes.ok) {
+      const errBody = await capiRes.text();
+      console.error('Meta CAPI Purchase failed:', capiRes.status, errBody);
+    }
+  } catch (err) {
+    console.error('Error sending Meta CAPI Purchase event:', err);
+  }
+}
 
 // Vercel-specific: we need the RAW request body to verify the Stripe
 // signature, so we turn off Vercel's automatic JSON body parsing.
@@ -163,6 +251,10 @@ module.exports = async (req, res) => {
     const email = session.customer_details && session.customer_details.email;
     const name = session.customer_details && session.customer_details.name;
     const meta = session.metadata || {};
+
+    // Report the sale to Meta first (independent of whether email is configured)
+    // so ad campaigns can attribute and optimise for it.
+    await sendMetaPurchaseEvent(session);
 
     if (email && process.env.RESEND_API_KEY) {
       const packageName = PACKAGE_NAMES[meta.package] || 'Porto Pub Crawl';

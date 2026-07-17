@@ -2506,6 +2506,24 @@ try{
     }, 1200);
   }
 
+  // Reads Meta's browser cookies so the server-side Conversions API Purchase
+  // event (sent from our Stripe webhook) can be matched back to the same person
+  // the Pixel saw — this is what lets Meta attribute the sale to the ad. _fbp is
+  // set by the Pixel; _fbc encodes the ad click. The Pixel only writes _fbc on a
+  // visit that carries an fbclid, so we rebuild it from the URL as a fallback.
+  function readCookie(name){
+    const m = document.cookie.match('(^|;)\\s*' + name.replace(/([.*+?^${}()|[\]\\])/g, '\\$1') + '\\s*=\\s*([^;]+)');
+    return m ? decodeURIComponent(m.pop()) : '';
+  }
+  function getMetaIdentifiers(){
+    let fbc = readCookie('_fbc');
+    if(!fbc){
+      const fbclid = new URLSearchParams(window.location.search).get('fbclid');
+      if(fbclid) fbc = 'fb.1.' + Date.now() + '.' + fbclid;
+    }
+    return { fbp: readCookie('_fbp'), fbc: fbc, event_source_url: window.location.href };
+  }
+
   function startEmbeddedCheckout(){
     if(!USE_EMBEDDED_CHECKOUT || STRIPE_PUBLISHABLE_KEY.indexOf('XXXX') !== -1){
       redirectToPaymentLink();
@@ -2518,12 +2536,12 @@ try{
     const sessionReady = fetch('/api/create-checkout-session', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+      body: JSON.stringify(Object.assign({
         package: state.pkg,
         packageName: NAMES[state.pkg],
         date: state.date,
         quantity: state.qty
-      })
+      }, getMetaIdentifiers()))
     }).then(function(res){
       if(!res.ok){
         return res.json().catch(function(){ return {}; }).then(function(errBody){

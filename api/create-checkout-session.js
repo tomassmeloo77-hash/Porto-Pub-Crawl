@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const { package: pkg, packageName, date, quantity } = body;
+    const { package: pkg, packageName, date, quantity, fbp, fbc, event_source_url } = body;
 
     if (!PRICES_EUR[pkg]) { res.status(400).json({ error: 'Invalid package.' }); return; }
     const qty = parseInt(quantity, 10);
@@ -82,7 +82,21 @@ module.exports = async (req, res) => {
           adjustable_quantity: { enabled: true, minimum: 0, maximum: MAX_QTY }
         }
       ],
-      metadata: { package: pkg, event_date: date, quantity: String(qty) },
+      // We stash Meta's match identifiers (fbp/fbc) plus the visitor's IP and
+      // user-agent here so the Stripe webhook can fire a server-side Meta
+      // Conversions API "Purchase" event that Meta can attribute back to the ad.
+      // Stripe caps each metadata value at 500 chars — the user-agent is sliced
+      // to stay safely under that.
+      metadata: {
+        package: pkg,
+        event_date: date,
+        quantity: String(qty),
+        fbp: fbp || '',
+        fbc: fbc || '',
+        event_source_url: event_source_url || '',
+        client_ip: (req.headers['x-forwarded-for'] || '').split(',')[0].trim(),
+        client_ua: (req.headers['user-agent'] || '').slice(0, 480)
+      },
       return_url: siteUrl + '/?booking=success&session_id={CHECKOUT_SESSION_ID}'
     });
 
