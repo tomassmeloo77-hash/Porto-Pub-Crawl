@@ -132,7 +132,25 @@ const PACKAGE_NAMES = {
   pack: 'Party Boat + Pub Crawl Pack'
 };
 
+// The buyer fully controls the name (and email) they type into Stripe Checkout.
+// Those land in the confirmation email and — more importantly — the admin
+// notification delivered to our own inbox. Escaping them before interpolation
+// stops a booking name like `<a href="evil">…</a>` from injecting HTML/links.
+function escapeHtml(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function buildEmailHtml({ name, packageName, niceDate, qty }) {
+  name = escapeHtml(name);
+  packageName = escapeHtml(packageName);
+  niceDate = escapeHtml(niceDate);
+  qty = escapeHtml(qty);
   const MAPS_LINK = 'https://maps.app.goo.gl/gw6wz2S7iKU7eybL7';
   return `
   <div style="background:#08070a;padding:40px 20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
@@ -187,6 +205,12 @@ function buildEmailHtml({ name, packageName, niceDate, qty }) {
 }
 
 function buildAdminNotificationHtml({ name, email, packageName, niceDate, qty, amount, currency, sessionId, purchasedAt }) {
+  name = escapeHtml(name);
+  email = escapeHtml(email);
+  packageName = escapeHtml(packageName);
+  niceDate = escapeHtml(niceDate);
+  qty = escapeHtml(qty);
+  amount = escapeHtml(amount);
   const row = (label, value) => `
     <tr>
       <td style="padding:11px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;white-space:nowrap;">${label}</td>

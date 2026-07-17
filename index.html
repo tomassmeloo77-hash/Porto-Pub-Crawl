@@ -2537,6 +2537,15 @@ try{
       bookSubmitLabel.textContent = 'Continue to payment';
       return;
     }
+    // The hosted Payment Link fallback can only charge the single base ticket —
+    // it cannot carry a quantity > 1 or the "Book with Confidence" add-on. Rather
+    // than silently undercharge, route group / add-on bookings to WhatsApp.
+    if(state.qty > 1 || state.flex){
+      showError('Our secure form had a hiccup. For ' + (state.qty > 1 ? state.qty + ' spots' : 'your add-on') + ', message us on WhatsApp (+351 910 694 984) and we\'ll confirm your booking in seconds.');
+      bookSubmit.disabled = false;
+      bookSubmitLabel.textContent = 'Continue to payment';
+      return;
+    }
     const reference = state.date + ' | ' + state.qty + ' spot(s)';
     const finalUrl = link + '?client_reference_id=' + encodeURIComponent(reference);
     bookSubmitLabel.textContent = 'Redirecting to payment…';
@@ -2599,7 +2608,12 @@ try{
       if(!res.ok){
         return res.json().catch(function(){ return {}; }).then(function(errBody){
           console.error('create-checkout-session failed:', res.status, errBody);
-          throw new Error('backend unavailable');
+          const err = new Error((errBody && errBody.error) ? errBody.error : 'backend unavailable');
+          // 4xx means the server rejected the booking details (past date, bad
+          // quantity…) — surface that to the user instead of silently falling
+          // back to a fixed-price Payment Link. Only 5xx / network is a real outage.
+          err.userFacing = res.status >= 400 && res.status < 500;
+          throw err;
         });
       }
       return res.json();
@@ -2629,8 +2643,15 @@ try{
           });
       })
       .catch(function(err){
-        // Stripe.js or our backend unavailable — fall back to the hosted
-        // Payment Link so booking still works either way.
+        if(err && err.userFacing){
+          // the server rejected the booking details — show why and let them fix it
+          showError(err.message);
+          bookSubmit.disabled = false;
+          bookSubmitLabel.textContent = 'Continue to payment';
+          return;
+        }
+        // Stripe.js or our backend genuinely unavailable — fall back to the
+        // hosted Payment Link so booking still works either way.
         console.error('Embedded checkout unavailable, falling back:', err);
         redirectToPaymentLink();
       });
@@ -2661,36 +2682,33 @@ try{
     checkoutStep.style.display = 'none';
     successStep.style.display = '';
     setTimeout(function(){ document.getElementById('bookClose').focus(); }, 50);
-    if(window.posthog) posthog.capture('Booking Completed');
-
-    // Google Ads conversion + GA4 purchase event — look up the real amount
-    // paid (includes any add-ons the customer chose) so both report actual value
+    // ----- conversion tracking (gated on a real Stripe session id) -----
+    // Only a genuine Stripe return carries session_id, so gating here stops
+    // "Booking Completed"/Purchase from over-counting on shared or bookmarked
+    // success links. We fire exactly once and — crucially — still record the
+    // conversion even if the amount lookup fails (just without a value), so the
+    // Google Ads / GA4 / PostHog / Meta conversions are never silently lost.
     const sessionId = params.get('session_id');
     if(sessionId){
+      let conversionFired = false;
+      const recordConversion = function(amount, currency){
+        if(conversionFired) return;
+        conversionFired = true;
+        const money = amount ? { value: amount, currency: currency || 'EUR' } : {};
+        if(window.posthog) posthog.capture('Booking Completed', Object.assign({ transaction_id: sessionId }, money));
+        if(typeof gtag === 'function'){
+          gtag('event', 'conversion', Object.assign({ 'send_to': 'AW-18071337739/rS_NCP2ly5wcEIv2iqlD', 'transaction_id': sessionId }, money));
+          gtag('event', 'purchase', Object.assign({ 'transaction_id': sessionId }, money));
+        }
+        if(typeof fbq === 'function') fbq('track', 'Purchase', money, { eventID: sessionId });
+      };
       fetch('/api/get-session-amount?session_id=' + encodeURIComponent(sessionId))
         .then(function(r){ return r.json(); })
-        .then(function(data){
-          if(typeof gtag === 'function' && data.amount){
-            gtag('event', 'conversion', {
-              'send_to': 'AW-18071337739/rS_NCP2ly5wcEIv2iqlD',
-              'value': data.amount,
-              'currency': data.currency || 'EUR',
-              'transaction_id': sessionId
-            });
-            gtag('event', 'purchase', {
-              'transaction_id': sessionId,
-              'value': data.amount,
-              'currency': data.currency || 'EUR'
-            });
-          }
-          if(typeof fbq === 'function' && data.amount){
-            fbq('track', 'Purchase', {
-              value: data.amount,
-              currency: data.currency || 'EUR'
-            }, { eventID: sessionId });
-          }
-        })
-        .catch(function(err){ console.error('Could not fetch session amount for conversion tracking:', err); });
+        .then(function(data){ recordConversion(data && data.amount, data && data.currency); })
+        .catch(function(err){
+          console.error('Could not fetch session amount for conversion tracking:', err);
+          recordConversion(null, null); // still record the sale, just without a value
+        });
     }
 
     // strip the query params so refreshing or reopening the modal later
