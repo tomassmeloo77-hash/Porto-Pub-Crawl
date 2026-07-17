@@ -1017,6 +1017,19 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 }
 .book-total .bt-label{font-size:12.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;}
 .book-total .bt-amount{font-size:24px;font-weight:800;color:var(--cream);font-family:'Space Mono',monospace;}
+.book-flex{
+  display:flex;align-items:flex-start;gap:10px;padding:10px 13px;border-radius:14px;margin-top:14px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--line);cursor:pointer;
+  transition:border-color .2s,background .2s;
+}
+.book-flex.on{border-color:var(--pink);background:rgba(255,23,63,0.08);}
+.book-flex input{width:18px;height:18px;margin:1px 0 0;flex-shrink:0;accent-color:var(--pink);cursor:pointer;}
+.book-flex .bf-body{flex:1;min-width:0;}
+.book-flex .bf-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:700;color:var(--cream);}
+.book-flex .bf-name{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.book-flex .bf-tag{font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--lime);background:rgba(34,255,122,0.12);border:1px solid rgba(34,255,122,0.3);padding:1.5px 6px;border-radius:100px;white-space:nowrap;}
+.book-flex .bf-price{font-family:'Space Mono',monospace;color:var(--pink-soft);white-space:nowrap;}
+.book-flex .bf-desc{font-size:11px;color:var(--muted);line-height:1.35;margin-top:2px;}
 .book-error{display:none;color:var(--pink-soft);font-size:13px;margin-bottom:14px;text-align:center;}
 .book-error.show{display:block;}
 .book-panel .pay-row{justify-content:center;margin-top:18px;}
@@ -1571,6 +1584,14 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
           <button type="button" class="qty-btn" id="qtyPlus" aria-label="Increase number of spots">+</button>
         </div>
       </div>
+
+      <label class="book-flex" id="flexOpt">
+        <input type="checkbox" id="flexToggle">
+        <span class="bf-body">
+          <span class="bf-title"><span class="bf-name">Book with Confidence <span class="bf-tag">Recommended</span></span> <span class="bf-price">+€1.90 / person</span></span>
+          <span class="bf-desc">Plans might change? Cancel or reschedule up to 3h before — no questions asked.</span>
+        </span>
+      </label>
 
       <div class="book-total">
         <span class="bt-label">Total</span>
@@ -2262,6 +2283,7 @@ try{
   const STRIPE_PUBLISHABLE_KEY = 'pk_live_51TBx6cRv5AOf2Qm1Bf8U8CaO9C7GtbFKw9oYAknmP8j0sJEeNqmljb9CXyqBwwZr3LXB5YiBmE2npy5HfjJpNqHS00uH8iO6fZ';
 
   const PRICES = { crawl: 17, pack: 44 };
+  const FLEX_PRICE = 1.90; // "Book with Confidence" optional add-on, per spot
   const NAMES = { crawl: 'Porto Pub Crawl', pack: 'Party Boat + Pub Crawl Pack' };
 
   // Last bookable Saturday shown in the date picker — bump this every few
@@ -2283,6 +2305,8 @@ try{
   const qtyMinus = document.getElementById('qtyMinus');
   const qtyPlus = document.getElementById('qtyPlus');
   const bookTotal = document.getElementById('bookTotal');
+  const flexToggle = document.getElementById('flexToggle');
+  const flexOpt = document.getElementById('flexOpt');
   const bookError = document.getElementById('bookError');
   const bookSubmit = document.getElementById('bookSubmit');
   const bookSubmitLabel = document.getElementById('bookSubmitLabel');
@@ -2290,7 +2314,7 @@ try{
 
   if(!overlay) return;
 
-  let state = { pkg: 'crawl', date: null, qty: 1 };
+  let state = { pkg: 'crawl', date: null, qty: 1, flex: false };
   let embeddedCheckout = null;
 
   // ----- build the Saturdays list, next one through 19 Dec 2026 -----
@@ -2356,7 +2380,22 @@ try{
   }
 
   function updateTotal(){
-    bookTotal.textContent = '€' + (PRICES[state.pkg] * state.qty);
+    const total = PRICES[state.pkg] * state.qty + (state.flex ? FLEX_PRICE * state.qty : 0);
+    // whole euros show without decimals (€17), the add-on makes it fractional (€18.90)
+    bookTotal.textContent = '€' + (Number.isInteger(total) ? total : total.toFixed(2));
+  }
+
+  // The "Book with Confidence" upsell is offered on the Pub Crawl only, not the
+  // Party Boat + Pub Crawl pack. Hiding it also forces the add-on off so the
+  // total and the Stripe session can never carry it for the pack.
+  function applyFlexVisibility(){
+    const showFlex = state.pkg === 'crawl';
+    if(flexOpt) flexOpt.style.display = showFlex ? '' : 'none';
+    if(!showFlex){
+      state.flex = false;
+      if(flexToggle) flexToggle.checked = false;
+      if(flexOpt) flexOpt.classList.remove('on');
+    }
   }
 
   function resetToSelectStep(){
@@ -2396,6 +2435,10 @@ try{
     state.pkg = pkg || 'crawl';
     state.qty = 1;
     qtyNum.textContent = '1';
+    state.flex = false;
+    if(flexToggle) flexToggle.checked = false;
+    if(flexOpt) flexOpt.classList.remove('on');
+    applyFlexVisibility();
     bookError.classList.remove('show');
     document.querySelectorAll('.pkg-opt').forEach(function(opt){
       const active = opt.dataset.pkg === state.pkg;
@@ -2436,6 +2479,14 @@ try{
     el.addEventListener('click', function(e){ e.preventDefault(); openBookModal('pack', el); });
   });
 
+  if(flexToggle){
+    flexToggle.addEventListener('change', function(){
+      state.flex = flexToggle.checked;
+      if(flexOpt) flexOpt.classList.toggle('on', flexToggle.checked);
+      updateTotal();
+    });
+  }
+
   document.getElementById('bookClose').addEventListener('click', closeBookModal);
   if(dateArrowLeft) dateArrowLeft.addEventListener('click', function(){ dateScroller.scrollBy({left:-220, behavior:'smooth'}); });
   if(dateArrowRight) dateArrowRight.addEventListener('click', function(){ dateScroller.scrollBy({left:220, behavior:'smooth'}); });
@@ -2461,6 +2512,7 @@ try{
       opt.classList.add('active');
       opt.querySelector('input').checked = true;
       state.pkg = opt.dataset.pkg;
+      applyFlexVisibility();
       updateTotal();
     });
   });
@@ -2540,7 +2592,8 @@ try{
         package: state.pkg,
         packageName: NAMES[state.pkg],
         date: state.date,
-        quantity: state.qty
+        quantity: state.qty,
+        flex: state.flex
       }, getMetaIdentifiers()))
     }).then(function(res){
       if(!res.ok){
