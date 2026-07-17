@@ -1151,7 +1151,15 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 <!-- which Vercel only shows on paid plans). Replace phc_Cdk4z8rtjHYU5i2P9k2MR3Q4TesednoVXsYokLiRByty below. -->
 <script>
   !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey getNextSurveyStep identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
-  posthog.init('phc_Cdk4z8rtjHYU5i2P9k2MR3Q4TesednoVXsYokLiRByty', { api_host: 'https://eu.i.posthog.com', person_profiles: 'identified_only' });
+  // Load the PostHog library off the critical path. The stub above already
+  // queues any early capture()/$pageview calls, so they flush once it boots on
+  // idle — nothing is lost, and it stops competing with first paint. Idle (not
+  // first-interaction) so pageviews are still captured for visitors who bounce.
+  (function(){
+    function bootPostHog(){ posthog.init('phc_Cdk4z8rtjHYU5i2P9k2MR3Q4TesednoVXsYokLiRByty', { api_host: 'https://eu.i.posthog.com', person_profiles: 'identified_only' }); }
+    if('requestIdleCallback' in window){ requestIdleCallback(bootPostHog, { timeout: 3000 }); }
+    else { setTimeout(bootPostHog, 1200); }
+  })();
 </script>
 </head>
 <body>
@@ -1888,12 +1896,18 @@ document.addEventListener('visibilitychange', function(){
 // ===== exit-intent modal =====
 const exitOverlay = document.getElementById('exitOverlay');
 if(exitOverlay){
-  let exitShown = sessionStorage.getItem('noiteExitShown');
+  // sessionStorage throws (SecurityError) when storage is blocked — private mode,
+  // "block all cookies", or a sandboxed/cross-origin iframe. An unguarded throw
+  // here would halt the rest of this script and leave every .reveal element below
+  // the hero permanently hidden, so guard it like the localStorage code does.
+  let exitShown;
+  try { exitShown = sessionStorage.getItem('noiteExitShown'); }
+  catch(e){ exitShown = '1'; } // storage unavailable → just never show the exit modal
   function openExit(){
     if(exitShown) return;
     exitOverlay.classList.add('show');
     exitShown = true;
-    sessionStorage.setItem('noiteExitShown','1');
+    try { sessionStorage.setItem('noiteExitShown','1'); } catch(e){}
   }
   function closeExit(){ exitOverlay.classList.remove('show'); }
   document.addEventListener('mouseout', (e)=>{
@@ -1977,9 +1991,12 @@ window.addEventListener('scroll', ()=>{
 
 // ===== particle canvas =====
 const canvas = document.getElementById('particles');
-if(canvas){
+// Honour reduced-motion (the rest of the site already does) — skip it entirely.
+if(canvas && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
 const ctx = canvas.getContext('2d');
 let particles = [];
+let particleRaf = null;
+let particlesOnScreen = true;
 function resizeCanvas(){
   canvas.width = canvas.offsetWidth * devicePixelRatio;
   canvas.height = canvas.offsetHeight * devicePixelRatio;
@@ -1997,7 +2014,7 @@ function initParticles(){
     hue: Math.random() > 0.5 ? '255,23,63' : '34,255,122'
   }));
 }
-function animateParticles(){
+function drawParticles(){
   ctx.clearRect(0,0,canvas.offsetWidth, canvas.offsetHeight);
   particles.forEach(p=>{
     p.y += p.vy; p.x += p.vx;
@@ -2009,9 +2026,20 @@ function animateParticles(){
     ctx.shadowBlur = 6;
     ctx.fill();
   });
-  requestAnimationFrame(animateParticles);
+  particleRaf = requestAnimationFrame(drawParticles);
 }
-resizeCanvas(); initParticles(); animateParticles();
+function startParticles(){ if(particleRaf === null && particlesOnScreen && !document.hidden) particleRaf = requestAnimationFrame(drawParticles); }
+function stopParticles(){ if(particleRaf !== null){ cancelAnimationFrame(particleRaf); particleRaf = null; } }
+resizeCanvas(); initParticles(); startParticles();
+// Stop burning CPU/GPU/battery once the hero scrolls out of view or the tab is
+// hidden — the loop previously ran forever at 60fps regardless of visibility.
+if('IntersectionObserver' in window){
+  new IntersectionObserver(function(entries){
+    particlesOnScreen = entries[0].isIntersecting;
+    if(particlesOnScreen) startParticles(); else stopParticles();
+  }, { threshold: 0 }).observe(canvas);
+}
+document.addEventListener('visibilitychange', function(){ if(document.hidden) stopParticles(); else startParticles(); });
 }
 
 // ===== gallery video: lazy-load (only start downloading once near viewport, =====
