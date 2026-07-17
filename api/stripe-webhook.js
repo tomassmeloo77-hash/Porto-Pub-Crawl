@@ -276,19 +276,38 @@ module.exports = async (req, res) => {
     const name = session.customer_details && session.customer_details.name;
     const meta = session.metadata || {};
 
+    // Hosted Payment Link fallbacks (used when embedded checkout can't load)
+    // carry no metadata — recover package / date / quantity from the
+    // client_reference_id we set as "pkg_date_qty", so confirmation emails
+    // aren't sent with a blank date and the wrong package name.
+    if (!meta.event_date && session.client_reference_id) {
+      const ref = String(session.client_reference_id).split('_');
+      if (ref.length >= 3) {
+        if (!meta.package && PACKAGE_NAMES[ref[0]]) meta.package = ref[0];
+        if (/^\d{4}-\d{2}-\d{2}$/.test(ref[1])) meta.event_date = ref[1];
+        if (!meta.quantity && /^\d+$/.test(ref[2])) meta.quantity = ref[2];
+      }
+    }
+
     // Report the sale to Meta first (independent of whether email is configured)
     // so ad campaigns can attribute and optimise for it.
     await sendMetaPurchaseEvent(session);
 
+    let emailFailed = false;
     if (email && process.env.RESEND_API_KEY) {
       const packageName = PACKAGE_NAMES[meta.package] || 'Porto Pub Crawl';
       const qty = meta.quantity || '1';
-      let niceDate = meta.event_date || '';
+      let niceDate = '';
       if (meta.event_date) {
         niceDate = new Date(meta.event_date + 'T00:00:00Z').toLocaleDateString('en-GB', {
           weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC'
         });
       }
+      // never render a blank date — neutral label + subject when it's unknown
+      const dateLabel = niceDate || 'Your booked Saturday (see your Stripe receipt)';
+      const customerSubject = niceDate
+        ? `You're on the list! Saturday, ${niceDate}`
+        : `You're on the list! Your booking is confirmed`;
       const amount = ((session.amount_total || 0) / 100).toFixed(2) + ' ' + (session.currency || 'eur').toUpperCase();
       const purchasedAt = new Date().toLocaleString('en-GB', {
         dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/Lisbon'
@@ -310,16 +329,21 @@ module.exports = async (req, res) => {
           body: JSON.stringify({
             from: 'Porto Pub Crawl <bookings@porto-pubcrawl.com>',
             to: email,
-            subject: `You're on the list! Saturday, ${niceDate}`,
-            html: buildEmailHtml({ name, packageName, niceDate, qty })
+            subject: customerSubject,
+            html: buildEmailHtml({ name, packageName, niceDate: dateLabel, qty })
           })
         });
         if (!resendRes.ok) {
           const errBody = await resendRes.text();
           console.error('Resend send failed (customer email):', resendRes.status, errBody);
+          // retry only transient (5xx) failures — a 4xx (e.g. unverified domain)
+          // won't fix itself, and forcing endless Stripe retries could get the
+          // webhook endpoint disabled.
+          if (resendRes.status >= 500) emailFailed = true;
         }
       } catch (err) {
         console.error('Error sending confirmation email:', err);
+        emailFailed = true; // network/timeout — transient, worth a retry
       }
 
       // 2) internal sale notification to your personal inbox
@@ -335,16 +359,27 @@ module.exports = async (req, res) => {
             from: 'Porto Pub Crawl <bookings@porto-pubcrawl.com>',
             to: 'tomasmelo002@gmail.com',
             subject: `💰 New booking — ${packageName} — ${amount}`,
-            html: buildAdminNotificationHtml({ name, email, packageName, niceDate, qty, amount, sessionId: session.id, purchasedAt })
+            html: buildAdminNotificationHtml({ name, email, packageName, niceDate: dateLabel, qty, amount, sessionId: session.id, purchasedAt })
           })
         });
         if (!adminRes.ok) {
           const errBody = await adminRes.text();
           console.error('Resend send failed (admin notification):', adminRes.status, errBody);
+          if (adminRes.status >= 500) emailFailed = true; // retry transient only
         }
       } catch (err) {
         console.error('Error sending admin notification email:', err);
+        emailFailed = true; // network/timeout — transient, worth a retry
       }
+    }
+
+    // If a confirmation/admin email failed to send, return non-2xx so Stripe
+    // redelivers the webhook and we get another chance. The Idempotency-Keys
+    // above dedupe the emails and Meta CAPI dedupes by event_id, so the retry
+    // never double-sends.
+    if (emailFailed) {
+      res.status(500).json({ error: 'notification delivery failed' });
+      return;
     }
   }
 

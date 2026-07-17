@@ -1989,58 +1989,9 @@ window.addEventListener('scroll', ()=>{
   }
 }, {passive:true});
 
-// ===== particle canvas =====
-const canvas = document.getElementById('particles');
-// Honour reduced-motion (the rest of the site already does) — skip it entirely.
-if(canvas && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)){
-const ctx = canvas.getContext('2d');
-let particles = [];
-let particleRaf = null;
-let particlesOnScreen = true;
-function resizeCanvas(){
-  canvas.width = canvas.offsetWidth * devicePixelRatio;
-  canvas.height = canvas.offsetHeight * devicePixelRatio;
-  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
-}
-function initParticles(){
-  const count = window.innerWidth < 768 ? 26 : 55;
-  particles = Array.from({length:count}, ()=>({
-    x: Math.random()*canvas.offsetWidth,
-    y: Math.random()*canvas.offsetHeight,
-    r: Math.random()*1.8 + 0.6,
-    vy: -(Math.random()*0.35 + 0.08),
-    vx: (Math.random()-0.5)*0.15,
-    a: Math.random()*0.5 + 0.15,
-    hue: Math.random() > 0.5 ? '255,23,63' : '34,255,122'
-  }));
-}
-function drawParticles(){
-  ctx.clearRect(0,0,canvas.offsetWidth, canvas.offsetHeight);
-  particles.forEach(p=>{
-    p.y += p.vy; p.x += p.vx;
-    if(p.y < -10){ p.y = canvas.offsetHeight + 10; p.x = Math.random()*canvas.offsetWidth; }
-    ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
-    ctx.fillStyle = `rgba(${p.hue},${p.a})`;
-    ctx.shadowColor = `rgba(${p.hue},0.8)`;
-    ctx.shadowBlur = 6;
-    ctx.fill();
-  });
-  particleRaf = requestAnimationFrame(drawParticles);
-}
-function startParticles(){ if(particleRaf === null && particlesOnScreen && !document.hidden) particleRaf = requestAnimationFrame(drawParticles); }
-function stopParticles(){ if(particleRaf !== null){ cancelAnimationFrame(particleRaf); particleRaf = null; } }
-resizeCanvas(); initParticles(); startParticles();
-// Stop burning CPU/GPU/battery once the hero scrolls out of view or the tab is
-// hidden — the loop previously ran forever at 60fps regardless of visibility.
-if('IntersectionObserver' in window){
-  new IntersectionObserver(function(entries){
-    particlesOnScreen = entries[0].isIntersecting;
-    if(particlesOnScreen) startParticles(); else stopParticles();
-  }, { threshold: 0 }).observe(canvas);
-}
-document.addEventListener('visibilitychange', function(){ if(document.hidden) stopParticles(); else startParticles(); });
-}
+// (The hero particle-canvas feature was removed earlier — its #particles
+// element no longer exists in the markup, so the old code never ran. Dead code
+// and its stray resize handler deleted to avoid a latent reduced-motion throw.)
 
 // ===== gallery video: lazy-load (only start downloading once near viewport, =====
 // ===== so these don't compete with the hero image for bandwidth on load),   =====
@@ -2113,7 +2064,6 @@ function setupLazyVideo(heroVideo){
 ['clubfloorVideoEl','reelVideoEl'].forEach(function(videoId){
   setupLazyVideo(document.getElementById(videoId));
 });
-window.addEventListener('resize', ()=>{ if(canvas){ resizeCanvas(); initParticles(); } });
 
 // ===== scarcity ticker (subtle variance, believable) — all driven by SITE.spotsLeft =====
 syncSpotsEverywhere(); // initial paint
@@ -2574,7 +2524,9 @@ try{
       bookSubmitLabel.textContent = 'Continue to payment';
       return;
     }
-    const reference = state.date + ' | ' + state.qty + ' spot(s)';
+    // Encode package_date_quantity so the webhook can rebuild the confirmation
+    // email correctly — Payment Link sessions otherwise carry no metadata.
+    const reference = state.pkg + '_' + state.date + '_' + state.qty;
     const finalUrl = link + '?client_reference_id=' + encodeURIComponent(reference);
     bookSubmitLabel.textContent = 'Redirecting to payment…';
 
@@ -2732,11 +2684,12 @@ try{
       };
       fetch('/api/get-session-amount?session_id=' + encodeURIComponent(sessionId))
         .then(function(r){ return r.json(); })
-        .then(function(data){ recordConversion(data && data.amount, data && data.currency); })
-        .catch(function(err){
-          console.error('Could not fetch session amount for conversion tracking:', err);
-          recordConversion(null, null); // still record the sale, just without a value
-        });
+        .then(function(data){
+          // only record the conversion once Stripe has confirmed the session is
+          // paid — never fire pixels for an unpaid/abandoned/shared session
+          if(data && data.paid) recordConversion(data.amount, data.currency);
+        })
+        .catch(function(err){ console.error('Could not fetch session amount for conversion tracking:', err); });
     }
 
     // strip the query params so refreshing or reopening the modal later

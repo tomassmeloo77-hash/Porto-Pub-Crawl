@@ -30,8 +30,14 @@ module.exports = async (req, res) => {
   try {
     const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
     const session = await stripe.checkout.sessions.retrieve(sessionId);
+    // Only treat the session as a real sale when Stripe says it's paid — a
+    // session id alone (e.g. an abandoned/open checkout whose success URL was
+    // shared or bookmarked) must not fire conversion pixels for money that
+    // never actually came in.
+    const paid = session.payment_status === 'paid';
     res.status(200).json({
-      amount: (session.amount_total || 0) / 100,
+      paid: paid,
+      amount: paid ? (session.amount_total || 0) / 100 : 0,
       currency: (session.currency || 'eur').toUpperCase()
     });
   } catch (err) {
