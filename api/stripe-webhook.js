@@ -146,12 +146,39 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-function buildEmailHtml({ name, packageName, niceDate, qty }) {
+function buildEmailHtml({ name, packageName, niceDate, qty, pkg }) {
   name = escapeHtml(name);
   packageName = escapeHtml(packageName);
   niceDate = escapeHtml(niceDate);
   qty = escapeHtml(qty);
-  const MAPS_LINK = 'https://maps.app.goo.gl/gw6wz2S7iKU7eybL7';
+  const CRAWL_MAPS = 'https://maps.app.goo.gl/gw6wz2S7iKU7eybL7';
+  const BOAT_MAPS = 'https://maps.app.goo.gl/wFJyHs39LQFGMTLYA';
+  const isPack = pkg === 'pack';
+  const experience = isPack ? 'Party Boat + Pub Crawl' : 'Porto Pub Crawl';
+
+  const lblCell = 'padding:12px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;';
+  const valCell = 'padding:12px 0;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14.5px;text-align:right;font-weight:700;';
+  const linkCell = 'padding:12px 0;border-bottom:1px solid #232325;text-align:right;';
+  const lastLbl = 'padding:12px 0;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;';
+  const lastVal = 'padding:12px 0;color:#f5f4f2;font-size:14.5px;text-align:right;font-weight:700;';
+  const aStyle = 'color:#ff5468;font-size:14.5px;font-weight:700;text-decoration:none;';
+  const btn = (href, label) => `<a href="${href}" style="display:block;text-align:center;background:linear-gradient(135deg,#ff173f,#ff5a8f);color:#fff;font-size:14px;font-weight:800;text-decoration:none;padding:14px 20px;border-radius:100px;margin-bottom:12px;">${label}</a>`;
+
+  let logistics, ctas;
+  if (isPack) {
+    logistics =
+      `<tr><td style="${lblCell}">🚤 Party Boat</td><td style="${linkCell}"><a href="${BOAT_MAPS}" style="${aStyle}">📍 Cais de Gaia</a></td></tr>` +
+      `<tr><td style="${lblCell}">Boat time</td><td style="${valCell}">22:00 · sails 22:00–00:00</td></tr>` +
+      `<tr><td style="${lblCell}">🍹 Then · Pub Crawl</td><td style="${linkCell}"><a href="${CRAWL_MAPS}" style="${aStyle}">📍 Praça de Carlos Alberto</a></td></tr>` +
+      `<tr><td style="${lastLbl}">Crawl time</td><td style="${lastVal}">00:30 · look for the pink umbrellas</td></tr>`;
+    ctas = btn(BOAT_MAPS, '📍 Party Boat — Cais de Gaia (22:00)') + btn(CRAWL_MAPS, '📍 Pub Crawl — Praça de Carlos Alberto (00:30)');
+  } else {
+    logistics =
+      `<tr><td style="${lblCell}">Meeting point</td><td style="${linkCell}"><a href="${CRAWL_MAPS}" style="${aStyle}">📍 Praça de Carlos Alberto</a></td></tr>` +
+      `<tr><td style="${lastLbl}">Time</td><td style="${lastVal}">22:30 — look for the pink umbrellas</td></tr>`;
+    ctas = btn(CRAWL_MAPS, '📍 Open meeting point in Maps');
+  }
+
   return `
   <div style="background:#08070a;padding:40px 20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
     <div style="max-width:480px;margin:0 auto;background:#131314;border-radius:20px;overflow:hidden;border:1px solid #232325;box-shadow:0 30px 80px -20px rgba(255,23,63,0.25);">
@@ -163,38 +190,26 @@ function buildEmailHtml({ name, packageName, niceDate, qty }) {
       </div>
       <div style="padding:32px 28px 28px;">
         <p style="color:#f5f4f2;font-size:15px;line-height:1.6;margin:0 0 24px;">
-          ${name ? 'Hey ' + name + ',' : 'Hey,'} your spot on the Porto Pub Crawl is confirmed. Here's everything you need for Saturday:
+          ${name ? 'Hey ' + name + ',' : 'Hey,'} your spot on the ${experience} is confirmed. Here's everything you need for Saturday:
         </p>
         <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
           <tr>
-            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Package</td>
-            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14.5px;text-align:right;font-weight:700;">${packageName}</td>
+            <td style="${lblCell}">Package</td>
+            <td style="${valCell}">${packageName}</td>
           </tr>
           <tr>
-            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Date</td>
-            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14.5px;text-align:right;font-weight:700;">${niceDate}</td>
+            <td style="${lblCell}">Date</td>
+            <td style="${valCell}">${niceDate}</td>
           </tr>
           <tr>
-            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Spots</td>
-            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#f5f4f2;font-size:14.5px;text-align:right;font-weight:700;">${qty}</td>
+            <td style="${lblCell}">Spots</td>
+            <td style="${valCell}">${qty}</td>
           </tr>
-          <tr>
-            <td style="padding:12px 0;border-bottom:1px solid #232325;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Meeting point</td>
-            <td style="padding:12px 0;border-bottom:1px solid #232325;text-align:right;">
-              <a href="${MAPS_LINK}" style="color:#ff5468;font-size:14.5px;font-weight:700;text-decoration:none;">📍 Praça de Carlos Alberto</a>
-            </td>
-          </tr>
-          <tr>
-            <td style="padding:12px 0;color:#a3a0a1;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700;">Time</td>
-            <td style="padding:12px 0;color:#f5f4f2;font-size:14.5px;text-align:right;font-weight:700;">22:30 — look for the pink umbrellas</td>
-          </tr>
+          ${logistics}
         </table>
-        <a href="${MAPS_LINK}" style="display:block;text-align:center;background:linear-gradient(135deg,#ff173f,#ff5a8f);color:#fff;font-size:14px;font-weight:800;text-decoration:none;padding:14px 20px;border-radius:100px;margin-bottom:24px;">📍 Open meeting point in Maps</a>
-        <p style="color:#a3a0a1;font-size:13px;line-height:1.6;margin:0 0 6px;">
+        ${ctas}
+        <p style="color:#a3a0a1;font-size:13px;line-height:1.6;margin:14px 0 0;">
           Questions before Saturday? Message us on WhatsApp: <a href="https://wa.me/351910694984" style="color:#ff5468;">+351 910 694 984</a>
-        </p>
-        <p style="color:#7e7b7c;font-size:12px;line-height:1.6;margin:20px 0 0;">
-          Free cancellation up to 24h before your start time — just reply to this email or WhatsApp us.
         </p>
       </div>
       <div style="padding:20px 28px;background:#0d0d0e;text-align:center;border-top:1px solid #232325;">
@@ -330,7 +345,7 @@ module.exports = async (req, res) => {
             from: 'Porto Pub Crawl <bookings@porto-pubcrawl.com>',
             to: email,
             subject: customerSubject,
-            html: buildEmailHtml({ name, packageName, niceDate: dateLabel, qty })
+            html: buildEmailHtml({ name, packageName, niceDate: dateLabel, qty, pkg: meta.package })
           })
         });
         if (!resendRes.ok) {
