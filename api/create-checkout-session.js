@@ -48,8 +48,13 @@ module.exports = async (req, res) => {
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { res.status(400).json({ error: 'Invalid date.' }); return; }
     const parsedDate = new Date(date + 'T00:00:00Z');
     if (isNaN(parsedDate.getTime())) { res.status(400).json({ error: 'Invalid date.' }); return; }
-    const todayUTC = new Date(); todayUTC.setUTCHours(0, 0, 0, 0);
-    if (parsedDate < todayUTC) { res.status(400).json({ error: 'That date has already passed.' }); return; }
+    // Bookable until ~03:00 (Lisbon) the day AFTER the Saturday crawl, so tickets
+    // still sell during and just after the event. parsedDate is the Saturday at
+    // 00:00 UTC; + 27h ≈ Sunday 03:00 UTC (≈ 03:00–04:00 Lisbon depending on DST —
+    // we err a touch late rather than cut sales off early).
+    if (Date.now() > parsedDate.getTime() + 27 * 60 * 60 * 1000) {
+      res.status(400).json({ error: 'That date has already passed.' }); return;
+    }
     if (parsedDate.getUTCDay() !== 6) { res.status(400).json({ error: 'The crawl only runs on Saturdays.' }); return; }
 
     const siteUrl = process.env.SITE_URL || 'https://www.porto-pubcrawl.com';

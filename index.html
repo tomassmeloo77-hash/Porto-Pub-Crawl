@@ -2311,12 +2311,12 @@ try{
     const now = new Date();
     const d = new Date();
     d.setHours(0,0,0,0);
-    // Include TODAY when it's Saturday and the crawl hasn't started yet (before
-    // 22:30) — matches the countdown logic. The old `|| 7` ALWAYS skipped today,
-    // so same-day Saturday bookings (the biggest last-minute window) were impossible.
+    // Keep the crawl bookable until 03:00 the day AFTER it runs, so tickets sell
+    // right through the night (even mid-crawl). Saturday → today stays available
+    // all day; Sunday before 03:00 → the crawl that started last night is still
+    // on, so offer yesterday's Saturday. Only after 03:00 Sunday does it roll on.
     let daysUntilSat = (6 - d.getDay() + 7) % 7;
-    const pastTonightsStart = now.getDay() === 6 && (now.getHours() > 22 || (now.getHours() === 22 && now.getMinutes() >= 30));
-    if(daysUntilSat === 0 && pastTonightsStart){ daysUntilSat = 7; }
+    if(d.getDay() === 0 && now.getHours() < 3){ daysUntilSat = -1; }
     d.setDate(d.getDate() + daysUntilSat);
     const until = new Date(untilIso + 'T00:00:00');
     const dowNames = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
