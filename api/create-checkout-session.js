@@ -19,6 +19,12 @@ const Stripe = require('stripe');
 
 const PRICES_EUR = { crawl: 17, pack: 44 };
 const MAX_QTY = 100;
+// Per-package checkout subtitle — the pack has its own itinerary (boat first at
+// Cais de Gaia, then the crawl), so it must not reuse the crawl's line.
+const DESCRIPTIONS = {
+  crawl: 'Porto Pub Crawl · Praça de Carlos Alberto · 22:30–02:30',
+  pack: 'Party Boat · Cais de Gaia · 22:00, then Pub Crawl · Praça de Carlos Alberto · 00:30'
+};
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -60,7 +66,7 @@ module.exports = async (req, res) => {
           tax_behavior: 'exclusive',
           product_data: {
             name: (packageName || pkg) + ' — ' + niceDate,
-            description: 'Porto Pub Crawl · Praça de Carlos Alberto · 22:30–02:30'
+            description: DESCRIPTIONS[pkg] || DESCRIPTIONS.crawl
           }
         },
         quantity: qty
