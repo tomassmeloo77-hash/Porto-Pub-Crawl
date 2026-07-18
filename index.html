@@ -2308,9 +2308,15 @@ try{
 
   function nextSaturdays(untilIso){
     const out = [];
+    const now = new Date();
     const d = new Date();
     d.setHours(0,0,0,0);
-    const daysUntilSat = (6 - d.getDay() + 7) % 7 || 7;
+    // Include TODAY when it's Saturday and the crawl hasn't started yet (before
+    // 22:30) — matches the countdown logic. The old `|| 7` ALWAYS skipped today,
+    // so same-day Saturday bookings (the biggest last-minute window) were impossible.
+    let daysUntilSat = (6 - d.getDay() + 7) % 7;
+    const pastTonightsStart = now.getDay() === 6 && (now.getHours() > 22 || (now.getHours() === 22 && now.getMinutes() >= 30));
+    if(daysUntilSat === 0 && pastTonightsStart){ daysUntilSat = 7; }
     d.setDate(d.getDate() + daysUntilSat);
     const until = new Date(untilIso + 'T00:00:00');
     const dowNames = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
