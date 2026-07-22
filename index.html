@@ -2680,12 +2680,22 @@ try{
     const sessionId = params.get('session_id');
     if(sessionId){
       let conversionFired = false;
-      const recordConversion = function(amount, currency){
+      const recordConversion = function(data){
         if(conversionFired) return;
         conversionFired = true;
-        const money = amount ? { value: amount, currency: currency || 'EUR' } : {};
+        data = data || {};
+        const money = data.amount ? { value: data.amount, currency: data.currency || 'EUR' } : {};
         if(window.posthog) posthog.capture('Booking Completed', Object.assign({ transaction_id: sessionId }, money));
         if(typeof gtag === 'function'){
+          // Enhanced conversions: attach the customer's hashed email/phone so
+          // Google Ads can match this booking to the ad click more accurately.
+          // Values arrive already SHA-256'd from the server — no raw PII here.
+          const userData = {};
+          if(data.email_sha256) userData.sha256_email_address = data.email_sha256;
+          if(data.phone_sha256) userData.sha256_phone_number = data.phone_sha256;
+          if(userData.sha256_email_address || userData.sha256_phone_number){
+            gtag('set', 'user_data', userData);
+          }
           gtag('event', 'conversion', Object.assign({ 'send_to': 'AW-18071337739/rS_NCP2ly5wcEIv2iqlD', 'transaction_id': sessionId }, money));
           gtag('event', 'purchase', Object.assign({ 'transaction_id': sessionId }, money));
         }
@@ -2696,7 +2706,7 @@ try{
         .then(function(data){
           // only record the conversion once Stripe has confirmed the session is
           // paid — never fire pixels for an unpaid/abandoned/shared session
-          if(data && data.paid) recordConversion(data.amount, data.currency);
+          if(data && data.paid) recordConversion(data);
         })
         .catch(function(err){ console.error('Could not fetch session amount for conversion tracking:', err); });
     }
