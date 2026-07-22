@@ -36,6 +36,10 @@
 //    (optional) META_PIXEL_ID  = 1729899044988200  — only if the Pixel changes.
 //    Without META_CAPI_ACCESS_TOKEN the webhook still works; it just skips the
 //    server-side Purchase event and logs a warning.
+//    (optional) META_CAPI_TOKEN_ECO = EAAxxxxxxxx — a Conversions API token for
+//    the second pixel (1359229999643038, ECOTRAVEL ad account). Generate it in
+//    Events Manager for that dataset. When set, the same Purchase is also sent
+//    server-side to that pixel; when unset, that pixel is simply skipped.
 // 7. Redeploy so the new env vars are picked up.
 //
 // Do this once in test mode first (use a test-mode webhook + test Resend
@@ -44,10 +48,16 @@
 const Stripe = require('stripe');
 const crypto = require('crypto');
 
-// Meta Pixel this site loads in index.html. Kept in sync so the browser Pixel
-// and the server-side Conversions API report to the same asset.
-const META_PIXEL_ID = process.env.META_PIXEL_ID || '1729899044988200';
+// Meta Pixels this site reports Purchases to, server-side. The main pixel loads
+// in index.html; the second belongs to the ECOTRAVEL ad account, which runs its
+// own campaign for this site. Each pixel has its own Conversions API token. The
+// browser Pixel fires Purchase to both with the same eventID, and CAPI reuses
+// that event_id, so each pixel deduplicates its own browser + server events.
 const META_GRAPH_VERSION = 'v19.0';
+const META_PIXELS = [
+  { id: process.env.META_PIXEL_ID || '1729899044988200', token: process.env.META_CAPI_ACCESS_TOKEN },
+  { id: '1359229999643038', token: process.env.META_CAPI_TOKEN_ECO }
+];
 
 // Meta requires PII (email) to be SHA-256 hashed, normalised to lowercase and
 // trimmed first. fbp/fbc, IP and user-agent are sent raw (not hashed).
@@ -55,13 +65,14 @@ function hashSha256(value) {
   return crypto.createHash('sha256').update(String(value).trim().toLowerCase()).digest('hex');
 }
 
-// Fire a server-side "Purchase" to the Meta Conversions API. Never throws — a
-// tracking failure must not break the webhook (Stripe would just retry it and
-// the customer would get a duplicate email), so all errors are logged only.
+// Fire a server-side "Purchase" to the Meta Conversions API for every configured
+// pixel. Never throws — a tracking failure must not break the webhook (Stripe
+// would just retry it and the customer would get a duplicate email), so all
+// errors are logged only.
 async function sendMetaPurchaseEvent(session) {
-  const token = process.env.META_CAPI_ACCESS_TOKEN;
-  if (!token) {
-    console.warn('META_CAPI_ACCESS_TOKEN not set — skipping server-side Meta Purchase event');
+  const targets = META_PIXELS.filter(function (p) { return p.token; });
+  if (!targets.length) {
+    console.warn('No Meta CAPI tokens set — skipping server-side Meta Purchase event');
     return;
   }
 
@@ -98,20 +109,22 @@ async function sendMetaPurchaseEvent(session) {
     }]
   };
 
-  try {
-    const url = `https://graph.facebook.com/${META_GRAPH_VERSION}/${META_PIXEL_ID}/events?access_token=${encodeURIComponent(token)}`;
-    const capiRes = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (!capiRes.ok) {
-      const errBody = await capiRes.text();
-      console.error('Meta CAPI Purchase failed:', capiRes.status, errBody);
+  await Promise.all(targets.map(async function (pixel) {
+    try {
+      const url = `https://graph.facebook.com/${META_GRAPH_VERSION}/${pixel.id}/events?access_token=${encodeURIComponent(pixel.token)}`;
+      const capiRes = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!capiRes.ok) {
+        const errBody = await capiRes.text();
+        console.error(`Meta CAPI Purchase failed for pixel ${pixel.id}:`, capiRes.status, errBody);
+      }
+    } catch (err) {
+      console.error(`Error sending Meta CAPI Purchase event for pixel ${pixel.id}:`, err);
     }
-  } catch (err) {
-    console.error('Error sending Meta CAPI Purchase event:', err);
-  }
+  }));
 }
 
 // Vercel-specific: we need the RAW request body to verify the Stripe
