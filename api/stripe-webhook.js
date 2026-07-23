@@ -59,10 +59,72 @@ const META_PIXELS = [
   { id: '1359229999643038', token: process.env.META_CAPI_TOKEN_ECO }
 ];
 
+// PostHog project this site reports to. Same public key the browser SDK loads
+// in index.html, so this exposes nothing new. Sending "Booking Completed"
+// server-side from the webhook is what makes the funnel and cost-per-booking
+// trustworthy: the browser event only fires if the buyer lands back on
+// /?booking=success, which fails on a closed tab, ad-blockers or Safari ITP —
+// the exact same reason we already send the Meta Purchase server-side. The
+// webhook always runs, so it is the reliable source of truth.
+const POSTHOG_HOST = (process.env.POSTHOG_HOST || 'https://eu.i.posthog.com').replace(/\/$/, '');
+const POSTHOG_KEY = process.env.POSTHOG_PROJECT_KEY || 'phc_Cdk4z8rtjHYU5i2P9k2MR3Q4TesednoVXsYokLiRByty';
+
 // Meta requires PII (email) to be SHA-256 hashed, normalised to lowercase and
 // trimmed first. fbp/fbc, IP and user-agent are sent raw (not hashed).
 function hashSha256(value) {
   return crypto.createHash('sha256').update(String(value).trim().toLowerCase()).digest('hex');
+}
+
+// Fire a server-side "Booking Completed" to PostHog for every paid session.
+// Never throws — a tracking failure must not break the webhook. We tie it to the
+// visitor's real PostHog identity (distinct_id + session_id captured at checkout)
+// so it stitches into their funnel and session recording; if those weren't
+// captured we fall back to the email, then the Stripe session id. A deterministic
+// $insert_id ('booking_<session id>') means Stripe webhook retries — and the
+// browser event, which carries the same $insert_id — deduplicate to one booking.
+async function sendPostHogBookingEvent(session) {
+  if (!POSTHOG_KEY) {
+    console.warn('No PostHog key set — skipping server-side Booking Completed event');
+    return;
+  }
+  const meta = session.metadata || {};
+  const email = session.customer_details && session.customer_details.email;
+  const distinctId = meta.ph_distinct_id || email || session.id;
+  const value = (session.amount_total || 0) / 100;
+
+  const properties = {
+    transaction_id: session.id,
+    value: value,
+    revenue: value,
+    currency: (session.currency || 'eur').toUpperCase(),
+    package: meta.package || '',
+    quantity: parseInt(meta.quantity, 10) || 1,
+    source: 'stripe_webhook',
+    // Deterministic id → PostHog dedupes webhook retries and the browser event.
+    $insert_id: 'booking_' + session.id
+  };
+  // Stitch to the exact browsing session/recording when we have it.
+  if (meta.ph_session_id) properties.$session_id = meta.ph_session_id;
+
+  try {
+    const res = await fetch(POSTHOG_HOST + '/capture/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: POSTHOG_KEY,
+        event: 'Booking Completed',
+        distinct_id: String(distinctId),
+        properties: properties,
+        timestamp: new Date().toISOString()
+      })
+    });
+    if (!res.ok) {
+      const errBody = await res.text();
+      console.error('PostHog Booking Completed capture failed:', res.status, errBody);
+    }
+  } catch (err) {
+    console.error('Error sending PostHog Booking Completed event:', err);
+  }
 }
 
 // Fire a server-side "Purchase" to the Meta Conversions API for every configured
@@ -317,9 +379,11 @@ module.exports = async (req, res) => {
       }
     }
 
-    // Report the sale to Meta first (independent of whether email is configured)
-    // so ad campaigns can attribute and optimise for it.
+    // Report the sale to Meta and PostHog first (independent of whether email is
+    // configured) so ad campaigns can attribute/optimise for it and the booking
+    // funnel is recorded even when the buyer never returns to the success page.
     await sendMetaPurchaseEvent(session);
+    await sendPostHogBookingEvent(session);
 
     let emailFailed = false;
     if (email && process.env.RESEND_API_KEY) {

@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
-    const { package: pkg, packageName, date, quantity, flex, fbp, fbc, event_source_url } = body;
+    const { package: pkg, packageName, date, quantity, flex, fbp, fbc, event_source_url, ph_distinct_id, ph_session_id } = body;
 
     if (!PRICES_EUR[pkg]) { res.status(400).json({ error: 'Invalid package.' }); return; }
     const qty = parseInt(quantity, 10);
@@ -115,7 +115,11 @@ module.exports = async (req, res) => {
         fbc: fbc || '',
         event_source_url: event_source_url || '',
         client_ip: (req.headers['x-forwarded-for'] || '').split(',')[0].trim(),
-        client_ua: (req.headers['user-agent'] || '').slice(0, 480)
+        client_ua: (req.headers['user-agent'] || '').slice(0, 480),
+        // PostHog identity captured in the browser, so the webhook's server-side
+        // "Booking Completed" stitches to this visitor's funnel and recording.
+        ph_distinct_id: (ph_distinct_id || '').slice(0, 200),
+        ph_session_id: (ph_session_id || '').slice(0, 200)
       },
       return_url: siteUrl + '/?booking=success&session_id={CHECKOUT_SESSION_ID}'
     });

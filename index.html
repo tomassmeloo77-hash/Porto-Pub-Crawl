@@ -2581,6 +2581,21 @@ try{
     return { fbp: readCookie('_fbp'), fbc: fbc, event_source_url: window.location.href };
   }
 
+  // Pass the visitor's PostHog identity to the backend so it lands in the Stripe
+  // session metadata. The webhook then fires a reliable server-side "Booking
+  // Completed" tied to this same person + session — so the funnel is recorded
+  // even if the buyer never returns to the success page (closed tab, ad-blocker,
+  // Safari ITP). Best-effort: never let a tracking hiccup block checkout.
+  function getPostHogIdentifiers(){
+    try{
+      if(!window.posthog) return {};
+      return {
+        ph_distinct_id: (typeof posthog.get_distinct_id === 'function') ? posthog.get_distinct_id() : '',
+        ph_session_id: (typeof posthog.get_session_id === 'function') ? posthog.get_session_id() : ''
+      };
+    }catch(e){ return {}; }
+  }
+
   function startEmbeddedCheckout(){
     if(!USE_EMBEDDED_CHECKOUT || STRIPE_PUBLISHABLE_KEY.indexOf('XXXX') !== -1){
       redirectToPaymentLink();
@@ -2599,7 +2614,7 @@ try{
         date: state.date,
         quantity: state.qty,
         flex: state.flex
-      }, getMetaIdentifiers()))
+      }, getMetaIdentifiers(), getPostHogIdentifiers()))
     }).then(function(res){
       if(!res.ok){
         return res.json().catch(function(){ return {}; }).then(function(errBody){
@@ -2692,7 +2707,11 @@ try{
         conversionFired = true;
         data = data || {};
         const money = data.amount ? { value: data.amount, currency: data.currency || 'EUR' } : {};
-        if(window.posthog) posthog.capture('Booking Completed', Object.assign({ transaction_id: sessionId }, money));
+        // Same $insert_id the webhook sends server-side → PostHog dedupes the two
+        // to a single booking, whichever arrives first. So we get the real-time
+        // browser event when the buyer lands here, and the webhook as a reliable
+        // backstop when they don't — never a double count.
+        if(window.posthog) posthog.capture('Booking Completed', Object.assign({ transaction_id: sessionId, $insert_id: 'booking_' + sessionId }, money));
         if(typeof gtag === 'function'){
           // Enhanced conversions: attach the customer's hashed email/phone so
           // Google Ads can match this booking to the ad click more accurately.
