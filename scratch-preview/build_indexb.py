@@ -61,7 +61,7 @@ CSS = """
 @media(max-width:920px){
   .hero.xb .xb-d{display:none;} .hero.xb .xb-m{display:block;}
   .hero.xb .xb-veil{background:linear-gradient(180deg,rgba(8,7,10,.5),rgba(8,7,10,.08) 30%%,rgba(8,7,10,.86));}
-  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100svh;padding:70px 20px 24px;}
+  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100svh;padding:70px 20px 24px;gap:0;}
   .hero.xb .xb-pbig{position:absolute;left:50%%;top:15%%;transform:translate(-50%%,-50%%);height:200px;filter:drop-shadow(0 16px 40px rgba(255,23,63,.4));}
   .hero.xb .xb-left{padding-left:0;position:relative;z-index:5;margin-top:60px;}
   .hero.xb .xb-left h1{font-size:52px;line-height:.86;text-shadow:0 6px 30px rgba(0,0,0,.65);}
@@ -96,10 +96,10 @@ HERO = '''<header class="hero xb" id="top">
   <div class="xb-hc">
     <div class="xb-pbig">__PM__</div>
     <div class="xb-left">
-      <h1 class="reveal in">The Craziest<br>Night in Porto</h1>
-      <p class="xb-sub reveal in">The guided pub crawl locals warn you about — bars, boat, club, sunrise.</p>
+      <h1>The Craziest<br>Night in Porto</h1>
+      <p class="xb-sub">The guided pub crawl locals warn you about — bars, boat, club, sunrise.</p>
     </div>
-    <aside class="xb-card reveal in">
+    <aside class="xb-card">
       <div class="xb-chead"><div class="xb-badges"><span class="b">__GOOGLE__ <span>Google</span></span><span class="b">__TP__ <span>Trustpilot</span></span></div>
         <div class="xb-crate"><span class="stars">★★★★★</span><span class="rn">4.9</span></div></div>
       <div class="xb-revl">Rated <b>excellent</b> by <b>1,327+</b> crawlers</div>
