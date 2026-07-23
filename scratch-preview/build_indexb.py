@@ -69,7 +69,7 @@ CSS = """
   .hero.xb .xb-left{width:100%%;box-sizing:border-box;padding:0;margin:0;position:relative;z-index:5;display:block;text-align:center;transform:translateY(-46px);}
   .hero.xb .xb-left h1{font-size:58px;line-height:.85;text-shadow:0 6px 30px rgba(0,0,0,.65);}
   .hero.xb .xb-left .xb-sub{margin:12px auto 0;max-width:300px;font-size:12.5px;}
-  .hero.xb .xb-card{position:absolute;left:16px;right:16px;bottom:20px;z-index:5;flex:none;justify-self:auto;margin:0;max-width:none;width:auto;padding:16px 16px 18px;text-align:left;}
+  .hero.xb .xb-card{position:absolute;left:16px;right:16px;bottom:20px;z-index:5;flex:none;justify-self:auto;margin:0;max-width:none;width:auto;padding:16px 16px 18px;text-align:left;background:none;border:none;box-shadow:none;backdrop-filter:none;text-shadow:0 2px 14px rgba(0,0,0,.85);}
   .hero.xb .xb-hr{display:block;margin:12px 0 12px;}
   .hero.xb .xb-price{display:none;}
   .hero.xb .xb-plist{display:none;}
