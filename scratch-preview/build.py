@@ -7,7 +7,7 @@ fdir = base/"fonts"/"node_modules"
 def b64(p): return base64.b64encode(pathlib.Path(p).read_bytes()).decode()
 def font_uri(p): return "data:font/woff2;base64," + b64(p)
 
-VIDEO = "data:video/mp4;base64," + b64(base/"hero-video.mp4")
+VIDEO = "data:video/mp4;base64," + b64(base/"hero-video-hq.mp4")
 POSTER = "data:image/webp;base64," + b64(base/"hero-poster.webp")
 
 ANTON   = font_uri(fdir/"@fontsource/anton/files/anton-latin-400-normal.woff2")
@@ -48,7 +48,7 @@ a{color:inherit;text-decoration:none;}
 .hero{position:absolute;inset:0;overflow:hidden;background:var(--void);}
 .hbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
 /* cinematic grade so phone footage reads as intentional */
-.hbg{filter:brightness(.56) saturate(1.12) contrast(1.06);}
+.hbg{filter:brightness(.66) saturate(1.14) contrast(1.05);}
 .grain{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.5;mix-blend-mode:overlay;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");}
 
