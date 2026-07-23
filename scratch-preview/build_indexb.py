@@ -31,6 +31,7 @@ CSS = """
 .hero.xb .xb-m{display:none;}
 .hero.xb .xb-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(8,7,10,.55),rgba(8,7,10,.12) 42%%,rgba(8,7,10,.66));}
 .hero.xb .xb-hc{position:relative;z-index:5;min-height:100svh;display:grid;grid-template-columns:1fr 400px;align-items:center;gap:44px;padding:clamp(80px,10vh,120px) clamp(24px,5vw,70px) clamp(40px,6vh,70px);}
+.hero.xb .xb-stage{display:contents;}
 .hero.xb .xb-pbig{position:absolute;top:50%%;transform:translateY(-50%%);color:var(--pink);z-index:2;filter:drop-shadow(0 18px 46px rgba(255,23,63,.4));pointer-events:none;height:clamp(240px,32vw,440px);left:clamp(20px,3vw,58px);}
 .hero.xb .xb-pmark{display:block;height:100%%;width:auto;}
 .hero.xb .xb-left{position:relative;z-index:5;padding-left:clamp(58px,10vw,180px);text-align:left;}
@@ -63,10 +64,11 @@ CSS = """
   .hero.xb .xb-veil{background:linear-gradient(180deg,rgba(8,7,10,.5),rgba(8,7,10,.08) 30%%,rgba(8,7,10,.86));}
   .hero.xb .xb-hbg{height:100svh;bottom:auto;}
   .hero.xb .xb-hc{display:flex;flex-direction:column;align-items:center;text-align:center;min-height:100svh;padding:0;gap:0;}
-  .hero.xb .xb-pbig{position:absolute;left:50%%;top:12px;transform:translateX(-50%%);height:196px;filter:drop-shadow(0 16px 40px rgba(255,23,63,.4));}
-  .hero.xb .xb-left{width:100%%;box-sizing:border-box;min-height:100svh;padding:134px 20px 24px;position:relative;z-index:5;margin-top:0;display:flex;flex-direction:column;justify-content:flex-start;}
-  .hero.xb .xb-left h1{font-size:46px;line-height:.86;text-shadow:0 6px 30px rgba(0,0,0,.65);}
-  .hero.xb .xb-left .xb-sub{margin:12px auto 0;max-width:290px;font-size:12.5px;}
+  .hero.xb .xb-stage{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100svh;width:100%%;box-sizing:border-box;padding:0 18px;}
+  .hero.xb .xb-pbig{position:static;transform:none;height:240px;margin:0;filter:drop-shadow(0 16px 44px rgba(255,23,63,.45));}
+  .hero.xb .xb-left{width:100%%;box-sizing:border-box;padding:0;margin-top:-90px;position:relative;z-index:5;display:block;}
+  .hero.xb .xb-left h1{font-size:55px;line-height:.86;text-shadow:0 6px 30px rgba(0,0,0,.65);}
+  .hero.xb .xb-left .xb-sub{margin:14px auto 0;max-width:300px;font-size:13px;}
   .hero.xb .xb-card{position:relative;z-index:5;justify-self:auto;margin:28px auto 44px;max-width:400px;width:calc(100%% - 36px);padding:18px;text-align:left;}
   .hero.xb .xb-chead{gap:9px;}
   .hero.xb .xb-badges{gap:12px;}
