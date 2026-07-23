@@ -1272,8 +1272,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 </nav>
 
 <header class="hero xb" id="top">
-  <video class="xb-hbg xb-d" autoplay muted loop playsinline poster="assets/hero-video-poster.webp"><source src="assets/hero-video-desktop.mp4" type="video/mp4"></video>
-  <video class="xb-hbg xb-m" autoplay muted loop playsinline poster="assets/hero-video-poster.webp"><source src="assets/hero-video-mobile.mp4" type="video/mp4"></video>
+  <video class="xb-hbg" id="xbHeroVid" autoplay muted loop playsinline preload="auto" poster="assets/hero-video-poster.webp" data-vm="assets/hero-video-mobile.mp4" data-vd="assets/hero-video-desktop.mp4"></video>
+  <script>(function(){var v=document.getElementById('xbHeroVid');if(!v)return;var src=window.matchMedia('(max-width:920px)').matches?v.dataset.vm:v.dataset.vd;var s=document.createElement('source');s.type='video/mp4';s.src=src;v.appendChild(s);v.load();var p=v.play&&v.play();if(p&&p.catch)p.catch(function(){});})();</script>
   <div class="xb-veil"></div>
   <div class="xb-hc">
     <div class="xb-stage">
