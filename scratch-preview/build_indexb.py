@@ -65,8 +65,8 @@ CSS = """
   .hero.xb .xb-hbg{height:100%%;bottom:0;}
   .hero.xb .xb-stage{display:contents;}
   .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100svh;padding:0 16px;position:relative;gap:0;}
-  .hero.xb .xb-pbig{position:absolute;left:50%%;top:50%%;height:284px;margin:0;transform:translate(-50%%,-304px);z-index:4;filter:drop-shadow(0 16px 44px rgba(255,23,63,.45));}
-  .hero.xb .xb-left{width:100%%;box-sizing:border-box;padding:0;margin:0;position:relative;z-index:5;display:block;}
+  .hero.xb .xb-pbig{position:absolute;left:50%%;top:50%%;height:244px;margin:0;transform:translate(-50%%,-246px);z-index:4;filter:drop-shadow(0 16px 44px rgba(255,23,63,.45));}
+  .hero.xb .xb-left{width:100%%;box-sizing:border-box;padding:0;margin:0;position:relative;z-index:5;display:block;transform:translateY(24px);}
   .hero.xb .xb-left h1{font-size:50px;line-height:.86;text-shadow:0 6px 30px rgba(0,0,0,.65);}
   .hero.xb .xb-left .xb-sub{margin:12px auto 0;max-width:300px;font-size:12.5px;}
   .hero.xb .xb-card{position:absolute;left:16px;right:16px;bottom:20px;z-index:5;flex:none;justify-self:auto;margin:0;max-width:none;width:auto;padding:16px 16px 18px;text-align:left;}
