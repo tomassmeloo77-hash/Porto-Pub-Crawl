@@ -61,30 +61,30 @@ CSS = """
 @media(max-width:920px){
   .hero.xb .xb-d{display:none;} .hero.xb .xb-m{display:block;}
   .hero.xb .xb-veil{background:linear-gradient(180deg,rgba(8,7,10,.5),rgba(8,7,10,.08) 30%%,rgba(8,7,10,.86));}
-  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100svh;padding:70px 20px 24px;gap:0;}
-  .hero.xb .xb-pbig{position:absolute;left:50%%;top:8%%;transform:translate(-50%%,-50%%);height:200px;filter:drop-shadow(0 16px 40px rgba(255,23,63,.4));}
-  .hero.xb .xb-left{padding-left:0;position:relative;z-index:5;margin-top:60px;}
-  .hero.xb .xb-left h1{font-size:52px;line-height:.86;text-shadow:0 6px 30px rgba(0,0,0,.65);}
-  .hero.xb .xb-left .xb-sub{margin:15px auto 0;max-width:300px;font-size:13.5px;}
-  .hero.xb .xb-card{position:relative;z-index:5;justify-self:auto;margin:24px auto 0;max-width:400px;width:100%%;padding:22px;text-align:left;}
-  .hero.xb .xb-chead{gap:10px;}
-  .hero.xb .xb-badges{gap:13px;}
-  .hero.xb .xb-badges .b{gap:5px;font-size:11.5px;}
-  .hero.xb .xb-badges .b svg{height:15px;}
+  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100svh;padding:56px 18px 18px;gap:0;}
+  .hero.xb .xb-pbig{position:absolute;left:33%%;top:12%%;transform:translate(-50%%,-50%%);height:196px;filter:drop-shadow(0 16px 40px rgba(255,23,63,.4));}
+  .hero.xb .xb-left{padding-left:0;position:relative;z-index:5;margin-top:34px;}
+  .hero.xb .xb-left h1{font-size:46px;line-height:.86;text-shadow:0 6px 30px rgba(0,0,0,.65);}
+  .hero.xb .xb-left .xb-sub{margin:10px auto 0;max-width:290px;font-size:12.5px;}
+  .hero.xb .xb-card{position:relative;z-index:5;justify-self:auto;margin:14px auto 0;max-width:400px;width:100%%;padding:16px;text-align:left;}
+  .hero.xb .xb-chead{gap:9px;}
+  .hero.xb .xb-badges{gap:12px;}
+  .hero.xb .xb-badges .b{gap:5px;font-size:11px;}
+  .hero.xb .xb-badges .b svg{height:14px;}
   .hero.xb .xb-crate{gap:6px;}
-  .hero.xb .xb-crate .stars{letter-spacing:1.5px;font-size:11px;}
-  .hero.xb .xb-crate .rn{font-size:16px;}
-  .hero.xb .xb-revl{font-size:11px;margin-top:7px;}
-  .hero.xb .xb-hr{margin:14px 0;}
-  .hero.xb .xb-price{font-size:42px;margin-bottom:14px;}
-  .hero.xb .xb-price s{font-size:16px;margin-right:7px;}
-  .hero.xb .xb-price small{font-size:9.5px;margin-top:5px;}
-  .hero.xb .xb-plist{gap:9px;margin:0 0 14px;}
-  .hero.xb .xb-plist li{gap:9px;font-size:13px;}
-  .hero.xb .xb-plist svg{width:15px;height:15px;}
-  .hero.xb .xb-spots{font-size:12px;margin-bottom:14px;}
-  .hero.xb .xb-rea{font-size:10.5px;margin-top:10px;}
-  .hero.xb .xb-card .btn{padding:16px;font-size:14px;}
+  .hero.xb .xb-crate .stars{letter-spacing:1.5px;font-size:10.5px;}
+  .hero.xb .xb-crate .rn{font-size:15px;}
+  .hero.xb .xb-revl{font-size:10.5px;margin-top:6px;}
+  .hero.xb .xb-hr{margin:11px 0;}
+  .hero.xb .xb-price{font-size:38px;margin-bottom:11px;}
+  .hero.xb .xb-price s{font-size:15px;margin-right:7px;}
+  .hero.xb .xb-price small{font-size:9px;margin-top:4px;}
+  .hero.xb .xb-plist{gap:8px;margin:0 0 11px;}
+  .hero.xb .xb-plist li{gap:8px;font-size:12.5px;}
+  .hero.xb .xb-plist svg{width:14px;height:14px;}
+  .hero.xb .xb-spots{font-size:11.5px;margin-bottom:11px;}
+  .hero.xb .xb-rea{font-size:10px;margin-top:8px;}
+  .hero.xb .xb-card .btn{padding:14px;font-size:13.5px;}
 }
 """ % (ANTON,MAN400,MAN700,MAN800,MONO)
 
