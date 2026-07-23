@@ -125,6 +125,8 @@ src = root/"index.html"; out = root/"index-b.html"
 html = src.read_text()
 # version B: Book/Reserve buttons use the P red (keep the gradient/shine effect)
 html = html.replace('background:linear-gradient(135deg,var(--pink),#ff5a8f 45%, var(--violet));','background:linear-gradient(135deg,#ff173f 0%,#ff4d68 50%,#d1102e 100%);')
+# version B: trust-stats strip uses the site's black instead of the purple tint
+html = html.replace('position:relative;z-index:3;background:rgba(20,16,25,0.4);','position:relative;z-index:3;background:var(--void);')
 start = html.index('<header class="hero" id="top">')
 end = html.index('</header>', start) + len('</header>')
 html = html[:start] + HERO + html[end:]
