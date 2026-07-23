@@ -104,7 +104,7 @@ HERO = '''<header class="hero xb" id="top">
     <div class="xb-pbig">__PM__</div>
     <div class="xb-left">
       <h1>The Craziest<br>Night in Porto</h1>
-      <p class="xb-sub">The guided pub crawl locals warn you about — bars, boat, club, sunrise.</p>
+      <p class="xb-sub">The guided pub crawl locals warn you about — bars, shots, club, sunrise.</p>
     </div>
     <aside class="xb-card">
       <div class="xb-chead"><div class="xb-badges"><span class="b">__GOOGLE__ <span>Google</span></span><span class="b">__TP__ <span>Trustpilot</span></span></div>
