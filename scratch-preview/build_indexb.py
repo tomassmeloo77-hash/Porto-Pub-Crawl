@@ -60,12 +60,8 @@ CSS = """
 .hero.xb .xb-card .btn{width:100%%;}
 /* ===== hide site chrome so the hero matches the P3/M5 previews ===== */
 .strip{display:none!important;}
-nav{top:0!important;background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-bottom:none!important;box-shadow:none!important;}
-nav.scrolled{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-bottom:none!important;padding:16px 0!important;}
-#nav .logo,#nav .nav-cta,#nav .hamburger,#nav .nav-mobile-cta{display:none!important;}
-#nav .nav-inner{justify-content:center;}
+#nav{display:none!important;}
 @media(max-width:920px){
-  #nav{display:none!important;}
   .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100svh;padding:90px 20px 40px;}
   .hero.xb .xb-d{display:none;} .hero.xb .xb-m{display:block;}
   .hero.xb .xb-pbig{position:static;left:auto;top:auto;transform:none;height:150px;width:auto;margin:0 auto 20px;filter:drop-shadow(0 12px 34px rgba(255,23,63,.45));}
