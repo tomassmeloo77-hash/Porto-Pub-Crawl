@@ -61,12 +61,12 @@ CSS = """
 @media(max-width:920px){
   .hero.xb .xb-d{display:none;} .hero.xb .xb-m{display:block;}
   .hero.xb .xb-veil{background:linear-gradient(180deg,rgba(8,7,10,.5),rgba(8,7,10,.08) 30%%,rgba(8,7,10,.86));}
-  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100svh;padding:56px 18px 18px;gap:0;}
-  .hero.xb .xb-pbig{position:absolute;left:33%%;top:12%%;transform:translate(-50%%,-50%%);height:196px;filter:drop-shadow(0 16px 40px rgba(255,23,63,.4));}
-  .hero.xb .xb-left{padding-left:0;position:relative;z-index:5;margin-top:34px;}
+  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;text-align:center;min-height:100svh;padding:128px 18px 18px;gap:0;}
+  .hero.xb .xb-pbig{position:absolute;left:50%%;top:-34px;transform:translateX(-50%%);height:230px;filter:drop-shadow(0 16px 40px rgba(255,23,63,.4));}
+  .hero.xb .xb-left{padding-left:0;position:relative;z-index:5;margin-top:0;}
   .hero.xb .xb-left h1{font-size:46px;line-height:.86;text-shadow:0 6px 30px rgba(0,0,0,.65);}
-  .hero.xb .xb-left .xb-sub{margin:10px auto 0;max-width:290px;font-size:12.5px;}
-  .hero.xb .xb-card{position:relative;z-index:5;justify-self:auto;margin:14px auto 0;max-width:400px;width:100%%;padding:16px;text-align:left;}
+  .hero.xb .xb-left .xb-sub{margin:12px auto 0;max-width:290px;font-size:12.5px;}
+  .hero.xb .xb-card{position:relative;z-index:5;justify-self:auto;margin:16px auto 0;max-width:400px;width:100%%;padding:16px;text-align:left;}
   .hero.xb .xb-chead{gap:9px;}
   .hero.xb .xb-badges{gap:12px;}
   .hero.xb .xb-badges .b{gap:5px;font-size:11px;}
