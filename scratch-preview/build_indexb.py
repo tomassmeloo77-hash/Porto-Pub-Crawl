@@ -62,13 +62,13 @@ CSS = """
 .strip{display:none!important;}
 #nav{display:none!important;}
 @media(max-width:920px){
-  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100svh;padding:90px 20px 40px;}
+  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;text-align:center;min-height:100svh;padding:33vh 20px 40px;}
   .hero.xb .xb-d{display:none;} .hero.xb .xb-m{display:block;}
-  .hero.xb .xb-pbig{position:static;left:auto;top:auto;transform:none;height:150px;width:auto;margin:0 auto 20px;filter:drop-shadow(0 12px 34px rgba(255,23,63,.45));}
-  .hero.xb .xb-pbig .xb-pmark{height:150px;margin:0 auto;display:block;}
-  .hero.xb .xb-left{padding-left:0;} .hero.xb .xb-left h1{font-size:52px;}
+  .hero.xb .xb-pbig{position:absolute;left:50%%;top:33%%;transform:translate(-50%%,-50%%);height:min(88vw,420px);margin:0;filter:drop-shadow(0 16px 40px rgba(255,23,63,.45));}
+  .hero.xb .xb-pbig .xb-pmark{height:100%%;margin:0 auto;display:block;}
+  .hero.xb .xb-left{padding-left:0;position:relative;z-index:5;} .hero.xb .xb-left h1{font-size:52px;}
   .hero.xb .xb-left .xb-sub{margin-left:auto;margin-right:auto;}
-  .hero.xb .xb-card{align-self:stretch;max-width:440px;margin:22px auto 0;text-align:left;}
+  .hero.xb .xb-card{align-self:stretch;max-width:440px;margin:26px auto 0;text-align:left;position:relative;z-index:5;}
 }
 """ % (ANTON,MAN400,MAN700,MAN800,MONO)
 
