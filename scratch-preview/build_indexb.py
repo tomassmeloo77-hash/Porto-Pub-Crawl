@@ -15,29 +15,28 @@ GOOGLE='<svg viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-
 TP='<svg viewBox="0 0 24 24"><path fill="#00B67A" d="M12 1.5l3.09 6.26 6.91 1-5 4.87 1.18 6.87L12 17.25l-6.18 3.25L7 13.63l-5-4.87 6.91-1L12 1.5z"/></svg>'
 CRAWL="https://book.stripe.com/cNi8wReAZ8di9m29LI4AU02"
 
+# ===== CSS copied verbatim from the P3 (desktop) and M5 (mobile) previews, scoped to .hero.xb =====
 CSS = """
-/* ===== embedded fonts (self-hosted for the B hero) ===== */
 @font-face{font-family:'Anton';src:url(%s) format('woff2');font-weight:400;font-display:swap;}
 @font-face{font-family:'Manrope';src:url(%s) format('woff2');font-weight:400;font-display:swap;}
 @font-face{font-family:'Manrope';src:url(%s) format('woff2');font-weight:700;font-display:swap;}
 @font-face{font-family:'Manrope';src:url(%s) format('woff2');font-weight:800;font-display:swap;}
 @font-face{font-family:'Space Mono';src:url(%s) format('woff2');font-weight:400;font-display:swap;}
-/* ===== new P3/M5 hero (scoped .hero.xb) ===== */
+/* hide site chrome so the hero is exactly like the previews */
+.strip{display:none!important;}
+#nav{display:none!important;}
+/* ===== P3 DESKTOP (verbatim values) ===== */
 .hero.xb{padding-top:0;}
 .hero.xb .xb-hbg{position:absolute;inset:0;width:100%%;height:100%%;object-fit:cover;z-index:0;filter:brightness(.5) saturate(1.15);}
 .hero.xb .xb-m{display:none;}
 .hero.xb .xb-veil{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(8,7,10,.55),rgba(8,7,10,.12) 42%%,rgba(8,7,10,.66));}
-.hero.xb .xb-hc{position:relative;z-index:5;width:100%%;min-height:100svh;display:grid;grid-template-columns:1fr 400px;align-items:center;gap:44px;
-  max-width:1240px;margin:0 auto;padding:110px clamp(20px,5vw,64px) 60px;}
-.hero.xb .xb-pbig{position:absolute;top:50%%;transform:translateY(-50%%);color:var(--pink);z-index:2;pointer-events:none;
-  filter:drop-shadow(0 18px 46px rgba(255,23,63,.4));height:clamp(240px,32vw,440px);left:clamp(20px,3vw,58px);}
+.hero.xb .xb-hc{position:relative;z-index:5;min-height:100svh;display:grid;grid-template-columns:1fr 400px;align-items:center;gap:44px;padding:clamp(80px,10vh,120px) clamp(24px,5vw,70px) clamp(40px,6vh,70px);}
+.hero.xb .xb-pbig{position:absolute;top:50%%;transform:translateY(-50%%);color:var(--pink);z-index:2;filter:drop-shadow(0 18px 46px rgba(255,23,63,.4));pointer-events:none;height:clamp(240px,32vw,440px);left:clamp(20px,3vw,58px);}
 .hero.xb .xb-pmark{display:block;height:100%%;width:auto;}
-.hero.xb .xb-left{position:relative;z-index:5;padding-left:clamp(40px,9vw,170px);text-align:left;}
-.hero.xb .xb-left h1{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.005em;
-  font-size:clamp(46px,6.2vw,100px);line-height:.84;color:#fff;text-shadow:0 6px 30px rgba(0,0,0,.55);margin:0;}
-.hero.xb .xb-left .xb-sub{margin-top:22px;max-width:440px;font-size:clamp(15px,1.5vw,18px);color:#eceaeb;font-weight:500;}
-.hero.xb .xb-card{background:linear-gradient(180deg,rgba(20,16,23,.93),rgba(8,7,10,.96));border:1px solid var(--line-strong);
-  border-radius:20px;padding:26px;backdrop-filter:blur(16px);box-shadow:0 40px 100px -35px rgba(0,0,0,.95);justify-self:end;width:100%%;display:flex;flex-direction:column;}
+.hero.xb .xb-left{position:relative;z-index:5;padding-left:clamp(58px,10vw,180px);text-align:left;}
+.hero.xb .xb-left h1{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.005em;color:#fff;line-height:.84;font-size:clamp(46px,6.4vw,104px);text-shadow:0 6px 30px rgba(0,0,0,.55);margin:0;}
+.hero.xb .xb-left .xb-sub{margin-top:24px;max-width:440px;font-size:clamp(15px,1.5vw,18px);color:#eceaeb;font-weight:500;}
+.hero.xb .xb-card{background:linear-gradient(180deg,rgba(20,16,23,.93),rgba(8,7,10,.96));border:1px solid var(--line-strong);border-radius:20px;padding:26px;backdrop-filter:blur(16px);box-shadow:0 40px 100px -35px rgba(0,0,0,.95);justify-self:end;width:100%%;display:flex;flex-direction:column;}
 .hero.xb .xb-chead{display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .hero.xb .xb-badges{display:inline-flex;align-items:center;gap:16px;}
 .hero.xb .xb-badges .b{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--cream);}
@@ -58,17 +57,34 @@ CSS = """
 @keyframes xbpd{0%%,100%%{opacity:1;transform:scale(1)}50%%{opacity:.4;transform:scale(.7)}}
 .hero.xb .xb-rea{text-align:center;font-size:11px;color:var(--muted-2);margin-top:12px;}
 .hero.xb .xb-card .btn{width:100%%;}
-/* ===== hide site chrome so the hero matches the P3/M5 previews ===== */
-.strip{display:none!important;}
-#nav{display:none!important;}
+/* ===== M5 MOBILE (verbatim values) ===== */
 @media(max-width:920px){
-  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;text-align:center;min-height:100svh;padding:33vh 20px 40px;}
   .hero.xb .xb-d{display:none;} .hero.xb .xb-m{display:block;}
-  .hero.xb .xb-pbig{position:absolute;left:50%%;top:33%%;transform:translate(-50%%,-50%%);height:min(88vw,420px);margin:0;filter:drop-shadow(0 16px 40px rgba(255,23,63,.45));}
-  .hero.xb .xb-pbig .xb-pmark{height:100%%;margin:0 auto;display:block;}
-  .hero.xb .xb-left{padding-left:0;position:relative;z-index:5;} .hero.xb .xb-left h1{font-size:52px;}
-  .hero.xb .xb-left .xb-sub{margin-left:auto;margin-right:auto;}
-  .hero.xb .xb-card{align-self:stretch;max-width:440px;margin:26px auto 0;text-align:left;position:relative;z-index:5;}
+  .hero.xb .xb-veil{background:linear-gradient(180deg,rgba(8,7,10,.5),rgba(8,7,10,.08) 30%%,rgba(8,7,10,.85));}
+  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100svh;padding:74px 20px 26px;}
+  .hero.xb .xb-pbig{position:absolute;left:50%%;top:38%%;transform:translate(-50%%,-50%%);height:min(86vw,430px);filter:drop-shadow(0 16px 40px rgba(255,23,63,.4));}
+  .hero.xb .xb-left{padding-left:0;position:relative;z-index:5;}
+  .hero.xb .xb-left h1{font-size:54px;line-height:.86;}
+  .hero.xb .xb-left .xb-sub{margin:16px auto 0;max-width:300px;font-size:14px;}
+  .hero.xb .xb-card{position:relative;z-index:5;justify-self:auto;margin:26px auto 0;max-width:400px;width:100%%;padding:22px;text-align:left;}
+  .hero.xb .xb-chead{gap:10px;}
+  .hero.xb .xb-badges{gap:13px;}
+  .hero.xb .xb-badges .b{gap:5px;font-size:11.5px;}
+  .hero.xb .xb-badges .b svg{height:15px;}
+  .hero.xb .xb-crate{gap:6px;}
+  .hero.xb .xb-crate .stars{letter-spacing:1.5px;font-size:11px;}
+  .hero.xb .xb-crate .rn{font-size:16px;}
+  .hero.xb .xb-revl{font-size:11px;margin-top:7px;}
+  .hero.xb .xb-hr{margin:14px 0;}
+  .hero.xb .xb-price{font-size:42px;margin-bottom:14px;}
+  .hero.xb .xb-price s{font-size:16px;margin-right:7px;}
+  .hero.xb .xb-price small{font-size:9.5px;margin-top:5px;}
+  .hero.xb .xb-plist{gap:9px;margin:0 0 14px;}
+  .hero.xb .xb-plist li{gap:9px;font-size:13px;}
+  .hero.xb .xb-plist svg{width:15px;height:15px;}
+  .hero.xb .xb-spots{font-size:12px;margin-bottom:14px;}
+  .hero.xb .xb-rea{font-size:10.5px;margin-top:10px;}
+  .hero.xb .xb-card .btn{padding:16px;font-size:14px;}
 }
 """ % (ANTON,MAN400,MAN700,MAN800,MONO)
 
@@ -100,12 +116,10 @@ HERO=HERO.replace("__PM__",PM).replace("__GOOGLE__",GOOGLE).replace("__TP__",TP)
 
 src = root/"index.html"; out = root/"index-b.html"
 html = src.read_text()
-# replace hero block
 start = html.index('<header class="hero" id="top">')
 end = html.index('</header>', start) + len('</header>')
 html = html[:start] + HERO + html[end:]
-# inject css before first </style>
 i = html.index('</style>')
 html = html[:i] + CSS + html[i:]
 out.write_text(html)
-print("index-b.html regenerated;", round(len(html)/1024), "KB")
+print("index-b.html regenerated (verbatim P3/M5);", round(len(html)/1024), "KB")
