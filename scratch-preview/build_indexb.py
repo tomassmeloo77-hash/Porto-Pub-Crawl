@@ -61,19 +61,19 @@ CSS = """
 /* ===== M5 MOBILE (verbatim values) ===== */
 @media(max-width:920px){
   .hero.xb .xb-d{display:none;} .hero.xb .xb-m{display:block;}
-  .hero.xb .xb-veil{background:linear-gradient(180deg,rgba(8,7,10,.5) 0%%,rgba(8,7,10,.06) 24%%,rgba(8,7,10,.06) 50%%,rgba(8,7,10,.9) 100%%);}
+  .hero.xb .xb-veil{background:linear-gradient(180deg,rgba(8,7,10,.5),rgba(8,7,10,.08) 30%%,rgba(8,7,10,.86));}
   .hero.xb .xb-hbg{height:100%%;bottom:0;}
-  .hero.xb .xb-hc{display:flex;flex-direction:column;align-items:center;text-align:center;min-height:100svh;padding:24px 16px 26px;gap:0;}
-  .hero.xb .xb-stage{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1 1 auto;width:100%%;box-sizing:border-box;padding:0 4px;overflow:hidden;}
-  .hero.xb .xb-pbig{position:static;transform:none;height:230px;margin:0;filter:drop-shadow(0 16px 44px rgba(255,23,63,.45));}
-  .hero.xb .xb-left{width:100%%;box-sizing:border-box;padding:0;margin-top:-86px;position:relative;z-index:5;display:block;}
+  .hero.xb .xb-stage{display:contents;}
+  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:flex-start;align-items:center;text-align:center;min-height:100svh;padding:110px 16px 20px;gap:0;}
+  .hero.xb .xb-pbig{position:absolute;left:50%%;top:-26px;transform:translateX(-50%%);height:230px;margin:0;filter:drop-shadow(0 16px 44px rgba(255,23,63,.45));}
+  .hero.xb .xb-left{width:100%%;box-sizing:border-box;padding:0;margin-top:0;position:relative;z-index:5;display:block;}
   .hero.xb .xb-left h1{font-size:48px;line-height:.86;text-shadow:0 6px 30px rgba(0,0,0,.65);}
   .hero.xb .xb-left .xb-sub{margin:11px auto 0;max-width:300px;font-size:12.5px;}
-  .hero.xb .xb-card{position:relative;z-index:5;flex:none;background:none;border:none;box-shadow:none;backdrop-filter:none;margin:0 auto;max-width:430px;width:100%%;padding:0;text-align:left;text-shadow:0 2px 14px rgba(0,0,0,.8);}
+  .hero.xb .xb-card{position:relative;z-index:5;justify-self:auto;margin:24px auto 0;max-width:420px;width:100%%;padding:16px 16px 18px;text-align:left;}
   .hero.xb .xb-hr{display:none;}
   .hero.xb .xb-price{display:none;}
   .hero.xb .xb-plist{display:none;}
-  .hero.xb .xb-spots{margin:0 0 12px;justify-content:flex-start;}
+  .hero.xb .xb-spots{margin:2px 0 12px;justify-content:flex-start;}
   .hero.xb .xb-chead{gap:9px;}
   .hero.xb .xb-badges{gap:12px;}
   .hero.xb .xb-badges .b{gap:5px;font-size:11px;}
