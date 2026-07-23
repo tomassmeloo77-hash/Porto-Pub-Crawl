@@ -18,9 +18,9 @@ PM='<svg class="pmark" viewBox="0 0 1021 838" xmlns="http://www.w3.org/2000/svg"
 
 # panel WITHOUT the P mark (text wordmark instead)
 PANEL=r"""<aside class="panel">
-  <div class="ptop"><div class="wmk">Porto <span>Pub Crawl</span></div>
+  <div class="ptop">
     <div class="rate"><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span><br><b>4.9</b> · 1,327+</div></div>
-  <div class="price"><span><s>&euro;20</s>&euro;17</span><small>per person · tonight</small></div>
+  <div class="price"><span><s>&euro;20</s>&euro;17</span><small>per person</small></div>
   <ul class="plist">
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>9 free drinks — beer, sangria &amp; shots</li>
     <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>VIP entry · 4 bars + 1 nightclub</li>
@@ -77,7 +77,7 @@ h1{font-family:var(--disp);font-weight:400;text-transform:uppercase;letter-spaci
 .panel{background:linear-gradient(180deg,rgba(20,16,23,.92),rgba(8,7,10,.95));border:1px solid var(--line-strong);
   border-radius:20px;padding:24px;backdrop-filter:blur(16px);box-shadow:0 40px 100px -35px rgba(0,0,0,.95);justify-self:end;width:100%;}
 @media(max-width:920px){.panel{justify-self:stretch;max-width:440px;margin:0 auto;}}
-.panel .ptop{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.panel .ptop{display:flex;justify-content:flex-end;align-items:center;margin-bottom:16px;}
 .panel .wmk{font-family:var(--body);font-weight:800;font-size:14px;letter-spacing:.01em;color:var(--cream);line-height:1.15;text-transform:uppercase;}
 .panel .wmk span{display:block;color:var(--muted);font-weight:700;font-size:11px;letter-spacing:.14em;}
 .panel .rate{text-align:right;font-size:12px;color:var(--muted);line-height:1.35;}.panel .rate b{color:var(--cream);}
@@ -107,7 +107,7 @@ h1{font-family:var(--disp);font-weight:400;text-transform:uppercase;letter-spaci
 /* D4 — P bleeds off left edge */
 .d4 .hc{overflow:visible;}
 .d4 .bleed{position:absolute;left:calc(-1*clamp(24px,5vw,70px) - clamp(20px,3vw,60px));top:50%;transform:translateY(-50%);
-  height:clamp(240px,42vw,560px);color:var(--pink);opacity:.9;filter:drop-shadow(0 20px 50px rgba(255,23,63,.4));z-index:2;}
+  height:clamp(215px,37vw,500px);color:var(--pink);opacity:.9;filter:drop-shadow(0 20px 50px rgba(255,23,63,.4));z-index:2;}
 .d4 .bleed .pmark{height:100%;}
 .d4 .left{padding-left:clamp(90px,14vw,240px);z-index:5;}
 .d4 h1{font-size:clamp(46px,6.4vw,104px);line-height:.82;}
