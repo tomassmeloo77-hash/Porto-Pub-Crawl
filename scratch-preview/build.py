@@ -16,10 +16,10 @@ MAN800  = font_uri(fdir/"@fontsource/manrope/files/manrope-latin-800-normal.woff
 MONO400 = font_uri(fdir/"@fontsource/space-mono/files/space-mono-latin-400-normal.woff2")
 MONO700 = font_uri(fdir/"@fontsource/space-mono/files/space-mono-latin-700-normal.woff2")
 
-# real, authentic crawl photos
-WIDE    = img_uri(adir/"hero-photo-960w.webp")        # landscape group — full bleed
-FRIENDS = img_uri(adir/"photo-groupfriends.webp")     # women drinking, portrait
-CLUB    = img_uri(adir/"photo-shots-friends.webp")    # couple laughing, club, portrait
+# real crawl footage (user-uploaded): horizontal desktop + vertical mobile
+VIDEO_D = "data:video/mp4;base64," + b64(base/"hero-desktop-prev.mp4")
+VIDEO_M = "data:video/mp4;base64," + b64(base/"hero-mobile-prev.mp4")
+POSTER  = img_uri(base/"hero-poster.webp")
 
 html = r"""<style>
 @font-face{font-family:'Anton';src:url(__ANTON__) format('woff2');font-weight:400;font-display:swap;}
@@ -118,7 +118,7 @@ a{color:inherit;text-decoration:none;}
 .vB .kick{font-family:var(--mono);font-size:clamp(11px,1.4vw,14px);letter-spacing:.34em;text-transform:uppercase;color:var(--pink-soft);}
 .vB .mask{font-family:var(--disp);text-transform:uppercase;line-height:.8;letter-spacing:.01em;
   font-size:clamp(96px,26vw,420px);margin:0;
-  background-image:url(__FRIENDS__);background-size:cover;background-position:center 30%;
+  background-image:url(__POSTER__);background-size:cover;background-position:center 30%;
   -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
   filter:brightness(1.18) contrast(1.05) saturate(1.1);}
 .vB .maskline2{color:#fff;-webkit-text-fill-color:#fff;background:none;}
@@ -213,13 +213,13 @@ a{color:inherit;text-decoration:none;}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;}}
 </style>
 
-<div class="tagline">Porto Pub Crawl · <b id="tl">A · Conversion split</b> · fotos reais · preview</div>
+<div class="tagline">Porto Pub Crawl · <b id="tl">A · Conversion split</b> · vídeo real · preview</div>
 
 <div class="deck">
   <!-- A -->
   <section class="slide active vA" data-name="A · Conversion split">
     <div class="hero">
-      <img class="hbg kb" data-photo="wide" alt="">
+      <video class="hbg herovid" data-vid="desk" muted loop autoplay playsinline></video>
       <div class="veil"></div><div class="grain"></div>
       <div class="wrap">
         <div class="copy">
@@ -285,7 +285,7 @@ a{color:inherit;text-decoration:none;}
           </div>
         </div>
         <div class="frame">
-          <img class="hbg kb" data-photo="club" alt="">
+          <video class="hbg herovid" data-vid="desk" muted loop autoplay playsinline></video>
           <div class="grain"></div>
           <div class="cap"><span class="live"><span class="dot"></span> Shot last Saturday</span><span>Porto, PT</span></div>
         </div>
@@ -307,7 +307,7 @@ a{color:inherit;text-decoration:none;}
         <div class="trust"><span><span class="stars">★★★★★</span> <b>4.9</b></span><span><b>10K+</b> crawlers</span><span><b>60+</b> countries</span></div>
       </div>
       <div class="phone">
-        <img class="hbg" data-photo="friends" alt="">
+        <video class="hbg herovid" data-vid="mob" muted loop autoplay playsinline></video>
         <div class="bars"><i class="on"></i><i></i><i></i></div>
         <div class="handle"><span>P</span> portopubcrawl</div>
         <div class="ov"></div>
@@ -333,16 +333,27 @@ a{color:inherit;text-decoration:none;}
 </nav>
 
 <script>
-  var PHOTOS={wide:"__WIDE__",friends:"__FRIENDS__",club:"__CLUB__"};
-  document.querySelectorAll('img.hbg[data-photo]').forEach(function(im){ im.src=PHOTOS[im.dataset.photo]; });
+  var VIDEOS={desk:"__VIDEO_D__",mob:"__VIDEO_M__"}, POSTER="__POSTER__";
+  document.querySelectorAll('video.herovid[data-vid]').forEach(function(v){
+    v.poster=POSTER; v.src=VIDEOS[v.dataset.vid]; v.muted=true; v.setAttribute('playsinline','');
+  });
   var slides=[].slice.call(document.querySelectorAll('.slide'));
   var btns=[].slice.call(document.querySelectorAll('.switch button'));
   var tl=document.getElementById('tl'); var cur=0;
+  function playActive(){
+    slides.forEach(function(s,i){
+      s.querySelectorAll('video').forEach(function(v){
+        if(i===cur){var p=v.play();if(p&&p.catch)p.catch(function(){});}
+        else{try{v.pause();}catch(e){}}
+      });
+    });
+  }
   function go(i){
     cur=(i+slides.length)%slides.length;
     slides.forEach(function(s,k){s.classList.toggle('active',k===cur);});
     btns.forEach(function(b,k){b.classList.toggle('on',k===cur);});
     tl.textContent=slides[cur].dataset.name;
+    playActive();
   }
   btns.forEach(function(b){b.addEventListener('click',function(){go(+b.dataset.i);});});
   document.querySelector('.arrow.prev').addEventListener('click',function(){go(cur-1);});
@@ -352,11 +363,12 @@ a{color:inherit;text-decoration:none;}
     else if(e.key==='ArrowLeft')go(cur-1);
     else if(e.key>='1'&&e.key<='4')go(+e.key-1);
   });
+  playActive();
 </script>
 """
 
 repl={"__ANTON__":ANTON,"__MAN400__":MAN400,"__MAN700__":MAN700,"__MAN800__":MAN800,
-  "__MONO400__":MONO400,"__MONO700__":MONO700,"__WIDE__":WIDE,"__FRIENDS__":FRIENDS,"__CLUB__":CLUB}
+  "__MONO400__":MONO400,"__MONO700__":MONO700,"__VIDEO_D__":VIDEO_D,"__VIDEO_M__":VIDEO_M,"__POSTER__":POSTER}
 for k,v in repl.items(): html=html.replace(k,v)
 
 out=base/"hero-preview.html"; out.write_text(html)
