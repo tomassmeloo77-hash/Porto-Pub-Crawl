@@ -123,6 +123,8 @@ HERO=HERO.replace("__PM__",PM).replace("__GOOGLE__",GOOGLE).replace("__TP__",TP)
 
 src = root/"index.html"; out = root/"index-b.html"
 html = src.read_text()
+# version B: Book/Reserve buttons use the P red (keep the gradient/shine effect)
+html = html.replace('background:linear-gradient(135deg,var(--pink),#ff5a8f 45%, var(--violet));','background:linear-gradient(135deg,#ff173f 0%,#ff4d68 50%,#d1102e 100%);')
 start = html.index('<header class="hero" id="top">')
 end = html.index('</header>', start) + len('</header>')
 html = html[:start] + HERO + html[end:]
