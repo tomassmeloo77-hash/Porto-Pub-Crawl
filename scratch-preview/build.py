@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-import pathlib
+import base64, pathlib
 
 base = pathlib.Path("/home/user/Porto-Pub-Crawl/scratch-preview")
-def uri(name): return (base / name).read_text().strip()
 
-HERO = uri("img_hero.txt")
-BOAT = uri("img_boat.txt")
-CLUB = uri("img_club.txt")
-FRIENDS = uri("img_friends.txt")
-VODKA = uri("img_vodka.txt")
+VIDEO = "data:video/mp4;base64," + base64.b64encode((base/"hero-video.mp4").read_bytes()).decode()
+POSTER = "data:image/webp;base64," + base64.b64encode((base/"hero-poster.webp").read_bytes()).decode()
 
 html = r"""<style>
 :root{
@@ -123,7 +119,7 @@ a{color:inherit;text-decoration:none;}
 .v2 .fact b{font-family:var(--disp);font-weight:400;font-size:26px;color:var(--gold);display:block;line-height:1;}
 .v2 .fact span{font-size:11px;color:var(--muted-2);letter-spacing:.04em;}
 .v2 .right{position:relative;overflow:hidden;}
-.v2 .right img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.12) contrast(1.03);}
+.v2 .right .hbg{filter:saturate(1.12) contrast(1.03);}
 .v2 .right::after{content:"";position:absolute;inset:0;background:linear-gradient(200deg,transparent 55%,rgba(8,7,10,.5));}
 .v2 .badge{position:absolute;z-index:3;bottom:22px;left:22px;background:var(--pink);color:#fff;
   font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;padding:8px 14px;border-radius:100px;
@@ -165,10 +161,10 @@ a{color:inherit;text-decoration:none;}
 .v4 .type .l.out{color:transparent;-webkit-text-stroke:1.6px rgba(245,244,242,.55);}
 .v4 .type .l.fill{color:var(--pink);}
 .v4 .photo{position:absolute;z-index:2;right:clamp(20px,4vw,70px);top:50%;transform:translateY(-50%);
-  width:clamp(180px,30vw,380px);aspect-ratio:3/4;border-radius:14px;overflow:hidden;
+  width:clamp(180px,26vw,330px);aspect-ratio:9/16;border-radius:14px;overflow:hidden;
   border:1px solid var(--line-strong);box-shadow:0 30px 70px -25px rgba(0,0,0,.9);}
-.v4 .photo img{width:100%;height:100%;object-fit:cover;filter:saturate(1.15) contrast(1.05);}
-@media(max-width:720px){.v4 .photo{position:static;transform:none;margin:20px 0 0;width:100%;aspect-ratio:16/10;}}
+.v4 .photo .hbg{filter:saturate(1.15) contrast(1.05);}
+@media(max-width:720px){.v4 .photo{position:static;transform:none;margin:20px 0 0;width:100%;aspect-ratio:16/12;}}
 .v4 .lead{position:relative;z-index:3;margin-top:24px;max-width:420px;color:var(--muted);font-size:15px;}
 .v4 .lead .cta{margin-top:20px;}
 .v4 .marquee{overflow:hidden;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
@@ -202,8 +198,8 @@ a{color:inherit;text-decoration:none;}
 .v5 .detail .d span{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted-2);}
 .v5 .stub{position:relative;background:var(--void);overflow:hidden;display:flex;flex-direction:column;
   border-left:2px dashed var(--line-strong);}
-.v5 .stub img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.7) saturate(1.15);}
-.v5 .stub .ov{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,7,10,.2),rgba(8,7,10,.85));}
+.v5 .stub .hbg{filter:brightness(.7) saturate(1.15);}
+.v5 .stub .ov{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(8,7,10,.2),rgba(8,7,10,.85));}
 .v5 .stub .inner{position:relative;z-index:2;margin-top:auto;padding:22px;text-align:center;}
 .v5 .stub .price{font-family:var(--disp);font-size:38px;color:#fff;line-height:1;}
 .v5 .stub .price s{color:var(--muted-2);font-size:18px;-webkit-text-decoration-color:var(--pink);text-decoration-color:var(--pink);}
@@ -234,8 +230,8 @@ a{color:inherit;text-decoration:none;}
 </header>
 
 <section class="intro">
-  <p>Five fresh takes on the homepage hero — each keeps your existing brand (void-black ground, the <b style="color:var(--pink)">#ff173f</b> pink-red, gold accents, party energy) but explores a different layout, mood and structure. All are static mockups — <b style="color:var(--cream)">nothing on the live site was changed.</b></p>
-  <p class="note">Note: real fonts (Anton / Manrope) can't load inside this sandbox, so display type falls back to a condensed system face. Colours, layout, spacing and motion are accurate to how it would ship.</p>
+  <p>Five fresh takes on the homepage hero — now running your uploaded party video as the moving backdrop. Each keeps your existing brand (void-black ground, the <b style="color:var(--pink)">#ff173f</b> pink-red, gold accents, party energy) but explores a different layout, mood and structure. All are static mockups — <b style="color:var(--cream)">nothing on the live site was changed.</b></p>
+  <p class="note">Note: real fonts (Anton / Manrope) can't load inside this sandbox, so display type falls back to a condensed system face. Colours, layout, spacing, motion and the video are accurate to how it would ship. The clip is muted &amp; looping (autoplay requires muted).</p>
 </section>
 
 <!-- ===================== V1 ===================== -->
@@ -243,11 +239,11 @@ a{color:inherit;text-decoration:none;}
   <div class="v-label">
     <span class="v-num">01</span>
     <span class="v-name">Cinematic — bottom-weighted</span>
-    <span class="v-desc">Full-bleed film still with the headline anchored bottom-left like a movie poster. A live "spots left" chip floats top-right. Feels premium and editorial rather than centred.</span>
+    <span class="v-desc">Full-bleed video with the headline anchored bottom-left like a movie poster. A live "spots left" chip floats top-right. Feels premium and editorial rather than centred.</span>
   </div>
   <div class="frame v1">
     <div class="hero">
-      <img class="hbg" src="__HERO__" alt="">
+      <video class="hbg herovid" muted loop autoplay playsinline></video>
       <div class="grad"></div>
       <div class="chip"><span class="dot"></span> 7 spots left · tonight</div>
       <div class="hcontent">
@@ -268,8 +264,8 @@ a{color:inherit;text-decoration:none;}
 <section class="variant" id="v2">
   <div class="v-label">
     <span class="v-num">02</span>
-    <span class="v-name">Split poster — type meets photo</span>
-    <span class="v-desc">A 50/50 magazine split: outlined display type and hard facts on the left, a saturated crowd photo with a "book tonight" badge on the right. Confident and structured.</span>
+    <span class="v-name">Split poster — type meets video</span>
+    <span class="v-desc">A 50/50 magazine split: outlined display type and hard facts on the left, the party video playing on the right with a "book tonight" badge. Confident and structured.</span>
   </div>
   <div class="frame v2">
     <div class="hero">
@@ -288,7 +284,7 @@ a{color:inherit;text-decoration:none;}
         </div>
       </div>
       <div class="right">
-        <img src="__FRIENDS__" alt="">
+        <video class="hbg herovid" muted loop autoplay playsinline></video>
         <span class="badge">● Book tonight</span>
       </div>
     </div>
@@ -300,11 +296,11 @@ a{color:inherit;text-decoration:none;}
   <div class="v-label">
     <span class="v-num">03</span>
     <span class="v-name">Neon glass flyer</span>
-    <span class="v-desc">A blurred club backdrop behind a glowing glass card — like a nightclub flyer. Focus lands on one headline and one action. Great for conversion.</span>
+    <span class="v-desc">The video blurred behind a glowing glass card — like a nightclub flyer. Focus lands on one headline and one action. Great for conversion.</span>
   </div>
   <div class="frame v3">
     <div class="hero">
-      <img class="hbg" src="__CLUB__" alt="">
+      <video class="hbg herovid" muted loop autoplay playsinline></video>
       <div class="grad"></div>
       <div class="hcontent">
         <div class="card">
@@ -326,7 +322,7 @@ a{color:inherit;text-decoration:none;}
   <div class="v-label">
     <span class="v-num">04</span>
     <span class="v-name">Oversized type + marquee</span>
-    <span class="v-desc">Type-forward and loud: a giant outline/fill headline with a tall photo tucked to the side, capped by a scrolling pink ticker. The most "brand statement" of the five.</span>
+    <span class="v-desc">Type-forward and loud: a giant outline/fill headline with the vertical video tucked to the side, capped by a scrolling pink ticker. The most "brand statement" of the five — and the portrait clip fits the slot perfectly.</span>
   </div>
   <div class="frame v4">
     <div class="hero">
@@ -336,7 +332,7 @@ a{color:inherit;text-decoration:none;}
           <div class="l fill">Never</div>
           <div class="l">Sleeps</div>
         </div>
-        <div class="photo"><img src="__VODKA__" alt=""></div>
+        <div class="photo"><video class="hbg herovid" muted loop autoplay playsinline></video></div>
         <div class="lead">
           <p>The guided pub crawl locals warn you about. Five venues, one host, endless shots.</p>
           <div class="cta"><a class="btn btn-primary">Reserve My Spot →</a></div>
@@ -357,7 +353,7 @@ a{color:inherit;text-decoration:none;}
   <div class="v-label">
     <span class="v-num">05</span>
     <span class="v-name">Event ticket / wristband</span>
-    <span class="v-desc">The hero <em>is</em> the product: a tear-off event ticket with an ADMIT ONE stub, price and barcode. Playful, unmistakably an event, and it makes booking the obvious next move.</span>
+    <span class="v-desc">The hero <em>is</em> the product: a tear-off event ticket with an ADMIT ONE stub — now with the video playing inside the stub — plus price and barcode. Playful and unmistakably an event.</span>
   </div>
   <div class="frame v5">
     <div class="hero">
@@ -375,7 +371,7 @@ a{color:inherit;text-decoration:none;}
         </div>
         <div class="stub">
           <span class="perf-top"></span><span class="perf-bot"></span>
-          <img src="__BOAT__" alt="">
+          <video class="hbg herovid" muted loop autoplay playsinline></video>
           <div class="ov"></div>
           <div class="inner">
             <div class="price"><s>€35</s> €25</div>
@@ -390,15 +386,22 @@ a{color:inherit;text-decoration:none;}
 <footer class="foot">
   5 hero concepts · Porto Pub Crawl · <b>preview only — live site untouched</b>
 </footer>
+
+<script>
+  var HEROVID = "__VIDEO__";
+  var POSTER = "__POSTER__";
+  document.querySelectorAll('video.herovid').forEach(function(v){
+    v.poster = POSTER;
+    v.src = HEROVID;
+    v.muted = true;
+    var p = v.play();
+    if(p && p.catch){ p.catch(function(){}); }
+  });
+</script>
 """
 
-html = (html
-  .replace("__HERO__", HERO)
-  .replace("__FRIENDS__", FRIENDS)
-  .replace("__CLUB__", CLUB)
-  .replace("__VODKA__", VODKA)
-  .replace("__BOAT__", BOAT))
+html = html.replace("__VIDEO__", VIDEO).replace("__POSTER__", POSTER)
 
 out = base / "hero-preview.html"
 out.write_text(html)
-print("wrote", out, len(html), "bytes")
+print("wrote", out, round(len(html)/1024), "KB")
