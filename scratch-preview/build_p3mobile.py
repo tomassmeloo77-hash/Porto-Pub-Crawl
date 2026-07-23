@@ -31,7 +31,8 @@ video{display:block;}
 .hero{position:relative;height:100%;min-height:100svh;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding:74px 20px 26px;}
 .hbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(.5) saturate(1.15);}
 .veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(8,7,10,.5),rgba(8,7,10,.08) 30%,rgba(8,7,10,.85));}
-.pbig{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);height:min(82vw,440px);color:var(--pink);opacity:.16;z-index:2;}
+.pbig{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);height:min(86vw,430px);color:var(--pink);z-index:2;
+  filter:drop-shadow(0 16px 40px rgba(255,23,63,.4));}
 .pbig .pmark{height:100%;width:auto;display:block;}
 .hc{position:relative;z-index:5;text-align:center;display:flex;flex-direction:column;align-items:center;}
 h1{font-family:var(--disp);font-weight:400;text-transform:uppercase;letter-spacing:.005em;color:#fff;line-height:.86;font-size:54px;text-shadow:0 6px 30px rgba(0,0,0,.6);}
