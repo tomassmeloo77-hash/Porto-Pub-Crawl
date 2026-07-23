@@ -65,7 +65,7 @@ CSS = """
   .hero.xb .xb-hbg{height:100%%;bottom:0;}
   .hero.xb .xb-stage{display:contents;}
   .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100svh;padding:0 16px;position:relative;gap:0;}
-  .hero.xb .xb-pbig{position:absolute;left:2px;top:50%%;height:232px;margin:0;transform:translateY(calc(-50%% - 38px));z-index:2;filter:drop-shadow(0 16px 44px rgba(255,23,63,.45));}
+  .hero.xb .xb-pbig{position:absolute;left:10px;top:50%%;height:268px;margin:0;transform:translateY(calc(-50%% - 38px));z-index:2;filter:drop-shadow(0 16px 44px rgba(255,23,63,.45));}
   .hero.xb .xb-left{width:100%%;box-sizing:border-box;padding:0;margin:0;position:relative;z-index:5;display:block;text-align:center;transform:translateY(-46px);}
   .hero.xb .xb-left h1{font-size:58px;line-height:.85;text-shadow:0 6px 30px rgba(0,0,0,.65);}
   .hero.xb .xb-left .xb-sub{margin:12px auto 0;max-width:300px;font-size:12.5px;}
