@@ -3,12 +3,11 @@ import base64, pathlib
 
 base = pathlib.Path("/home/user/Porto-Pub-Crawl/scratch-preview")
 fdir = base/"fonts"/"node_modules"
+adir = base.parent/"assets"
 
 def b64(p): return base64.b64encode(pathlib.Path(p).read_bytes()).decode()
 def font_uri(p): return "data:font/woff2;base64," + b64(p)
-
-VIDEO = "data:video/mp4;base64," + b64(base/"hero-video-hq.mp4")
-POSTER = "data:image/webp;base64," + b64(base/"hero-poster.webp")
+def img_uri(p): return "data:image/webp;base64," + b64(p)
 
 ANTON   = font_uri(fdir/"@fontsource/anton/files/anton-latin-400-normal.woff2")
 MAN400  = font_uri(fdir/"@fontsource/manrope/files/manrope-latin-400-normal.woff2")
@@ -16,6 +15,11 @@ MAN700  = font_uri(fdir/"@fontsource/manrope/files/manrope-latin-700-normal.woff
 MAN800  = font_uri(fdir/"@fontsource/manrope/files/manrope-latin-800-normal.woff2")
 MONO400 = font_uri(fdir/"@fontsource/space-mono/files/space-mono-latin-400-normal.woff2")
 MONO700 = font_uri(fdir/"@fontsource/space-mono/files/space-mono-latin-700-normal.woff2")
+
+# real, authentic crawl photos
+WIDE    = img_uri(adir/"hero-photo-960w.webp")        # landscape group — full bleed
+FRIENDS = img_uri(adir/"photo-groupfriends.webp")     # women drinking, portrait
+CLUB    = img_uri(adir/"photo-shots-friends.webp")    # couple laughing, club, portrait
 
 html = r"""<style>
 @font-face{font-family:'Anton';src:url(__ANTON__) format('woff2');font-weight:400;font-display:swap;}
@@ -46,11 +50,12 @@ a{color:inherit;text-decoration:none;}
 .slide{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .55s ease;z-index:1;}
 .slide.active{opacity:1;visibility:visible;z-index:2;}
 .hero{position:absolute;inset:0;overflow:hidden;background:var(--void);}
-.hbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-/* cinematic grade so phone footage reads as intentional */
-.hbg{filter:brightness(.66) saturate(1.14) contrast(1.05);}
-.grain{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.5;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");}
+.hbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(.72) saturate(1.12) contrast(1.04);}
+/* slow ken-burns so a still photo feels alive */
+.slide.active .hbg.kb{animation:kb 18s ease-in-out infinite alternate;}
+@keyframes kb{from{transform:scale(1.03);}to{transform:scale(1.12);}}
+.grain{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:.4;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-family:var(--body);font-weight:800;
   font-size:15px;letter-spacing:.01em;padding:16px 28px;border-radius:100px;cursor:pointer;
@@ -66,15 +71,11 @@ a{color:inherit;text-decoration:none;}
 .container{width:100%;max-width:1240px;margin:0 auto;padding:0 clamp(22px,5vw,72px);}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--lime);box-shadow:0 0 12px var(--lime);animation:pulse 1.8s infinite;flex:none;}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(.65);}}
-.gsvg{width:15px;height:15px;flex:none;}
 
-/* ============================================================
-   A — CONVERSION SPLIT (video + live booking panel)
-   ============================================================ */
-.vA .hero{display:grid;grid-template-columns:1fr;}
-.vA .hbg{object-position:center 40%;}
+/* ===== A — CONVERSION SPLIT ===== */
+.vA .hbg{object-position:center 34%;}
 .vA .veil{position:absolute;inset:0;z-index:1;background:
-  linear-gradient(90deg,rgba(5,4,6,.9) 0%,rgba(5,4,6,.55) 42%,rgba(5,4,6,.25) 70%,rgba(5,4,6,.55) 100%),
+  linear-gradient(90deg,rgba(5,4,6,.92) 0%,rgba(5,4,6,.6) 40%,rgba(5,4,6,.25) 68%,rgba(5,4,6,.55) 100%),
   linear-gradient(0deg,rgba(5,4,6,.7),transparent 45%);}
 .vA .wrap{position:relative;z-index:5;height:100%;display:grid;grid-template-columns:1.15fr .85fr;align-items:center;
   gap:40px;padding:clamp(80px,10vh,120px) clamp(24px,5vw,80px) clamp(40px,6vh,70px);}
@@ -91,7 +92,6 @@ a{color:inherit;text-decoration:none;}
 .vA .socialrow .av span{width:30px;height:30px;border-radius:50%;border:2px solid var(--void);margin-left:-10px;
   background:linear-gradient(135deg,var(--pink),var(--violet));display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;}
 .vA .socialrow .av span:first-child{margin-left:0;}
-/* booking panel */
 .vA .panel{background:linear-gradient(180deg,rgba(20,16,23,.86),rgba(8,7,10,.9));border:1px solid var(--line-strong);
   border-radius:22px;padding:26px;backdrop-filter:blur(18px);box-shadow:0 40px 100px -35px rgba(0,0,0,.95);max-width:420px;justify-self:end;width:100%;}
 @media(max-width:900px){.vA .panel{justify-self:stretch;}}
@@ -112,19 +112,15 @@ a{color:inherit;text-decoration:none;}
 .vA .panel .btn{width:100%;}
 .vA .reassure{text-align:center;font-size:11px;color:var(--muted-2);margin-top:10px;}
 
-/* ============================================================
-   B — TYPE MASK (video shows THROUGH giant letters)
-   ============================================================ */
+/* ===== B — TYPE MASK ===== */
 .vB .hero{background:var(--void);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
   padding:clamp(70px,10vh,120px) 16px clamp(50px,7vh,90px);}
 .vB .kick{font-family:var(--mono);font-size:clamp(11px,1.4vw,14px);letter-spacing:.34em;text-transform:uppercase;color:var(--pink-soft);}
-.vB .maskwrap{position:relative;width:100%;}
 .vB .mask{font-family:var(--disp);text-transform:uppercase;line-height:.8;letter-spacing:.01em;
   font-size:clamp(96px,26vw,420px);margin:0;
-  background-image:url(__POSTER__);background-size:cover;background-position:center 35%;
+  background-image:url(__FRIENDS__);background-size:cover;background-position:center 30%;
   -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
-  filter:brightness(1.15) contrast(1.05);}
-.vB .maskvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;} /* fallback layer hidden; poster drives clip */
+  filter:brightness(1.18) contrast(1.05) saturate(1.1);}
 .vB .maskline2{color:#fff;-webkit-text-fill-color:#fff;background:none;}
 .vB .maskline2 span{color:var(--pink);-webkit-text-fill-color:var(--pink);}
 .vB .sub{margin:26px auto 0;max-width:560px;font-size:clamp(15px,1.6vw,19px);color:#d9d6d7;}
@@ -133,9 +129,7 @@ a{color:inherit;text-decoration:none;}
 .vB .trust b{color:var(--cream);}
 .vB .trust .g{display:inline-flex;align-items:center;gap:7px;}
 
-/* ============================================================
-   C — EDITORIAL MASTHEAD (curated culture magazine)
-   ============================================================ */
+/* ===== C — EDITORIAL MASTHEAD ===== */
 .vC .hero{background:var(--void);display:flex;flex-direction:column;}
 .vC .masthead{display:flex;justify-content:space-between;align-items:center;padding:clamp(74px,11vh,104px) clamp(24px,5vw,64px) 0;
   font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);gap:16px;flex-wrap:wrap;}
@@ -145,7 +139,6 @@ a{color:inherit;text-decoration:none;}
 .vC .grid{flex:1;display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(20px,3vw,48px);
   padding:clamp(20px,3.5vh,40px) clamp(24px,5vw,64px) clamp(30px,5vh,56px);align-items:center;}
 @media(max-width:900px){.vC .grid{grid-template-columns:1fr;}}
-.vC .lead{position:relative;}
 .vC .idx{font-family:var(--mono);font-size:13px;color:var(--pink);letter-spacing:.1em;}
 .vC h2{font-family:var(--disp);text-transform:uppercase;font-size:clamp(56px,8.2vw,140px);line-height:.82;color:#fff;margin:14px 0 0;letter-spacing:.004em;}
 .vC h2 em{font-style:normal;-webkit-text-stroke:1.6px var(--gold);color:transparent;}
@@ -161,9 +154,7 @@ a{color:inherit;text-decoration:none;}
   background:linear-gradient(0deg,rgba(8,7,10,.9),transparent);display:flex;justify-content:space-between;gap:10px;}
 .vC .frame .cap .live{color:var(--lime);display:inline-flex;align-items:center;gap:6px;}
 
-/* ============================================================
-   D — SOCIAL REEL (story-native, phone-frame)
-   ============================================================ */
+/* ===== D — SOCIAL REEL ===== */
 .vD .hero{background:
   radial-gradient(ellipse 55% 45% at 78% 12%,rgba(255,23,63,.22),transparent 60%),
   radial-gradient(ellipse 50% 50% at 15% 90%,rgba(122,10,31,.4),transparent 60%),var(--void);
@@ -182,15 +173,12 @@ a{color:inherit;text-decoration:none;}
 .vD .trust{margin-top:24px;font-size:13px;color:var(--muted);display:flex;gap:18px;flex-wrap:wrap;}
 @media(max-width:900px){.vD .trust{justify-content:center;}}
 .vD .trust b{color:var(--cream);}
-/* phone */
 .vD .phone{position:relative;width:clamp(240px,26vw,320px);aspect-ratio:9/19.5;border-radius:38px;
-  border:2px solid rgba(255,255,255,.14);overflow:hidden;box-shadow:0 50px 120px -35px rgba(0,0,0,.95),0 0 0 8px rgba(20,16,23,.6);
-  background:#000;}
+  border:2px solid rgba(255,255,255,.14);overflow:hidden;box-shadow:0 50px 120px -35px rgba(0,0,0,.95),0 0 0 8px rgba(20,16,23,.6);background:#000;}
 @media(max-width:520px){.vD .phone{width:74vw;}}
-.vD .phone .hbg{filter:brightness(.8) saturate(1.15) contrast(1.05);}
+.vD .phone .hbg{filter:brightness(.86) saturate(1.14) contrast(1.05);}
 .vD .phone .bars{position:absolute;top:14px;left:14px;right:14px;z-index:4;display:flex;gap:5px;}
 .vD .phone .bars i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.35);overflow:hidden;}
-.vD .phone .bars i.on{background:rgba(255,255,255,.35);}
 .vD .phone .bars i.on::after{content:"";display:block;height:100%;width:60%;background:#fff;}
 .vD .phone .handle{position:absolute;top:30px;left:16px;z-index:4;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:#fff;}
 .vD .phone .handle span{width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--violet));display:grid;place-items:center;font-size:11px;}
@@ -200,8 +188,7 @@ a{color:inherit;text-decoration:none;}
 .vD .phone .cap p{font-size:12px;color:#e0dddd;margin-top:6px;}
 .vD .phone .like{position:absolute;right:14px;bottom:96px;z-index:4;display:flex;flex-direction:column;gap:16px;align-items:center;color:#fff;font-size:11px;}
 .vD .phone .like svg{width:26px;height:26px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));}
-.vD .phone .tap{position:absolute;left:14px;right:14px;bottom:16px;z-index:4;background:#fff;color:var(--void);
-  text-align:center;font-weight:800;font-size:13px;padding:12px;border-radius:100px;}
+.vD .phone .tap{position:absolute;left:14px;right:14px;bottom:16px;z-index:4;background:#fff;color:var(--void);text-align:center;font-weight:800;font-size:13px;padding:12px;border-radius:100px;}
 
 /* ===== controls ===== */
 .switch{position:fixed;left:50%;bottom:clamp(16px,2.6vh,30px);transform:translateX(-50%);z-index:30;
@@ -226,15 +213,14 @@ a{color:inherit;text-decoration:none;}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;}}
 </style>
 
-<div class="tagline">Porto Pub Crawl · <b id="tl">A · Conversion split</b> · research-driven preview</div>
+<div class="tagline">Porto Pub Crawl · <b id="tl">A · Conversion split</b> · fotos reais · preview</div>
 
 <div class="deck">
-  <!-- ===== A ===== -->
+  <!-- A -->
   <section class="slide active vA" data-name="A · Conversion split">
     <div class="hero">
-      <video class="hbg herovid" muted loop autoplay playsinline></video>
-      <div class="veil"></div>
-      <div class="grain"></div>
+      <img class="hbg kb" data-photo="wide" alt="">
+      <div class="veil"></div><div class="grain"></div>
       <div class="wrap">
         <div class="copy">
           <span class="eyebrow"><span class="dot"></span> Live tonight · Porto's #1 rated crawl</span>
@@ -247,9 +233,7 @@ a{color:inherit;text-decoration:none;}
             <div class="price"><span><s>€20</s>€17</span><small>per person</small></div>
             <div class="rate"><span class="stars">★★★★★</span><br><b>4.9</b> · 1,327+ reviews</div>
           </div>
-          <div class="nights">
-            <button class="on">Tonight</button><button>Fri</button><button>Sat</button>
-          </div>
+          <div class="nights"><button class="on">Tonight</button><button>Fri</button><button>Sat</button></div>
           <ul class="plist">
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>9 free drinks — beer, sangria &amp; shots</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>VIP entry · 4 bars + 1 nightclub</li>
@@ -263,7 +247,7 @@ a{color:inherit;text-decoration:none;}
     </div>
   </section>
 
-  <!-- ===== B ===== -->
+  <!-- B -->
   <section class="slide vB" data-name="B · Type-mask">
     <div class="hero">
       <span class="kick">Porto · Nightlife · Since 2025</span>
@@ -282,7 +266,7 @@ a{color:inherit;text-decoration:none;}
     </div>
   </section>
 
-  <!-- ===== C ===== -->
+  <!-- C -->
   <section class="slide vC" data-name="C · Editorial masthead">
     <div class="hero">
       <div class="masthead">
@@ -301,15 +285,15 @@ a{color:inherit;text-decoration:none;}
           </div>
         </div>
         <div class="frame">
-          <video class="hbg herovid" muted loop autoplay playsinline></video>
+          <img class="hbg kb" data-photo="club" alt="">
           <div class="grain"></div>
-          <div class="cap"><span class="live"><span class="dot"></span> Filmed last Saturday</span><span>Porto, PT</span></div>
+          <div class="cap"><span class="live"><span class="dot"></span> Shot last Saturday</span><span>Porto, PT</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ===== D ===== -->
+  <!-- D -->
   <section class="slide vD" data-name="D · Social reel">
     <div class="hero">
       <div class="copy">
@@ -323,7 +307,7 @@ a{color:inherit;text-decoration:none;}
         <div class="trust"><span><span class="stars">★★★★★</span> <b>4.9</b></span><span><b>10K+</b> crawlers</span><span><b>60+</b> countries</span></div>
       </div>
       <div class="phone">
-        <video class="hbg herovid" muted loop autoplay playsinline></video>
+        <img class="hbg" data-photo="friends" alt="">
         <div class="bars"><i class="on"></i><i></i><i></i></div>
         <div class="handle"><span>P</span> portopubcrawl</div>
         <div class="ov"></div>
@@ -349,28 +333,16 @@ a{color:inherit;text-decoration:none;}
 </nav>
 
 <script>
-  var HEROVID="__VIDEO__", POSTER="__POSTER__";
+  var PHOTOS={wide:"__WIDE__",friends:"__FRIENDS__",club:"__CLUB__"};
+  document.querySelectorAll('img.hbg[data-photo]').forEach(function(im){ im.src=PHOTOS[im.dataset.photo]; });
   var slides=[].slice.call(document.querySelectorAll('.slide'));
   var btns=[].slice.call(document.querySelectorAll('.switch button'));
-  var tl=document.getElementById('tl');
-  var cur=0;
-  document.querySelectorAll('video.herovid').forEach(function(v){
-    v.poster=POSTER; v.src=HEROVID; v.muted=true; v.setAttribute('playsinline','');
-  });
-  function playActive(){
-    slides.forEach(function(s,i){
-      s.querySelectorAll('video').forEach(function(v){
-        if(i===cur){var p=v.play();if(p&&p.catch)p.catch(function(){});}
-        else{try{v.pause();}catch(e){}}
-      });
-    });
-  }
+  var tl=document.getElementById('tl'); var cur=0;
   function go(i){
     cur=(i+slides.length)%slides.length;
     slides.forEach(function(s,k){s.classList.toggle('active',k===cur);});
     btns.forEach(function(b,k){b.classList.toggle('on',k===cur);});
     tl.textContent=slides[cur].dataset.name;
-    playActive();
   }
   btns.forEach(function(b){b.addEventListener('click',function(){go(+b.dataset.i);});});
   document.querySelector('.arrow.prev').addEventListener('click',function(){go(cur-1);});
@@ -380,16 +352,12 @@ a{color:inherit;text-decoration:none;}
     else if(e.key==='ArrowLeft')go(cur-1);
     else if(e.key>='1'&&e.key<='4')go(+e.key-1);
   });
-  playActive();
 </script>
 """
 
-repl = {
-  "__ANTON__":ANTON,"__MAN400__":MAN400,"__MAN700__":MAN700,"__MAN800__":MAN800,
-  "__MONO400__":MONO400,"__MONO700__":MONO700,"__VIDEO__":VIDEO,"__POSTER__":POSTER,
-}
+repl={"__ANTON__":ANTON,"__MAN400__":MAN400,"__MAN700__":MAN700,"__MAN800__":MAN800,
+  "__MONO400__":MONO400,"__MONO700__":MONO700,"__WIDE__":WIDE,"__FRIENDS__":FRIENDS,"__CLUB__":CLUB}
 for k,v in repl.items(): html=html.replace(k,v)
 
-out=base/"hero-preview.html"
-out.write_text(html)
+out=base/"hero-preview.html"; out.write_text(html)
 print("wrote",out,round(len(html)/1024),"KB")
