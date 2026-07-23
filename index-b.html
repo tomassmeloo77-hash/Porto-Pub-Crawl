@@ -1192,13 +1192,21 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 @keyframes xbpd{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
 .hero.xb .xb-rea{text-align:center;font-size:11px;color:var(--muted-2);margin-top:12px;}
 .hero.xb .xb-card .btn{width:100%;}
+/* ===== hide site chrome so the hero matches the P3/M5 previews ===== */
+.strip{display:none!important;}
+nav{top:0!important;background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-bottom:none!important;box-shadow:none!important;}
+nav.scrolled{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;border-bottom:none!important;padding:16px 0!important;}
+#nav .logo,#nav .nav-cta,#nav .hamburger,#nav .nav-mobile-cta{display:none!important;}
+#nav .nav-inner{justify-content:center;}
 @media(max-width:920px){
-  .hero.xb .xb-hc{grid-template-columns:1fr;justify-items:center;text-align:center;padding-top:100px;padding-bottom:40px;}
+  #nav{display:none!important;}
+  .hero.xb .xb-hc{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;min-height:100svh;padding:90px 20px 40px;}
   .hero.xb .xb-d{display:none;} .hero.xb .xb-m{display:block;}
-  .hero.xb .xb-pbig{height:150px;left:50%;top:13%;transform:translate(-50%,-50%);}
-  .hero.xb .xb-left{padding-left:0;} .hero.xb .xb-left h1{font-size:56px;}
+  .hero.xb .xb-pbig{position:static;left:auto;top:auto;transform:none;height:150px;width:auto;margin:0 auto 20px;filter:drop-shadow(0 12px 34px rgba(255,23,63,.45));}
+  .hero.xb .xb-pbig .xb-pmark{height:150px;margin:0 auto;display:block;}
+  .hero.xb .xb-left{padding-left:0;} .hero.xb .xb-left h1{font-size:52px;}
   .hero.xb .xb-left .xb-sub{margin-left:auto;margin-right:auto;}
-  .hero.xb .xb-card{justify-self:stretch;max-width:440px;text-align:left;}
+  .hero.xb .xb-card{align-self:stretch;max-width:440px;margin:22px auto 0;text-align:left;}
 }
 </style>
 <script>
