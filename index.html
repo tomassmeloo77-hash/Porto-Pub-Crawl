@@ -1164,14 +1164,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
   // idle — nothing is lost, and it stops competing with first paint. Idle (not
   // first-interaction) so pageviews are still captured for visitors who bounce.
   (function(){
-    // A/B test: hero variant assigned by the edge middleware (cookie pp_variant).
-    // Computed synchronously (no posthog call here — register only exists after init).
-    var m=document.cookie.match(/(?:^|;\s*)pp_variant=(a|b)\b/);var HERO_AB=m?m[1]:(location.pathname.indexOf('index-b')>-1?'b':'a');window.__ppVariant=HERO_AB;
-    function bootPostHog(){
-      posthog.init('phc_Cdk4z8rtjHYU5i2P9k2MR3Q4TesednoVXsYokLiRByty', { api_host: 'https://eu.i.posthog.com', person_profiles: 'identified_only', capture_pageview: false });
-      try{ posthog.register({ hero_ab: HERO_AB }); }catch(e){}
-      posthog.capture('$pageview');
-    }
+    function bootPostHog(){ posthog.init('phc_Cdk4z8rtjHYU5i2P9k2MR3Q4TesednoVXsYokLiRByty', { api_host: 'https://eu.i.posthog.com', person_profiles: 'identified_only' }); }
     if('requestIdleCallback' in window){ requestIdleCallback(bootPostHog, { timeout: 3000 }); }
     else { setTimeout(bootPostHog, 1200); }
   })();
