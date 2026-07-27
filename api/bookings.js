@@ -1,5 +1,5 @@
 // /api/bookings.js
-// Vercel serverless function — the "reservations memory" behind /reservas.html.
+// Vercel serverless function — the "reservations memory" behind /reservas-3838c6284f.html.
 //
 // Stripe is already the reliable source of truth for every booking: each paid
 // Checkout Session stores the crawl date, package and quantity in its metadata
@@ -14,7 +14,7 @@
 // SETUP (Vercel dashboard, one-time):
 //   1. Project → Settings → Environment Variables
 //   2. Add ADMIN_TOKEN = <choose a long private password>
-//      (this is the password you'll type into /reservas.html)
+//      (this is the password you'll type into /reservas-3838c6284f.html)
 //   3. Redeploy so it's picked up.
 //   STRIPE_SECRET_KEY is the same key the checkout already uses — nothing new.
 
