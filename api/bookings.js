@@ -26,6 +26,18 @@ const PACKAGE_NAMES = {
   pack: 'Party Boat + Pub Crawl Pack'
 };
 
+// Manual corrections, keyed by Stripe Checkout Session id. Some bookings reach
+// Stripe with no usable date — e.g. Payment Link bookings carry no event_date —
+// or a customer is later moved to a different Saturday. Rather than guess, we
+// record the correct values here so the dashboard groups them properly. Each
+// entry may set event_date (YYYY-MM-DD), package ('crawl' | 'pack') and/or
+// quantity; only the fields present are overridden.
+const BOOKING_OVERRIDES = {
+  // Gurnoor Gill (noorgill19@gmail.com) — Payment Link booking with no date;
+  // confirmed by the organiser as Saturday 25 Jul 2026.
+  'cs_live_b1I3ulzzECkg1xUNXlksXGfczkCLd69Z5RDNNx4bDDgo9LdYDNKqHRVXzy': { event_date: '2026-07-25' }
+};
+
 // Constant-time compare so the token can't be guessed by timing the response.
 function tokensMatch(a, b) {
   if (typeof a !== 'string' || typeof b !== 'string') return false;
@@ -47,6 +59,14 @@ function extractBooking(session) {
       if (/^\d{4}-\d{2}-\d{2}$/.test(ref[1])) meta.event_date = ref[1];
       if (!meta.quantity && /^\d+$/.test(ref[2])) meta.quantity = ref[2];
     }
+  }
+  // Apply any manual correction for this session (takes precedence over the
+  // above, since it's a deliberate fix by the organiser).
+  const override = BOOKING_OVERRIDES[session.id];
+  if (override) {
+    if (override.event_date) meta.event_date = override.event_date;
+    if (override.package) meta.package = override.package;
+    if (override.quantity) meta.quantity = String(override.quantity);
   }
   const details = session.customer_details || {};
   const qty = parseInt(meta.quantity, 10);
