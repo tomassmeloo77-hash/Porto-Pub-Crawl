@@ -122,7 +122,12 @@
   .cust .em{display:block;color:var(--muted);font-weight:500;font-size:12px;margin-top:2px;}
   .badge{display:inline-block;background:rgba(255,84,104,.14);color:var(--pink-soft);border-radius:6px;padding:2px 8px;font-size:11.5px;font-weight:700;}
   .badge.pack{background:rgba(255,196,102,.14);color:var(--gold);}
+  .badge.refund{background:rgba(163,160,161,.16);color:var(--muted);}
   .qty{font-family:'Anton',sans-serif;font-size:18px;}
+  tr.refunded td{color:var(--muted-2);}
+  tr.refunded .cust{color:var(--muted);text-decoration:line-through;}
+  tr.refunded .qty,tr.refunded td.r{text-decoration:line-through;}
+  .refnote{color:var(--muted);font-size:11.5px;font-weight:700;margin-left:2px;}
 
   .empty{text-align:center;color:var(--muted);padding:60px 20px;font-size:15px;}
   .empty .big{font-family:'Anton',sans-serif;font-size:28px;color:var(--cream);margin-bottom:8px;}
@@ -302,7 +307,7 @@ function render(){
   }
 
   // sessions without a recoverable date
-  if(DATA.unknown && DATA.unknown.bookings > 0 && currentTab==='upcoming'){
+  if(DATA.unknown && (DATA.unknown.bookings > 0 || DATA.unknown.refundedBookings > 0) && currentTab==='upcoming'){
     html += '<div style="margin-top:22px;">' + unknownCard(DATA.unknown) + '</div>';
   }
 
@@ -322,11 +327,15 @@ function weekendCard(w, isPast, openByDefault){
     const p = w.packages[k];
     chips += '<span class="chip">'+esc(p.name)+': <b>'+p.bookings+'</b> res · <b>'+p.spots+'</b> lug.</span>';
   });
+  if(w.refundedBookings > 0){
+    chips += '<span class="chip">↩︎ '+w.refundedBookings+' reembolsada'+(w.refundedBookings>1?'s':'')+' ('+w.refundedSpots+' lug.)</span>';
+  }
   const rows = w.items.map(rowHtml).join('');
+  const refTag = w.refundedBookings > 0 ? '<span class="refnote">· '+w.refundedBookings+' reemb.</span>' : '';
   return (
     '<div class="weekend '+(isPast?'past ':'')+(openByDefault?'open':'')+'">'+
       '<div class="whead" onclick="this.parentNode.classList.toggle(\'open\')">'+
-        '<div class="wdate"><div class="d1">'+esc(rest)+'</div><div class="d2">'+esc(dayName)+'</div></div>'+
+        '<div class="wdate"><div class="d1">'+esc(rest)+refTag+'</div><div class="d2">'+esc(dayName)+'</div></div>'+
         '<div class="wstats">'+
           '<div class="stat"><div class="n">'+w.bookings+'</div><div class="l">Reservas</div></div>'+
           '<div class="stat"><div class="n lime">'+w.spots+'</div><div class="l">Lugares</div></div>'+
@@ -348,10 +357,13 @@ function rowHtml(b){
   const isPack = b.package === 'pack';
   const booked = b.bookedAt ? new Date(b.bookedAt).toLocaleDateString('pt-PT',{day:'numeric',month:'short'}) : '—';
   const email = b.email ? '<a class="em" href="mailto:'+esc(b.email)+'">'+esc(b.email)+'</a>' : '';
+  const pkgBadge = b.refunded
+    ? '<span class="badge refund">↩︎ Reembolsada</span>'
+    : '<span class="badge '+(isPack?'pack':'')+'">'+esc(isPack?'Boat + Crawl':'Crawl')+'</span>';
   return (
-    '<tr>'+
+    '<tr'+(b.refunded?' class="refunded"':'')+'>'+
       '<td class="cust">'+esc(b.name||'—')+email+'</td>'+
-      '<td><span class="badge '+(isPack?'pack':'')+'">'+esc(isPack?'Boat + Crawl':'Crawl')+'</span></td>'+
+      '<td>'+pkgBadge+'</td>'+
       '<td class="r"><span class="qty">'+b.quantity+'</span></td>'+
       '<td class="r hide-sm">'+eur(b.amount)+'</td>'+
       '<td class="hide-sm" style="color:var(--muted)">'+esc(booked)+'</td>'+
@@ -361,10 +373,11 @@ function rowHtml(b){
 
 function unknownCard(u){
   const rows = u.items.map(rowHtml).join('');
+  const refTag = u.refundedBookings > 0 ? '<span class="refnote">· '+u.refundedBookings+' reemb.</span>' : '';
   return (
     '<div class="weekend open">'+
       '<div class="whead" onclick="this.parentNode.classList.toggle(\'open\')">'+
-        '<div class="wdate"><div class="d1">Sem data associada</div><div class="d2">Reservas sem data legível nos metadados</div></div>'+
+        '<div class="wdate"><div class="d1">Sem data associada'+refTag+'</div><div class="d2">Reservas sem data legível nos metadados</div></div>'+
         '<div class="wstats">'+
           '<div class="stat"><div class="n">'+u.bookings+'</div><div class="l">Reservas</div></div>'+
           '<div class="stat"><div class="n lime">'+u.spots+'</div><div class="l">Lugares</div></div>'+
