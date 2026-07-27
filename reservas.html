@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Reservas · Porto Pub Crawl</title>
+<link rel="icon" href="/assets/avatar-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Manrope:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#08070a; --surface:#131314; --surface-2:#1a1a1c; --surface-3:#232325;
+    --pink:#ff173f; --pink-soft:#ff5468; --lime:#22ff7a; --gold:#ffc466;
+    --cream:#f5f4f2; --muted:#a3a0a1; --muted-2:#7e7b7c;
+    --line:rgba(245,244,242,0.09); --line-strong:rgba(245,244,242,0.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--void); color:var(--cream);
+    font-family:'Manrope',sans-serif; -webkit-font-smoothing:antialiased;
+    min-height:100vh; padding:0 0 80px;
+  }
+  h1,h2,.display{font-family:'Anton',sans-serif;font-weight:400;text-transform:uppercase;letter-spacing:.01em;line-height:.95;}
+  .mono{font-family:'Space Mono',monospace;}
+  a{color:var(--pink-soft);text-decoration:none;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px;}
+
+  /* Header */
+  header{
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(255,23,63,.06),transparent);
+    padding:28px 0 24px; margin-bottom:28px;
+  }
+  header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand img{width:40px;height:40px;border-radius:10px;}
+  .brand .t1{font-family:'Anton',sans-serif;font-size:26px;letter-spacing:.02em;}
+  .brand .t2{color:var(--muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-top:2px;}
+  .hbtns{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+
+  button{font-family:'Manrope',sans-serif;cursor:pointer;border:none;}
+  .btn{
+    background:var(--surface-3);color:var(--cream);border:1px solid var(--line-strong);
+    border-radius:100px;padding:10px 18px;font-weight:700;font-size:13.5px;transition:.15s;
+  }
+  .btn:hover{background:#2c2c2f;}
+  .btn-pink{background:linear-gradient(135deg,#ff173f,#ff5a8f);border:none;color:#fff;}
+  .btn-pink:hover{filter:brightness(1.08);}
+
+  /* Login gate */
+  .gate{max-width:400px;margin:8vh auto 0;text-align:center;padding:0 20px;}
+  .gate img{width:64px;height:64px;border-radius:16px;margin-bottom:20px;}
+  .gate h1{font-size:34px;margin-bottom:10px;}
+  .gate p{color:var(--muted);font-size:14.5px;line-height:1.6;margin-bottom:26px;}
+  .gate input{
+    width:100%;background:var(--surface);border:1px solid var(--line-strong);
+    border-radius:12px;padding:15px 16px;color:var(--cream);font-size:15px;
+    font-family:'Space Mono',monospace;margin-bottom:14px;outline:none;
+  }
+  .gate input:focus{border-color:var(--pink-soft);}
+  .gate .btn-pink{width:100%;padding:15px;font-size:15px;border-radius:12px;}
+  .err{color:var(--pink-soft);font-size:13.5px;margin-top:14px;min-height:18px;font-weight:600;}
+
+  /* Summary tiles */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:14px;}
+  .tile{
+    background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 20px;
+  }
+  .tile .k{color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+  .tile .v{font-family:'Anton',sans-serif;font-size:34px;line-height:1;}
+  .tile .v.lime{color:var(--lime);}
+  .tile .v.gold{color:var(--gold);}
+  .tile .v.pink{color:var(--pink-soft);}
+
+  /* Toolbar */
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:26px 0 16px;flex-wrap:wrap;}
+  .tabs{display:flex;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:100px;padding:5px;}
+  .tab{background:transparent;color:var(--muted);border-radius:100px;padding:8px 18px;font-weight:700;font-size:13.5px;}
+  .tab.active{background:var(--surface-3);color:var(--cream);}
+  .meta-line{color:var(--muted-2);font-size:12px;}
+
+  /* Weekend cards */
+  .weekend{
+    background:var(--surface);border:1px solid var(--line);border-radius:18px;
+    margin-bottom:14px;overflow:hidden;transition:border-color .15s;
+  }
+  .weekend.past{opacity:.72;}
+  .whead{
+    display:flex;align-items:center;gap:16px;padding:18px 20px;cursor:pointer;user-select:none;
+    flex-wrap:wrap;
+  }
+  .whead:hover{background:rgba(255,255,255,.02);}
+  .wdate{flex:1;min-width:180px;}
+  .wdate .d1{font-family:'Anton',sans-serif;font-size:22px;letter-spacing:.01em;}
+  .wdate .d2{color:var(--muted);font-size:12px;font-weight:600;margin-top:3px;}
+  .wstats{display:flex;gap:22px;align-items:center;flex-wrap:wrap;}
+  .stat{text-align:right;}
+  .stat .n{font-family:'Anton',sans-serif;font-size:24px;line-height:1;}
+  .stat .n.lime{color:var(--lime);}
+  .stat .n.gold{color:var(--gold);}
+  .stat .l{color:var(--muted);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;margin-top:4px;}
+  .chev{color:var(--muted);font-size:13px;transition:transform .2s;margin-left:4px;}
+  .weekend.open .chev{transform:rotate(180deg);}
+
+  .wbody{display:none;border-top:1px solid var(--line);padding:8px 20px 18px;}
+  .weekend.open .wbody{display:block;}
+  .pkgchips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0;}
+  .chip{background:var(--surface-2);border:1px solid var(--line);border-radius:100px;padding:6px 13px;font-size:12.5px;color:var(--muted);font-weight:600;}
+  .chip b{color:var(--cream);}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{
+    text-align:left;color:var(--muted);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+    font-weight:700;padding:10px 10px;border-bottom:1px solid var(--line);white-space:nowrap;
+  }
+  th.r,td.r{text-align:right;}
+  td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  .cust{font-weight:700;color:var(--cream);}
+  .cust .em{display:block;color:var(--muted);font-weight:500;font-size:12px;margin-top:2px;}
+  .badge{display:inline-block;background:rgba(255,84,104,.14);color:var(--pink-soft);border-radius:6px;padding:2px 8px;font-size:11.5px;font-weight:700;}
+  .badge.pack{background:rgba(255,196,102,.14);color:var(--gold);}
+  .qty{font-family:'Anton',sans-serif;font-size:18px;}
+
+  .empty{text-align:center;color:var(--muted);padding:60px 20px;font-size:15px;}
+  .empty .big{font-family:'Anton',sans-serif;font-size:28px;color:var(--cream);margin-bottom:8px;}
+  .spinner{text-align:center;padding:70px 20px;color:var(--muted);}
+  .hidden{display:none;}
+  @media(max-width:560px){
+    .wstats{gap:16px;} .stat .n{font-size:20px;} .wdate .d1{font-size:18px;}
+    header .wrap{gap:12px;} .brand .t1{font-size:22px;}
+    td .em{font-size:11px;}
+    .hide-sm{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN GATE -->
+<div id="gate" class="gate">
+  <img src="/assets/avatar-icon.png" alt="">
+  <h1>Reservas</h1>
+  <p>Painel privado das reservas do Porto Pub Crawl. Introduz a password de admin para veres tudo agrupado por fim de semana.</p>
+  <input id="pw" type="password" placeholder="password de admin" autocomplete="current-password">
+  <button class="btn-pink" onclick="login()">Entrar</button>
+  <div class="err" id="gateErr"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="app" class="hidden">
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <img src="/assets/avatar-icon.png" alt="">
+        <div>
+          <div class="t1">Reservas</div>
+          <div class="t2">Porto Pub Crawl</div>
+        </div>
+      </div>
+      <div class="hbtns">
+        <button class="btn" onclick="load()">↻ Atualizar</button>
+        <button class="btn" onclick="logout()">Sair</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div id="content">
+      <div class="spinner">A carregar reservas…</div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TOKEN_KEY = 'ppc_admin_token';
+let DATA = null;
+let currentTab = 'upcoming';
+
+function esc(s){
+  return String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function eur(n){ return '€' + (Math.round(n*100)/100).toLocaleString('pt-PT',{minimumFractionDigits:0,maximumFractionDigits:2}); }
+
+// Today's Saturday-week cutoff (UTC): the crawl runs Saturdays, so we treat a
+// weekend as "upcoming" until the Sunday after it (keeps the current Saturday
+// visible under Próximos all night). Returns YYYY-MM-DD to compare as strings.
+function upcomingCutoff(){
+  const now = new Date();
+  // shift back 1 day so Saturday's date still counts as upcoming through Sunday
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+  return d.toISOString().slice(0,10);
+}
+
+function login(){
+  const pw = document.getElementById('pw').value.trim();
+  if(!pw){ return; }
+  localStorage.setItem(TOKEN_KEY, pw);
+  load(true);
+}
+function logout(){
+  localStorage.removeItem(TOKEN_KEY);
+  DATA = null;
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('gate').classList.remove('hidden');
+  document.getElementById('pw').value = '';
+  document.getElementById('gateErr').textContent = '';
+}
+
+async function load(fromGate){
+  const token = localStorage.getItem(TOKEN_KEY);
+  if(!token){ logout(); return; }
+
+  if(fromGate){
+    // keep gate visible with a loading state until we know the token works
+    document.getElementById('gateErr').textContent = 'A verificar…';
+  } else {
+    document.getElementById('content').innerHTML = '<div class="spinner">A carregar reservas…</div>';
+  }
+
+  try{
+    const res = await fetch('/api/bookings?days=365', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if(res.status === 401){
+      document.getElementById('gateErr').textContent = 'Password incorreta.';
+      localStorage.removeItem(TOKEN_KEY);
+      showGate();
+      return;
+    }
+    if(res.status === 503){
+      const j = await res.json().catch(()=>({}));
+      showApp();
+      document.getElementById('content').innerHTML =
+        '<div class="empty"><div class="big">Falta configurar</div>' +
+        esc(j.detail || 'Define a variável ADMIN_TOKEN no Vercel.') + '</div>';
+      return;
+    }
+    if(!res.ok){ throw new Error('HTTP ' + res.status); }
+
+    DATA = await res.json();
+    showApp();
+    render();
+  }catch(err){
+    if(fromGate){
+      document.getElementById('gateErr').textContent = 'Não foi possível ligar. Tenta de novo.';
+    } else {
+      document.getElementById('content').innerHTML =
+        '<div class="empty"><div class="big">Erro ao carregar</div>Tenta atualizar dentro de momentos.</div>';
+    }
+  }
+}
+
+function showGate(){
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('gate').classList.remove('hidden');
+}
+function showApp(){
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+}
+
+function render(){
+  if(!DATA){ return; }
+  const cutoff = upcomingCutoff();
+  const upcoming = DATA.weekends.filter(w => w.date >= cutoff);
+  const past = DATA.weekends.filter(w => w.date < cutoff).reverse();
+
+  // upcoming totals for the tiles
+  const upSpots = upcoming.reduce((s,w)=>s+w.spots,0);
+  const upBookings = upcoming.reduce((s,w)=>s+w.bookings,0);
+  const upRevenue = upcoming.reduce((s,w)=>s+w.revenue,0);
+
+  const gen = DATA.generatedAt ? new Date(DATA.generatedAt).toLocaleString('pt-PT',{dateStyle:'short',timeStyle:'short'}) : '';
+
+  let html = '';
+  html += '<div class="tiles">';
+  html += tile('Próximos fins de semana', upcoming.length, '');
+  html += tile('Reservas por vir', upBookings, 'pink');
+  html += tile('Lugares por vir', upSpots, 'lime');
+  html += tile('Receita por vir', eur(upRevenue), 'gold');
+  html += '</div>';
+
+  html += '<div class="toolbar">';
+  html += '<div class="tabs">';
+  html += '<button class="tab '+(currentTab==='upcoming'?'active':'')+'" onclick="setTab(\'upcoming\')">Próximos ('+upcoming.length+')</button>';
+  html += '<button class="tab '+(currentTab==='past'?'active':'')+'" onclick="setTab(\'past\')">Passados ('+past.length+')</button>';
+  html += '</div>';
+  html += '<div class="meta-line">Atualizado '+esc(gen)+' · Stripe</div>';
+  html += '</div>';
+
+  const list = currentTab === 'upcoming' ? upcoming : past;
+
+  if(!list.length){
+    html += '<div class="empty"><div class="big">'+(currentTab==='upcoming'?'Sem reservas próximas':'Sem reservas passadas')+'</div>'+
+            (currentTab==='upcoming'?'Assim que entrar uma reserva, aparece aqui automaticamente.':'')+'</div>';
+  } else {
+    list.forEach((w,i)=>{ html += weekendCard(w, currentTab==='past', currentTab==='upcoming' && i===0); });
+  }
+
+  // sessions without a recoverable date
+  if(DATA.unknown && DATA.unknown.bookings > 0 && currentTab==='upcoming'){
+    html += '<div style="margin-top:22px;">' + unknownCard(DATA.unknown) + '</div>';
+  }
+
+  document.getElementById('content').innerHTML = html;
+}
+
+function tile(k,v,cls){
+  return '<div class="tile"><div class="k">'+esc(k)+'</div><div class="v '+(cls||'')+'">'+esc(v)+'</div></div>';
+}
+
+function weekendCard(w, isPast, openByDefault){
+  const parts = w.label.split(', ');
+  const dayName = parts[0] || '';
+  const rest = parts.slice(1).join(', ');
+  let chips = '';
+  Object.keys(w.packages).forEach(k=>{
+    const p = w.packages[k];
+    chips += '<span class="chip">'+esc(p.name)+': <b>'+p.bookings+'</b> res · <b>'+p.spots+'</b> lug.</span>';
+  });
+  const rows = w.items.map(rowHtml).join('');
+  return (
+    '<div class="weekend '+(isPast?'past ':'')+(openByDefault?'open':'')+'">'+
+      '<div class="whead" onclick="this.parentNode.classList.toggle(\'open\')">'+
+        '<div class="wdate"><div class="d1">'+esc(rest)+'</div><div class="d2">'+esc(dayName)+'</div></div>'+
+        '<div class="wstats">'+
+          '<div class="stat"><div class="n">'+w.bookings+'</div><div class="l">Reservas</div></div>'+
+          '<div class="stat"><div class="n lime">'+w.spots+'</div><div class="l">Lugares</div></div>'+
+          '<div class="stat hide-sm"><div class="n gold">'+eur(w.revenue)+'</div><div class="l">Receita</div></div>'+
+          '<span class="chev">▼</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="wbody">'+
+        '<div class="pkgchips">'+chips+'</div>'+
+        '<table><thead><tr>'+
+          '<th>Cliente</th><th>Package</th><th class="r">Lugares</th><th class="r hide-sm">Valor</th><th class="hide-sm">Reservado</th>'+
+        '</tr></thead><tbody>'+rows+'</tbody></table>'+
+      '</div>'+
+    '</div>'
+  );
+}
+
+function rowHtml(b){
+  const isPack = b.package === 'pack';
+  const booked = b.bookedAt ? new Date(b.bookedAt).toLocaleDateString('pt-PT',{day:'numeric',month:'short'}) : '—';
+  const email = b.email ? '<a class="em" href="mailto:'+esc(b.email)+'">'+esc(b.email)+'</a>' : '';
+  return (
+    '<tr>'+
+      '<td class="cust">'+esc(b.name||'—')+email+'</td>'+
+      '<td><span class="badge '+(isPack?'pack':'')+'">'+esc(isPack?'Boat + Crawl':'Crawl')+'</span></td>'+
+      '<td class="r"><span class="qty">'+b.quantity+'</span></td>'+
+      '<td class="r hide-sm">'+eur(b.amount)+'</td>'+
+      '<td class="hide-sm" style="color:var(--muted)">'+esc(booked)+'</td>'+
+    '</tr>'
+  );
+}
+
+function unknownCard(u){
+  const rows = u.items.map(rowHtml).join('');
+  return (
+    '<div class="weekend open">'+
+      '<div class="whead" onclick="this.parentNode.classList.toggle(\'open\')">'+
+        '<div class="wdate"><div class="d1">Sem data associada</div><div class="d2">Reservas sem data legível nos metadados</div></div>'+
+        '<div class="wstats">'+
+          '<div class="stat"><div class="n">'+u.bookings+'</div><div class="l">Reservas</div></div>'+
+          '<div class="stat"><div class="n lime">'+u.spots+'</div><div class="l">Lugares</div></div>'+
+          '<span class="chev">▼</span>'+
+        '</div>'+
+      '</div>'+
+      '<div class="wbody"><table><thead><tr>'+
+        '<th>Cliente</th><th>Package</th><th class="r">Lugares</th><th class="r hide-sm">Valor</th><th class="hide-sm">Reservado</th>'+
+      '</tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '</div>'
+  );
+}
+
+function setTab(t){ currentTab = t; render(); }
+
+// Enter key submits the gate
+document.getElementById('pw').addEventListener('keydown', e=>{ if(e.key==='Enter') login(); });
+
+// Auto-login if we already have a token stored
+if(localStorage.getItem(TOKEN_KEY)){
+  showApp();
+  load();
+} else {
+  document.getElementById('pw').focus();
+}
+</script>
+</body>
+</html>
