@@ -1,5 +1,5 @@
 // /api/bookings.js
-// Vercel serverless function — the "reservations memory" behind /reservas.html.
+// Vercel serverless function — the "reservations memory" behind /reservas-3838c6284f.html.
 //
 // Stripe is already the reliable source of truth for every booking: each paid
 // Checkout Session stores the crawl date, package and quantity in its metadata
@@ -14,7 +14,7 @@
 // SETUP (Vercel dashboard, one-time):
 //   1. Project → Settings → Environment Variables
 //   2. Add ADMIN_TOKEN = <choose a long private password>
-//      (this is the password you'll type into /reservas.html)
+//      (this is the password you'll type into /reservas-3838c6284f.html)
 //   3. Redeploy so it's picked up.
 //   STRIPE_SECRET_KEY is the same key the checkout already uses — nothing new.
 
@@ -50,6 +50,9 @@ function extractBooking(session) {
   }
   const details = session.customer_details || {};
   const qty = parseInt(meta.quantity, 10);
+  const pi = typeof session.payment_intent === 'string'
+    ? session.payment_intent
+    : (session.payment_intent && session.payment_intent.id) || null;
   return {
     date: /^\d{4}-\d{2}-\d{2}$/.test(meta.event_date || '') ? meta.event_date : null,
     package: meta.package || null,
@@ -61,8 +64,36 @@ function extractBooking(session) {
     amount: (session.amount_total || 0) / 100,
     currency: (session.currency || 'eur').toUpperCase(),
     bookedAt: session.created ? new Date(session.created * 1000).toISOString() : null,
-    sessionId: session.id
+    sessionId: session.id,
+    paymentIntent: pi,
+    // set later once we know which payments were refunded
+    refunded: false
   };
+}
+
+// Build the set of payment_intent ids that have a succeeded refund since the
+// cutoff. Stripe keeps a Checkout Session's payment_status as "paid" even after
+// the money is refunded, so without this a cancelled-and-refunded booking would
+// keep being counted. One or two list calls total (100 refunds/page), no matter
+// how many bookings there are, so it stays cheap as volume grows.
+async function fetchRefundedPaymentIntents(stripe, since) {
+  const refunded = new Set();
+  let startingAfter;
+  let guard = 0;
+  while (guard < 20) {
+    guard++;
+    const params = { limit: 100, created: { gte: since } };
+    if (startingAfter) params.starting_after = startingAfter;
+    const page = await stripe.refunds.list(params);
+    for (const r of page.data) {
+      if (r.status === 'succeeded' && r.payment_intent) {
+        refunded.add(typeof r.payment_intent === 'string' ? r.payment_intent : r.payment_intent.id);
+      }
+    }
+    if (!page.has_more || !page.data.length) break;
+    startingAfter = page.data[page.data.length - 1].id;
+  }
+  return refunded;
 }
 
 module.exports = async (req, res) => {
@@ -119,17 +150,28 @@ module.exports = async (req, res) => {
       startingAfter = page.data[page.data.length - 1].id;
     }
 
-    // Group by Saturday. Sessions with no recoverable date go in their own
-    // bucket so nothing is silently dropped.
+    // Flag bookings whose payment was refunded — Stripe leaves payment_status
+    // "paid" after a refund, so we cross-reference the refunds list and mark
+    // them so they can be excluded from the active counts.
+    const refundedPIs = await fetchRefundedPaymentIntents(stripe, since);
+    for (const b of bookings) {
+      if (b.paymentIntent && refundedPIs.has(b.paymentIntent)) b.refunded = true;
+    }
+
+    const round2 = (n) => Math.round(n * 100) / 100;
+
+    // Group by Saturday. Refunded bookings stay in the list (so they're visible)
+    // but never count towards the active spots / bookings / revenue. Sessions
+    // with no recoverable date go in their own bucket so nothing is dropped.
     const byDate = new Map();
-    const unknown = { spots: 0, bookings: 0, revenue: 0, items: [] };
+    const unknown = { spots: 0, bookings: 0, revenue: 0, refundedBookings: 0, refundedSpots: 0, items: [] };
 
     for (const b of bookings) {
-      if (!b.date) {
-        unknown.spots += b.quantity;
-        unknown.bookings += 1;
-        unknown.revenue += b.amount;
-        unknown.items.push(b);
+      const bucket = b.date ? null : unknown;
+      if (bucket) {
+        bucket.items.push(b);
+        if (b.refunded) { bucket.refundedBookings += 1; bucket.refundedSpots += b.quantity; }
+        else { bucket.spots += b.quantity; bucket.bookings += 1; bucket.revenue += b.amount; }
         continue;
       }
       if (!byDate.has(b.date)) {
@@ -138,11 +180,19 @@ module.exports = async (req, res) => {
           spots: 0,
           bookings: 0,
           revenue: 0,
+          refundedBookings: 0,
+          refundedSpots: 0,
           packages: {},
           items: []
         });
       }
       const g = byDate.get(b.date);
+      g.items.push(b);
+      if (b.refunded) {
+        g.refundedBookings += 1;
+        g.refundedSpots += b.quantity;
+        continue; // refunded → excluded from active spots/bookings/revenue/packages
+      }
       g.spots += b.quantity;
       g.bookings += 1;
       g.revenue += b.amount;
@@ -150,7 +200,6 @@ module.exports = async (req, res) => {
       if (!g.packages[pk]) g.packages[pk] = { name: b.packageName, spots: 0, bookings: 0 };
       g.packages[pk].spots += b.quantity;
       g.packages[pk].bookings += 1;
-      g.items.push(b);
     }
 
     const weekends = Array.from(byDate.values()).sort((a, b) => a.date.localeCompare(b.date));
@@ -158,17 +207,21 @@ module.exports = async (req, res) => {
       w.label = new Date(w.date + 'T00:00:00Z').toLocaleDateString('en-GB', {
         weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'
       });
-      w.revenue = Math.round(w.revenue * 100) / 100;
+      w.revenue = round2(w.revenue);
       w.items.sort((a, b) => (b.bookedAt || '').localeCompare(a.bookedAt || ''));
     }
-    unknown.revenue = Math.round(unknown.revenue * 100) / 100;
+    unknown.revenue = round2(unknown.revenue);
     unknown.items.sort((a, b) => (b.bookedAt || '').localeCompare(a.bookedAt || ''));
 
+    const active = bookings.filter((b) => !b.refunded);
+    const refundedList = bookings.filter((b) => b.refunded);
     const totals = {
       weekends: weekends.length,
-      bookings: bookings.length,
-      spots: bookings.reduce((s, b) => s + b.quantity, 0),
-      revenue: Math.round(bookings.reduce((s, b) => s + b.amount, 0) * 100) / 100
+      bookings: active.length,
+      spots: active.reduce((s, b) => s + b.quantity, 0),
+      revenue: round2(active.reduce((s, b) => s + b.amount, 0)),
+      refundedBookings: refundedList.length,
+      refundedSpots: refundedList.reduce((s, b) => s + b.quantity, 0)
     };
 
     // No caching — this is live booking data behind a token.
@@ -186,3 +239,8 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: 'Could not load bookings.' });
   }
 };
+
+// Exposed for unit testing only. Vercel invokes the default export (the handler
+// function above); attaching helpers as properties on it changes nothing at
+// runtime but lets the grouping/refund logic be verified against real data.
+module.exports.extractBooking = extractBooking;

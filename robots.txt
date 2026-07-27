@@ -1,6 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /reservas.html
-Disallow: /api/
 
 Sitemap: https://www.porto-pubcrawl.com/sitemap.xml
