@@ -1037,7 +1037,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .book-flex .bf-name{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;}
 .book-flex .bf-tag{font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--lime);background:rgba(34,255,122,0.12);border:1px solid rgba(34,255,122,0.3);padding:1.5px 6px;border-radius:100px;white-space:nowrap;}
 .book-flex .bf-price{font-family:'Space Mono',monospace;color:var(--pink-soft);white-space:nowrap;}
-.book-flex .bf-desc{display:block;font-size:11px;font-weight:700;color:var(--muted);line-height:1.35;margin-top:4px;}
+.book-flex .bf-desc{display:block;font-size:11px;color:var(--muted);line-height:1.35;margin-top:4px;}
 .book-error{display:none;color:var(--pink-soft);font-size:13px;margin-bottom:14px;text-align:center;}
 .book-error.show{display:block;}
 .book-panel .pay-row{justify-content:center;margin-top:18px;}
@@ -1603,8 +1603,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
         </div>
       </div>
 
-      <label class="book-flex on" id="flexOpt">
-        <input type="checkbox" id="flexToggle" checked>
+      <label class="book-flex" id="flexOpt">
+        <input type="checkbox" id="flexToggle">
         <span class="bf-body">
           <span class="bf-title"><span class="bf-name">VIP Upgrade <span class="bf-tag">Most Popular</span></span> <span class="bf-price">Only €4.90 / person</span></span>
           <span class="bf-desc">Skip the queue · +1 Drink &amp; +1 Shot · VIP Wristband</span>
@@ -2447,11 +2447,9 @@ try{
     state.pkg = pkg || 'crawl';
     state.qty = 1;
     qtyNum.textContent = '1';
-    // VIP Upgrade is pre-selected by default (Pub Crawl only). applyFlexVisibility()
-    // still forces it off for the Party Boat pack, where it isn't offered.
-    state.flex = (state.pkg === 'crawl');
-    if(flexToggle) flexToggle.checked = state.flex;
-    if(flexOpt) flexOpt.classList.toggle('on', state.flex);
+    state.flex = false;
+    if(flexToggle) flexToggle.checked = false;
+    if(flexOpt) flexOpt.classList.remove('on');
     applyFlexVisibility();
     bookError.classList.remove('show');
     document.querySelectorAll('.pkg-opt').forEach(function(opt){
