@@ -55,7 +55,12 @@ module.exports = async (req, res) => {
     if (Date.now() > parsedDate.getTime() + 27 * 60 * 60 * 1000) {
       res.status(400).json({ error: 'That date has already passed.' }); return;
     }
-    if (parsedDate.getUTCDay() !== 6) { res.status(400).json({ error: 'The crawl only runs on Saturdays.' }); return; }
+    // The crawl normally runs Saturdays, but we occasionally open a one-off
+    // special date (e.g. a Friday event). Those are allowlisted here so they
+    // pass the Saturday-only check — keep this in sync with EXTRA_DATES in the
+    // booking modal on index.html.
+    const EXTRA_DATES = ['2026-07-31'];
+    if (parsedDate.getUTCDay() !== 6 && !EXTRA_DATES.includes(date)) { res.status(400).json({ error: 'The crawl only runs on Saturdays.' }); return; }
 
     const siteUrl = process.env.SITE_URL || 'https://www.porto-pubcrawl.com';
     const niceDate = new Date(date + 'T00:00:00Z').toLocaleDateString('en-GB', {
@@ -86,10 +91,10 @@ module.exports = async (req, res) => {
       lineItems.push({
         price_data: {
           currency: 'eur',
-          unit_amount: 190,
+          unit_amount: 490,
           tax_behavior: 'exclusive',
           product_data: {
-            name: 'Book with Confidence',
+            name: 'VIP',
             description: 'Cancel or reschedule up to 3 hours before the event. No questions asked.'
           }
         },

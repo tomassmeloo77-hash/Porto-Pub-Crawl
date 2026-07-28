@@ -1606,7 +1606,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
       <label class="book-flex" id="flexOpt">
         <input type="checkbox" id="flexToggle">
         <span class="bf-body">
-          <span class="bf-title"><span class="bf-name">Book with Confidence <span class="bf-tag">Recommended</span></span> <span class="bf-price">+€1.90 / person</span></span>
+          <span class="bf-title"><span class="bf-name">VIP <span class="bf-tag">Recommended</span></span> <span class="bf-price">+€4.90 / person</span></span>
           <span class="bf-desc">Plans might change? Cancel or reschedule up to 3h before — no questions asked.</span>
         </span>
       </label>
@@ -2271,13 +2271,19 @@ try{
   const STRIPE_PUBLISHABLE_KEY = 'pk_live_51TBx6cRv5AOf2Qm1Bf8U8CaO9C7GtbFKw9oYAknmP8j0sJEeNqmljb9CXyqBwwZr3LXB5YiBmE2npy5HfjJpNqHS00uH8iO6fZ';
 
   const PRICES = { crawl: 17, pack: 44 };
-  const FLEX_PRICE = 1.90; // "Book with Confidence" optional add-on, per spot
+  const FLEX_PRICE = 4.90; // "VIP" optional add-on, per spot
   const NAMES = { crawl: 'Porto Pub Crawl', pack: 'Party Boat + Pub Crawl Pack' };
 
   // Last bookable Saturday shown in the date picker — bump this every few
   // months. If this date passes without being updated, the picker shows a
   // "no dates available" message instead of breaking (see renderDates()).
   const LAST_BOOKABLE_DATE = '2026-12-19';
+
+  // One-off special crawl dates (e.g. a Friday event) shown in the date picker
+  // alongside the weekly Saturdays. Any date still upcoming is merged into the
+  // list in chronological order. Keep this in sync with EXTRA_DATES in
+  // api/create-checkout-session.js so these dates also pass server-side checks.
+  const EXTRA_DATES = ['2026-07-31'];
 
   const overlay = document.getElementById('bookOverlay');
   const panel = document.getElementById('bookPanel');
@@ -2342,8 +2348,29 @@ try{
     return out;
   }
 
+  function isoToPill(iso){
+    const dt = new Date(iso + 'T00:00:00');
+    const dowNames = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    const monNames = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    return { iso: iso, dow: dowNames[dt.getDay()], day: dt.getDate(), mon: monNames[dt.getMonth()] };
+  }
+
   function renderDates(){
     const dates = nextSaturdays(LAST_BOOKABLE_DATE);
+
+    // Merge in any upcoming one-off special dates (e.g. Friday events), keeping
+    // the list in chronological order and dropping anything already passed or
+    // already present as a Saturday.
+    const todayIso = toLocalISODate(new Date());
+    const existing = new Set(dates.map(function(d){ return d.iso; }));
+    EXTRA_DATES.forEach(function(iso){
+      if(iso >= todayIso && !existing.has(iso)){
+        dates.push(isoToPill(iso));
+        existing.add(iso);
+      }
+    });
+    dates.sort(function(a,b){ return a.iso < b.iso ? -1 : (a.iso > b.iso ? 1 : 0); });
+
     dateScroller.innerHTML = '';
 
     // LAST_BOOKABLE_DATE has passed without being bumped — show this instead
