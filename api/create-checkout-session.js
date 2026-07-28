@@ -19,6 +19,10 @@ const Stripe = require('stripe');
 
 const PRICES_EUR = { crawl: 17, pack: 44 };
 const MAX_QTY = 100;
+// One-off extra crawl dates outside the regular Saturday schedule (e.g. a
+// special Friday night). Keep in sync with EXTRA_DATES in index.html — the
+// picker offers these, and the Saturday-only guard below must allow them.
+const EXTRA_DATES = ['2026-07-31'];
 // Per-package checkout subtitle — the pack has its own itinerary (boat first at
 // Cais de Gaia, then the crawl), so it must not reuse the crawl's line.
 const DESCRIPTIONS = {
@@ -55,7 +59,7 @@ module.exports = async (req, res) => {
     if (Date.now() > parsedDate.getTime() + 27 * 60 * 60 * 1000) {
       res.status(400).json({ error: 'That date has already passed.' }); return;
     }
-    if (parsedDate.getUTCDay() !== 6) { res.status(400).json({ error: 'The crawl only runs on Saturdays.' }); return; }
+    if (parsedDate.getUTCDay() !== 6 && !EXTRA_DATES.includes(date)) { res.status(400).json({ error: 'The crawl only runs on Saturdays.' }); return; }
 
     const siteUrl = process.env.SITE_URL || 'https://www.porto-pubcrawl.com';
     const niceDate = new Date(date + 'T00:00:00Z').toLocaleDateString('en-GB', {
@@ -78,7 +82,7 @@ module.exports = async (req, res) => {
       }
     ];
 
-    // "Book with Confidence" is now an explicit opt-in on the booking modal — we
+    // "VIP" is now an explicit opt-in on the booking modal — we
     // only add it here when the customer ticked it, so the Stripe total always
     // matches the total they saw in the modal (no surprise add-on at payment).
     // Offered on the Pub Crawl only, never on the Party Boat + Pub Crawl pack.
@@ -86,10 +90,10 @@ module.exports = async (req, res) => {
       lineItems.push({
         price_data: {
           currency: 'eur',
-          unit_amount: 190,
+          unit_amount: 490,
           tax_behavior: 'exclusive',
           product_data: {
-            name: 'Book with Confidence',
+            name: 'VIP',
             description: 'Cancel or reschedule up to 3 hours before the event. No questions asked.'
           }
         },
