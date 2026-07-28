@@ -1037,7 +1037,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .book-flex .bf-name{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;}
 .book-flex .bf-tag{font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--lime);background:rgba(34,255,122,0.12);border:1px solid rgba(34,255,122,0.3);padding:1.5px 6px;border-radius:100px;white-space:nowrap;}
 .book-flex .bf-price{font-family:'Space Mono',monospace;color:var(--pink-soft);white-space:nowrap;}
-.book-flex .bf-desc{font-size:11px;color:var(--muted);line-height:1.35;margin-top:2px;}
+.book-flex .bf-desc{display:block;font-size:11px;color:var(--muted);line-height:1.35;margin-top:4px;}
 .book-error{display:none;color:var(--pink-soft);font-size:13px;margin-bottom:14px;text-align:center;}
 .book-error.show{display:block;}
 .book-panel .pay-row{justify-content:center;margin-top:18px;}
@@ -1586,7 +1586,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
       </div>
 
       <div class="book-field">
-        <label>Saturday</label>
+        <label>Date</label>
         <div class="date-scroll-wrap">
           <button type="button" class="date-arrow" id="dateArrowLeft" aria-label="Previous dates"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 6l-6 6 6 6"/></svg></button>
           <div class="date-scroller" id="dateScroller"></div>
@@ -1606,8 +1606,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
       <label class="book-flex" id="flexOpt">
         <input type="checkbox" id="flexToggle">
         <span class="bf-body">
-          <span class="bf-title"><span class="bf-name">Book with Confidence <span class="bf-tag">Recommended</span></span> <span class="bf-price">+€1.90 / person</span></span>
-          <span class="bf-desc">Plans might change? Cancel or reschedule up to 3h before — no questions asked.</span>
+          <span class="bf-title"><span class="bf-name">VIP Upgrade <span class="bf-tag">Most Popular</span></span> <span class="bf-price">Only €4.90 / person</span></span>
+          <span class="bf-desc">Skip the queue · +1 Drink &amp; +1 Shot · VIP Wristband</span>
         </span>
       </label>
 
@@ -2271,13 +2271,20 @@ try{
   const STRIPE_PUBLISHABLE_KEY = 'pk_live_51TBx6cRv5AOf2Qm1Bf8U8CaO9C7GtbFKw9oYAknmP8j0sJEeNqmljb9CXyqBwwZr3LXB5YiBmE2npy5HfjJpNqHS00uH8iO6fZ';
 
   const PRICES = { crawl: 17, pack: 44 };
-  const FLEX_PRICE = 1.90; // "Book with Confidence" optional add-on, per spot
+  const FLEX_PRICE = 4.90; // "VIP" optional add-on, per spot
   const NAMES = { crawl: 'Porto Pub Crawl', pack: 'Party Boat + Pub Crawl Pack' };
 
   // Last bookable Saturday shown in the date picker — bump this every few
   // months. If this date passes without being updated, the picker shows a
   // "no dates available" message instead of breaking (see renderDates()).
   const LAST_BOOKABLE_DATE = '2026-12-19';
+
+  // One-off extra crawl dates outside the regular Saturday schedule (e.g. a
+  // special Friday night). ISO strings; merged into the date picker in
+  // chronological order and only shown while still bookable. Keep this in sync
+  // with the same list in /api/create-checkout-session.js, or the checkout will
+  // reject these dates as "Saturdays only".
+  const EXTRA_DATES = ['2026-07-31'];
 
   const overlay = document.getElementById('bookOverlay');
   const panel = document.getElementById('bookPanel');
@@ -2326,20 +2333,31 @@ try{
     if(d.getDay() === 0 && now.getHours() < 3){ daysUntilSat = -1; }
     d.setDate(d.getDate() + daysUntilSat);
     const until = new Date(untilIso + 'T00:00:00');
-    const dowNames = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-    const monNames = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    const isoList = [];
     let dt = new Date(d);
     while(dt <= until){
-      out.push({
-        iso: toLocalISODate(dt),
-        dow: dowNames[dt.getDay()],
-        day: dt.getDate(),
-        mon: monNames[dt.getMonth()]
-      });
+      isoList.push(toLocalISODate(dt));
       dt = new Date(dt);
       dt.setDate(dt.getDate() + 7);
     }
-    return out;
+    // Merge one-off extra dates (special non-Saturday crawls) that are still
+    // bookable — same ~27h-after-midnight grace as the checkout API — so they
+    // land in the correct chronological spot in the picker.
+    EXTRA_DATES.forEach(function(iso){
+      if(isoList.indexOf(iso) !== -1) return;
+      const t = new Date(iso + 'T00:00:00');
+      if(t > until) return;
+      if(now.getTime() > t.getTime() + 27 * 60 * 60 * 1000) return; // already passed
+      isoList.push(iso);
+    });
+    isoList.sort(); // YYYY-MM-DD sorts chronologically as plain strings
+
+    const dowNames = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+    const monNames = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+    return isoList.map(function(iso){
+      const o = new Date(iso + 'T00:00:00');
+      return { iso: iso, dow: dowNames[o.getDay()], day: o.getDate(), mon: monNames[o.getMonth()] };
+    });
   }
 
   function renderDates(){
@@ -2379,7 +2397,7 @@ try{
     bookTotal.textContent = '€' + (Number.isInteger(total) ? total : total.toFixed(2));
   }
 
-  // The "Book with Confidence" upsell is offered on the Pub Crawl only, not the
+  // The "VIP" upsell is offered on the Pub Crawl only, not the
   // Party Boat + Pub Crawl pack. Hiding it also forces the add-on off so the
   // total and the Stripe session can never carry it for the pack.
   function applyFlexVisibility(){
@@ -2532,7 +2550,7 @@ try{
       return;
     }
     // The hosted Payment Link fallback can only charge the single base ticket —
-    // it cannot carry a quantity > 1 or the "Book with Confidence" add-on. Rather
+    // it cannot carry a quantity > 1 or the "VIP" add-on. Rather
     // than silently undercharge, route group / add-on bookings to WhatsApp.
     if(state.qty > 1 || state.flex){
       showError('Our secure form had a hiccup. For ' + (state.qty > 1 ? state.qty + ' spots' : 'your add-on') + ', message us on WhatsApp (+351 910 694 984) and we\'ll confirm your booking in seconds.');
