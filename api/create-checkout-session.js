@@ -94,7 +94,7 @@ module.exports = async (req, res) => {
           tax_behavior: 'exclusive',
           product_data: {
             name: 'VIP Upgrade',
-            description: 'Priority entry · Exclusive drinks · VIP wristband'
+            description: 'Skip the queue · +1 Drink & +1 Shot · VIP wristband'
           }
         },
         quantity: qty
