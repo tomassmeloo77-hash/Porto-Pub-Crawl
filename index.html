@@ -1035,6 +1035,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .book-flex .bf-body{flex:1;min-width:0;}
 .book-flex .bf-title{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:700;color:var(--cream);}
 .book-flex .bf-name{display:inline-flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.book-flex .bf-star{color:var(--lime);flex-shrink:0;}
+.book-flex .bf-vip{border-bottom:2px solid var(--lime);padding-bottom:1px;}
 .book-flex .bf-tag{font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--lime);background:rgba(34,255,122,0.12);border:1px solid rgba(34,255,122,0.3);padding:1.5px 6px;border-radius:100px;white-space:nowrap;}
 .book-flex .bf-price{font-family:'Space Mono',monospace;color:var(--pink-soft);white-space:nowrap;}
 .book-flex .bf-desc{font-size:11px;color:var(--muted);line-height:1.35;margin-top:2px;}
@@ -1606,8 +1608,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
       <label class="book-flex" id="flexOpt">
         <input type="checkbox" id="flexToggle">
         <span class="bf-body">
-          <span class="bf-title"><span class="bf-name">⭐ VIP Upgrade <span class="bf-tag">Most Popular</span></span> <span class="bf-price">Only +€4.90 / person</span></span>
-          <span class="bf-desc">✓ Priority entry<br>✓ Exclusive drinks<br>✓ VIP wristband</span>
+          <span class="bf-title"><span class="bf-name"><svg class="bf-star" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.786 1.401 8.169L12 18.896l-7.335 3.869 1.401-8.169L.132 9.21l8.2-1.192z"/></svg><span class="bf-vip">VIP Upgrade</span> <span class="bf-tag">Most Popular</span></span> <span class="bf-price">Only +€4.90 / person</span></span>
+          <span class="bf-desc">✓ Priority entry &nbsp;·&nbsp; Exclusive drinks &nbsp;·&nbsp; VIP wristband</span>
         </span>
       </label>
 
