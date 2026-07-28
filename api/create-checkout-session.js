@@ -93,8 +93,8 @@ module.exports = async (req, res) => {
           unit_amount: 490,
           tax_behavior: 'exclusive',
           product_data: {
-            name: 'VIP',
-            description: 'Cancel or reschedule up to 3 hours before the event. No questions asked.'
+            name: 'VIP Upgrade',
+            description: 'Priority entry · Exclusive drinks · VIP wristband'
           }
         },
         quantity: qty
