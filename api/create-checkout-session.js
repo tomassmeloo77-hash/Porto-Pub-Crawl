@@ -106,6 +106,9 @@ module.exports = async (req, res) => {
       payment_method_types: ['card'],
       mode: 'payment',
       line_items: lineItems,
+      // Show a "promotion code" field in checkout so customers can redeem codes
+      // created in the Stripe Dashboard (e.g. PORTODIANOITE).
+      allow_promotion_codes: true,
       // We stash Meta's match identifiers (fbp/fbc) plus the visitor's IP and
       // user-agent here so the Stripe webhook can fire a server-side Meta
       // Conversions API "Purchase" event that Meta can attribute back to the ad.
