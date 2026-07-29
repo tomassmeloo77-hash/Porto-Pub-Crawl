@@ -777,8 +777,15 @@ section{position:relative;padding:130px 0;}
   background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 96'><path fill='%2300b67a' d='M0 0h96v96H0zM104 0h96v96h-96zM208 0h96v96h-96zM312 0h96v96h-96zM416 0h96v96h-96z'/><path fill='%23fff' d='M48 64.7L62.6 61L68.7 79.8ZM81.6 40.4H55.9L48 16.6L40.1 40.4H14.4L35.2 55.4L27.3 79.2L48 64.2L60.8 54.6Z M152 64.7L166.6 61L172.7 79.8ZM185.6 40.4H159.9L152 16.6L144.1 40.4H118.4L139.2 55.4L131.3 79.2L152 64.2L164.8 54.6Z M256 64.7L270.6 61L276.7 79.8ZM289.6 40.4H263.9L256 16.6L248.1 40.4H222.4L243.2 55.4L235.3 79.2L256 64.2L268.8 54.6Z M360 64.7L374.6 61L380.7 79.8ZM393.6 40.4H367.9L360 16.6L352.1 40.4H326.4L347.2 55.4L339.3 79.2L360 64.2L372.8 54.6Z M464 64.7L478.6 61L484.7 79.8ZM497.6 40.4H471.9L464 16.6L456.1 40.4H430.4L451.2 55.4L443.3 79.2L464 64.2L476.8 54.6Z'/></svg>") left center/contain no-repeat;
 }
 .tcard .stars{font-size:13px;margin-bottom:14px;display:block;flex-shrink:0;}
-/* Gold star glyphs (Google-style), used on the Google reviews card. */
-.stars-gold{color:#fbbc05;letter-spacing:2px;}
+/* Original gold star glyphs. Used for the reviews-section rating, the review
+   cards and the Google card. The hero pill and the Trustpilot verified card
+   keep the green Trustpilot tiles (base .stars). */
+.stars-gold{color:var(--gold);letter-spacing:2px;}
+.big-rating .meta .stars,
+.tcard .stars{
+  background:none;width:auto;height:auto;text-indent:0;overflow:visible;
+  white-space:normal;vertical-align:baseline;color:var(--gold);letter-spacing:2px;
+}
 .tcard p{font-size:15px;line-height:1.65;color:var(--cream);opacity:.92;overflow:hidden;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;height:128px;flex-shrink:0;}
 .tcard .who{display:flex;align-items:center;gap:12px;margin-top:auto;padding-top:16px;flex-shrink:0;}
 .tcard .who img{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;}
