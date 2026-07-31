@@ -190,12 +190,12 @@ function esc(s){
 }
 function eur(n){ return '€' + (Math.round(n*100)/100).toLocaleString('pt-PT',{minimumFractionDigits:0,maximumFractionDigits:2}); }
 
-// Today's Saturday-week cutoff (UTC): the crawl runs Saturdays, so we treat a
-// weekend as "upcoming" until the Sunday after it (keeps the current Saturday
+// Today's cutoff (UTC): the crawl runs Fridays and Saturdays, so we treat a
+// crawl date as "upcoming" until the day after it (keeps the current night
 // visible under Próximos all night). Returns YYYY-MM-DD to compare as strings.
 function upcomingCutoff(){
   const now = new Date();
-  // shift back 1 day so Saturday's date still counts as upcoming through Sunday
+  // shift back 1 day so a crawl date still counts as upcoming through the next day
   const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
   return d.toISOString().slice(0,10);
 }

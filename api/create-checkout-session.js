@@ -19,9 +19,9 @@ const Stripe = require('stripe');
 
 const PRICES_EUR = { crawl: 17, pack: 44 };
 const MAX_QTY = 100;
-// One-off extra crawl dates outside the regular Saturday schedule (e.g. a
-// special Friday night). Keep in sync with EXTRA_DATES in index.html — the
-// picker offers these, and the Saturday-only guard below must allow them.
+// One-off extra crawl dates outside the regular Friday/Saturday schedule (e.g.
+// a special midweek night). Keep in sync with EXTRA_DATES in index.html — the
+// picker offers these, and the Fri/Sat guard below must allow them.
 const EXTRA_DATES = ['2026-07-31'];
 // Per-package checkout subtitle — the pack has its own itinerary (boat first at
 // Cais de Gaia, then the crawl), so it must not reuse the crawl's line.
@@ -52,14 +52,17 @@ module.exports = async (req, res) => {
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) { res.status(400).json({ error: 'Invalid date.' }); return; }
     const parsedDate = new Date(date + 'T00:00:00Z');
     if (isNaN(parsedDate.getTime())) { res.status(400).json({ error: 'Invalid date.' }); return; }
-    // Bookable until ~03:00 (Lisbon) the day AFTER the Saturday crawl, so tickets
-    // still sell during and just after the event. parsedDate is the Saturday at
-    // 00:00 UTC; + 27h ≈ Sunday 03:00 UTC (≈ 03:00–04:00 Lisbon depending on DST —
-    // we err a touch late rather than cut sales off early).
+    // Bookable until ~03:00 (Lisbon) the day AFTER the crawl, so tickets still
+    // sell during and just after the event. parsedDate is the crawl day at
+    // 00:00 UTC; + 27h ≈ 03:00 UTC the next day (≈ 03:00–04:00 Lisbon depending on
+    // DST — we err a touch late rather than cut sales off early).
     if (Date.now() > parsedDate.getTime() + 27 * 60 * 60 * 1000) {
       res.status(400).json({ error: 'That date has already passed.' }); return;
     }
-    if (parsedDate.getUTCDay() !== 6 && !EXTRA_DATES.includes(date)) { res.status(400).json({ error: 'The crawl only runs on Saturdays.' }); return; }
+    // The crawl runs Fridays (day 5) and Saturdays (day 6); EXTRA_DATES allows
+    // one-off nights outside that schedule.
+    const dow = parsedDate.getUTCDay();
+    if (dow !== 5 && dow !== 6 && !EXTRA_DATES.includes(date)) { res.status(400).json({ error: 'The crawl only runs on Fridays and Saturdays.' }); return; }
 
     const siteUrl = process.env.SITE_URL || 'https://www.porto-pubcrawl.com';
     const niceDate = new Date(date + 'T00:00:00Z').toLocaleDateString('en-GB', {

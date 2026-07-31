@@ -4,9 +4,9 @@
 // Stripe is already the reliable source of truth for every booking: each paid
 // Checkout Session stores the crawl date, package and quantity in its metadata
 // (see create-checkout-session.js). Instead of building a separate database we
-// simply read those sessions back from Stripe and group them by Saturday, so
+// simply read those sessions back from Stripe and group them by crawl date, so
 // you can see — at a glance — how many reservations (and how many spots) you
-// have for each weekend, without digging through the email inbox.
+// have for each crawl night, without digging through the email inbox.
 //
 // This endpoint is READ-ONLY and password-protected: it never exposes booking
 // data unless the caller sends the correct ADMIN_TOKEN.
@@ -180,7 +180,7 @@ module.exports = async (req, res) => {
 
     const round2 = (n) => Math.round(n * 100) / 100;
 
-    // Group by Saturday. Refunded bookings stay in the list (so they're visible)
+    // Group by crawl date. Refunded bookings stay in the list (so they're visible)
     // but never count towards the active spots / bookings / revenue. Sessions
     // with no recoverable date go in their own bucket so nothing is dropped.
     const byDate = new Map();

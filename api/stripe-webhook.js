@@ -265,7 +265,7 @@ function buildEmailHtml({ name, packageName, niceDate, qty, pkg }) {
       </div>
       <div style="padding:32px 28px 28px;">
         <p style="color:#f5f4f2;font-size:15px;line-height:1.6;margin:0 0 24px;">
-          ${name ? 'Hey ' + name + ',' : 'Hey,'} your spot on the ${experience} is confirmed. Here's everything you need for Saturday:
+          ${name ? 'Hey ' + name + ',' : 'Hey,'} your spot on the ${experience} is confirmed. Here's everything you need for the night:
         </p>
         <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
           <tr>
@@ -284,11 +284,11 @@ function buildEmailHtml({ name, packageName, niceDate, qty, pkg }) {
         </table>
         ${ctas}
         <p style="color:#a3a0a1;font-size:13px;line-height:1.6;margin:14px 0 0;">
-          Questions before Saturday? Message us on WhatsApp: <a href="https://wa.me/351910694984" style="color:#ff5468;">+351 910 694 984</a>
+          Questions before the crawl? Message us on WhatsApp: <a href="https://wa.me/351910694984" style="color:#ff5468;">+351 910 694 984</a>
         </p>
       </div>
       <div style="padding:20px 28px;background:#0d0d0e;text-align:center;border-top:1px solid #232325;">
-        <p style="color:#7e7b7c;font-size:11px;margin:0;">Project P · Porto's most talked-about night out, every Saturday since 2025.</p>
+        <p style="color:#7e7b7c;font-size:11px;margin:0;">Project P · Porto's most talked-about night out, every Friday &amp; Saturday since 2025.</p>
       </div>
     </div>
   </div>`;
@@ -396,9 +396,9 @@ module.exports = async (req, res) => {
         });
       }
       // never render a blank date — neutral label + subject when it's unknown
-      const dateLabel = niceDate || 'Your booked Saturday (see your Stripe receipt)';
+      const dateLabel = niceDate || 'Your booked crawl night (see your Stripe receipt)';
       const customerSubject = niceDate
-        ? `You're on the list! Saturday, ${niceDate}`
+        ? `You're on the list! ${niceDate}`
         : `You're on the list! Your booking is confirmed`;
       const amount = ((session.amount_total || 0) / 100).toFixed(2) + ' ' + (session.currency || 'eur').toUpperCase();
       const purchasedAt = new Date().toLocaleString('en-GB', {
