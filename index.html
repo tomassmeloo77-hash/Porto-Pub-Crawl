@@ -1266,7 +1266,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
     <div class="avail-widget reveal">
       <div class="avail-tiles" id="availTiles"></div>
       <div class="info">
-        <p>This Saturday's crawl is filling up</p>
+        <p id="urgencyLead">This Saturday's crawl is filling up</p>
         <p><b id="tilesSpots" class="spot-count-sync">10</b> spots left · <span id="bookedCount">41</span> already booked</p>
       </div>
     </div>
@@ -2088,6 +2088,26 @@ function setupLazyVideo(heroVideo){
 ['clubfloorVideoEl'].forEach(function(videoId){
   setupLazyVideo(document.getElementById(videoId));
 });
+
+// ===== urgency copy: name the day the crawl actually runs =====
+// The crawl normally runs Saturdays, but on special one-off dates (e.g. an
+// extra Friday night) there's also a crawl that same day. On those days the
+// urgency line names that day; once the date passes it reverts to "Saturday"
+// automatically. Keep this list in sync with EXTRA_DATES in the booking module.
+const URGENCY_EXTRA_DATES = ['2026-07-31'];
+function currentCrawlDayName(){
+  const now = new Date();
+  const todayIso = now.getFullYear() + '-' +
+    String(now.getMonth()+1).padStart(2,'0') + '-' +
+    String(now.getDate()).padStart(2,'0');
+  const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  return URGENCY_EXTRA_DATES.indexOf(todayIso) !== -1 ? days[now.getDay()] : 'Saturday';
+}
+function updateUrgencyDay(){
+  const el = document.getElementById('urgencyLead');
+  if(el) el.textContent = "This " + currentCrawlDayName() + "'s crawl is filling up";
+}
+updateUrgencyDay();
 
 // ===== scarcity ticker (subtle variance, believable) — all driven by SITE.spotsLeft =====
 syncSpotsEverywhere(); // initial paint
