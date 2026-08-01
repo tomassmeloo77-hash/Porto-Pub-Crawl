@@ -19,6 +19,13 @@ const Stripe = require('stripe');
 
 const PRICES_EUR = { crawl: 17, pack: 44 };
 const MAX_QTY = 100;
+// Catalog Product for the base Porto Pub Crawl ticket. The crawl line item
+// references this fixed Product (instead of an ad-hoc product_data) so that
+// product-restricted promotion codes actually match it — e.g. PARTY50, which is
+// scoped in Stripe to this product so its 50% only ever hits the crawl ticket,
+// never the VIP add-on or the Party Boat pack (both stay ad-hoc, so an
+// applies_to restriction can't reach them). Must be a live-mode Product id.
+const CRAWL_PRODUCT_ID = 'prod_UtBLENI0fhwp7v';
 // One-off extra crawl dates outside the regular Friday/Saturday schedule (e.g.
 // a special midweek night). Keep in sync with EXTRA_DATES in index.html — the
 // picker offers these, and the Fri/Sat guard below must allow them.
@@ -70,17 +77,28 @@ module.exports = async (req, res) => {
     });
 
     // Base ticket line item — always present.
+    const basePrice = {
+      currency: 'eur',
+      unit_amount: PRICES_EUR[pkg] * 100,
+      tax_behavior: 'exclusive'
+    };
+    if (pkg === 'crawl') {
+      // Reference the fixed catalog Product so a product-restricted promo code
+      // (PARTY50 → 50% off the crawl ticket only) matches this line. The catalog
+      // Product supplies the name shown at checkout ("Porto Pub Crawl"); the
+      // booked date still travels in metadata and the confirmation email.
+      basePrice.product = CRAWL_PRODUCT_ID;
+    } else {
+      // The pack stays an ad-hoc product, so product-restricted crawl promo codes
+      // can't reach it — exactly what we want (PARTY50 must not discount the pack).
+      basePrice.product_data = {
+        name: (packageName || pkg) + ' — ' + niceDate,
+        description: DESCRIPTIONS[pkg] || DESCRIPTIONS.crawl
+      };
+    }
     const lineItems = [
       {
-        price_data: {
-          currency: 'eur',
-          unit_amount: PRICES_EUR[pkg] * 100,
-          tax_behavior: 'exclusive',
-          product_data: {
-            name: (packageName || pkg) + ' — ' + niceDate,
-            description: DESCRIPTIONS[pkg] || DESCRIPTIONS.crawl
-          }
-        },
+        price_data: basePrice,
         quantity: qty
       }
     ];
