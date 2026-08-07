@@ -921,12 +921,12 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .avail-widget .info b{color:var(--pink);font-family:'Space Mono',monospace;}
 /* diagonal "sold out" corner ribbon (top-right) */
 .avail-ribbon{
-  position:absolute;top:26px;right:-56px;width:200px;padding:5px 0;
+  position:absolute;top:28px;right:-58px;width:210px;padding:3.5px 0;
   transform:rotate(45deg);transform-origin:center;
-  background:linear-gradient(135deg,var(--pink) 0%,var(--pink-soft) 100%);
+  background:linear-gradient(135deg,var(--pink),#ff5a8f 45%,var(--violet));
   color:#fff;text-align:center;
-  font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
-  box-shadow:0 3px 10px rgba(0,0,0,0.35);pointer-events:none;z-index:2;
+  font-size:8px;font-weight:700;letter-spacing:.055em;text-transform:uppercase;
+  box-shadow:0 2px 8px rgba(0,0,0,0.30);pointer-events:none;z-index:2;
 }
 @media(max-width:640px){
   .avail-widget{flex-direction:column;text-align:center;padding:20px;gap:16px;}
@@ -2163,7 +2163,7 @@ function updateSoldOutNote(){
   });
   if(!days.length){ note.style.display = 'none'; return; }
   note.textContent = days.length === 1
-    ? days[0].slice(0, 3) + ' sold out'
+    ? days[0] + ' sold out'
     : 'Sold out';
   note.style.display = '';
 }
