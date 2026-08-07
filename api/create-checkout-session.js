@@ -39,7 +39,7 @@ const SOLD_OUT_DATES = ['2026-08-07'];
 // Cais de Gaia, then the crawl), so it must not reuse the crawl's line.
 const DESCRIPTIONS = {
   crawl: 'Porto Pub Crawl · Praça de Carlos Alberto · 22:30–02:30',
-  pack: 'Party Boat · Cais de Gaia · 22:00, then Pub Crawl · Praça de Carlos Alberto · 00:30'
+  pack: 'Party Boat · Cais de Gaia · 17:15, then Pub Crawl · Praça de Carlos Alberto · 22:30'
 };
 
 module.exports = async (req, res) => {

@@ -243,10 +243,10 @@ function buildEmailHtml({ name, packageName, niceDate, qty, pkg }) {
   if (isPack) {
     logistics =
       `<tr><td style="${lblCell}">🚤 Party Boat</td><td style="${linkCell}"><a href="${BOAT_MAPS}" style="${aStyle}">📍 Cais de Gaia</a></td></tr>` +
-      `<tr><td style="${lblCell}">Boat time</td><td style="${valCell}">22:00 · sails 22:00–00:00</td></tr>` +
+      `<tr><td style="${lblCell}">Boat time</td><td style="${valCell}">17:15 · sails 17:15–19:15</td></tr>` +
       `<tr><td style="${lblCell}">🍹 Then · Pub Crawl</td><td style="${linkCell}"><a href="${CRAWL_MAPS}" style="${aStyle}">📍 Praça de Carlos Alberto</a></td></tr>` +
-      `<tr><td style="${lastLbl}">Crawl time</td><td style="${lastVal}">00:30 · look for the pink umbrellas</td></tr>`;
-    ctas = btn(BOAT_MAPS, '📍 Party Boat — Cais de Gaia (22:00)') + btn(CRAWL_MAPS, '📍 Pub Crawl — Praça de Carlos Alberto (00:30)');
+      `<tr><td style="${lastLbl}">Crawl time</td><td style="${lastVal}">22:30 · look for the pink umbrellas</td></tr>`;
+    ctas = btn(BOAT_MAPS, '📍 Party Boat — Cais de Gaia (17:15)') + btn(CRAWL_MAPS, '📍 Pub Crawl — Praça de Carlos Alberto (22:30)');
   } else {
     logistics =
       `<tr><td style="${lblCell}">Meeting point</td><td style="${linkCell}"><a href="${CRAWL_MAPS}" style="${aStyle}">📍 Praça de Carlos Alberto</a></td></tr>` +
