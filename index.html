@@ -915,11 +915,11 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .avail-tiles .t.filled{background:var(--pink);animation:tile-pulse 3s ease-in-out infinite;}
 @keyframes tile-pulse{0%,100%{opacity:.55}50%{opacity:1}}
 .avail-widget .info{flex:1;min-width:0;}
-.avail-widget .info p:first-child{font-weight:800;font-size:14.5px;color:var(--cream);}
+.avail-widget .info #urgencyLead{font-weight:800;font-size:14.5px;color:var(--cream);}
 .avail-widget .info p:last-child{font-size:13px;color:var(--muted);margin-top:2px;}
 .avail-widget .info b{color:var(--pink);font-family:'Space Mono',monospace;}
-.avail-widget .info .avail-soldout{font-size:12px;font-weight:700;color:var(--pink-soft);margin-top:3px;letter-spacing:.01em;display:flex;align-items:center;gap:6px;}
-.avail-widget .info .avail-soldout::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--pink);flex-shrink:0;animation:tile-pulse 3s ease-in-out infinite;}
+.avail-widget .info .avail-soldout{font-size:10.5px;font-weight:600;color:var(--muted-2);margin:0 0 4px;letter-spacing:.02em;display:flex;align-items:center;gap:5px;}
+.avail-widget .info .avail-soldout::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--pink);opacity:.5;flex-shrink:0;}
 @media(max-width:640px){
   .avail-widget{flex-direction:column;text-align:center;padding:20px;gap:16px;}
   .avail-widget .info{text-align:center;}
@@ -1278,8 +1278,8 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
     <div class="avail-widget reveal">
       <div class="avail-tiles" id="availTiles"></div>
       <div class="info">
-        <p id="urgencyLead">This Saturday's crawl is filling up</p>
         <p id="soldOutNote" class="avail-soldout" style="display:none;"></p>
+        <p id="urgencyLead">This Saturday's crawl is filling up</p>
         <p><b id="tilesSpots" class="spot-count-sync">10</b> spots left · <span id="bookedCount">41</span> already booked</p>
       </div>
     </div>
