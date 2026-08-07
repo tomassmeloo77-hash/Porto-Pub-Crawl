@@ -30,6 +30,11 @@ const CRAWL_PRODUCT_ID = 'prod_UtBLENI0fhwp7v';
 // a special midweek night). Keep in sync with EXTRA_DATES in index.html — the
 // picker offers these, and the Fri/Sat guard below must allow them.
 const EXTRA_DATES = ['2026-07-31'];
+// Crawl nights that are fully booked. Keep in sync with SOLD_OUT_DATES in
+// index.html — the picker shows these as "SOLD OUT" and won't select them, and
+// this guard rejects them server-side so the date can't be booked by posting it
+// straight to this endpoint.
+const SOLD_OUT_DATES = ['2026-08-07'];
 // Per-package checkout subtitle — the pack has its own itinerary (boat first at
 // Cais de Gaia, then the crawl), so it must not reuse the crawl's line.
 const DESCRIPTIONS = {
@@ -70,6 +75,8 @@ module.exports = async (req, res) => {
     // one-off nights outside that schedule.
     const dow = parsedDate.getUTCDay();
     if (dow !== 5 && dow !== 6 && !EXTRA_DATES.includes(date)) { res.status(400).json({ error: 'The crawl only runs on Fridays and Saturdays.' }); return; }
+    // Fully-booked nights can't be sold, even if the date is otherwise valid.
+    if (SOLD_OUT_DATES.includes(date)) { res.status(400).json({ error: 'That night is sold out — please pick another date.' }); return; }
 
     const siteUrl = process.env.SITE_URL || 'https://www.porto-pubcrawl.com';
     const niceDate = new Date(date + 'T00:00:00Z').toLocaleDateString('en-GB', {

@@ -1021,6 +1021,9 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .date-pill .dp-mon{display:block;font-size:10px;color:var(--muted-2);}
 .date-pill.active{border-color:var(--pink);background:rgba(255,23,63,0.1);}
 .date-pill.active .dp-day{color:var(--pink-soft);}
+.date-pill.sold-out{cursor:not-allowed;opacity:.5;position:relative;}
+.date-pill.sold-out .dp-dow,.date-pill.sold-out .dp-day,.date-pill.sold-out .dp-mon{color:var(--muted-2);}
+.date-pill.sold-out .dp-so{display:block;margin-top:3px;font-size:8px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--pink-soft);}
 
 .qty-row{display:flex;align-items:center;gap:16px;}
 .qty-btn{
@@ -2330,6 +2333,13 @@ try{
   // reject these dates as "Fridays and Saturdays only".
   const EXTRA_DATES = ['2026-07-31'];
 
+  // Crawl nights that are fully booked. Dates listed here still appear in the
+  // picker (so people can see the night exists) but show a "SOLD OUT" badge,
+  // can't be selected, and are never auto-selected. Keep this in sync with the
+  // same list in /api/create-checkout-session.js so a sold-out night can't be
+  // booked by posting the date directly to the checkout endpoint.
+  const SOLD_OUT_DATES = ['2026-08-07'];
+
   const overlay = document.getElementById('bookOverlay');
   const panel = document.getElementById('bookPanel');
   const selectStep = document.getElementById('bookSelectStep');
@@ -2422,19 +2432,32 @@ try{
       return;
     }
 
-    dates.forEach(function(d, i){
+    // Default selection = first date that isn't sold out, so we never open the
+    // modal with a fully-booked night pre-selected (which the checkout rejects).
+    const firstAvailable = dates.find(function(d){ return SOLD_OUT_DATES.indexOf(d.iso) === -1; });
+
+    dates.forEach(function(d){
+      const soldOut = SOLD_OUT_DATES.indexOf(d.iso) !== -1;
+      const isActive = firstAvailable && d.iso === firstAvailable.iso;
       const pill = document.createElement('div');
-      pill.className = 'date-pill' + (i===0 ? ' active' : '');
+      pill.className = 'date-pill' + (isActive ? ' active' : '') + (soldOut ? ' sold-out' : '');
       pill.dataset.iso = d.iso;
-      pill.innerHTML = '<span class="dp-dow">'+d.dow+'</span><span class="dp-day">'+d.day+'</span><span class="dp-mon">'+d.mon+'</span>';
-      pill.addEventListener('click', function(){
-        dateScroller.querySelectorAll('.date-pill').forEach(p=>p.classList.remove('active'));
-        pill.classList.add('active');
-        state.date = d.iso;
-      });
+      pill.innerHTML = '<span class="dp-dow">'+d.dow+'</span><span class="dp-day">'+d.day+'</span><span class="dp-mon">'+d.mon+'</span>'
+        + (soldOut ? '<span class="dp-so">Sold out</span>' : '');
+      if(soldOut){
+        pill.setAttribute('aria-disabled', 'true');
+      } else {
+        pill.addEventListener('click', function(){
+          dateScroller.querySelectorAll('.date-pill').forEach(p=>p.classList.remove('active'));
+          pill.classList.add('active');
+          state.date = d.iso;
+        });
+      }
       dateScroller.appendChild(pill);
     });
-    state.date = dates[0].iso;
+    // May be null if every listed night is sold out — the submit handler treats
+    // a null date as "pick a date", so booking is blocked rather than broken.
+    state.date = firstAvailable ? firstAvailable.iso : null;
   }
 
   function updateTotal(){
