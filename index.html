@@ -1571,7 +1571,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
   <a href="https://book.stripe.com/cNi8wReAZ8di9m29LI4AU02" target="_blank" rel="noopener" class="btn btn-primary magnetic js-book-crawl">Book</a>
 </div>
 
-<a href="https://book.stripe.com/cNi8wReAZ8di9m29LI4AU02" target="_blank" rel="noopener" class="btn btn-primary float-cta magnetic js-book-crawl" id="floatCta"><span class="shine"></span>🍹 Book Saturday — €17</a>
+<a href="https://book.stripe.com/cNi8wReAZ8di9m29LI4AU02" target="_blank" rel="noopener" class="btn btn-primary float-cta magnetic js-book-crawl" id="floatCta"><span class="shine"></span>🍹 Book Now — €17</a>
 
 <div class="exit-overlay" id="exitOverlay">
   <div class="exit-panel">
@@ -2116,21 +2116,17 @@ function setupLazyVideo(heroVideo){
 });
 
 // ===== urgency copy: name the night the next crawl actually runs =====
-// The crawl runs Fridays and Saturdays, so the urgency line, the sticky bar and
-// the floating button all name whichever night is up next — flipping from
-// "Friday" to "Saturday" (and back) automatically as the week rolls on.
+// The crawl runs Fridays and Saturdays, so the urgency line and the sticky bar
+// name whichever night is up next — flipping from "Friday" to "Saturday" (and
+// back) automatically as the week rolls on. The floating CTA is left generic
+// ("Book Now"): naming a single night there confused people, since crawls run
+// both Fri and Sat and only the checkout shows which nights are sold out.
 function updateCrawlDayLabels(){
   const day = nextCrawlDayName();
   const urgency = document.getElementById('urgencyLead');
   if(urgency) urgency.textContent = "This " + day + "'s crawl is filling up";
   const stickyLabel = document.getElementById('stickyDay');
   if(stickyLabel) stickyLabel.textContent = "This " + day + ", 22:30";
-  const floatBtn = document.getElementById('floatCta');
-  if(floatBtn){
-    const shine = floatBtn.querySelector('.shine');
-    floatBtn.textContent = '🍹 Book ' + day + ' — €17';
-    if(shine) floatBtn.insertBefore(shine, floatBtn.firstChild);
-  }
 }
 updateCrawlDayLabels();
 
