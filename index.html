@@ -907,6 +907,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 
 /* ===== availability widget ===== */
 .avail-widget{
+  position:relative;overflow:hidden;
   display:flex;align-items:center;gap:20px;padding:22px 26px;border-radius:20px;
   background:rgba(255,255,255,0.03);border:1px solid var(--line);max-width:520px;margin:0 auto 56px;
 }
@@ -918,12 +919,18 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .avail-widget .info #urgencyLead{font-weight:800;font-size:14.5px;color:var(--cream);}
 .avail-widget .info p:last-child{font-size:13px;color:var(--muted);margin-top:2px;}
 .avail-widget .info b{color:var(--pink);font-family:'Space Mono',monospace;}
-.avail-widget .info .avail-soldout{display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--muted-2);margin:0 0 5px;}
-.avail-widget .info .avail-soldout::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--pink);opacity:.55;flex-shrink:0;}
+/* diagonal "sold out" corner ribbon (top-right) */
+.avail-ribbon{
+  position:absolute;top:26px;right:-56px;width:200px;padding:5px 0;
+  transform:rotate(45deg);transform-origin:center;
+  background:linear-gradient(135deg,var(--pink) 0%,var(--pink-soft) 100%);
+  color:#fff;text-align:center;
+  font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  box-shadow:0 3px 10px rgba(0,0,0,0.35);pointer-events:none;z-index:2;
+}
 @media(max-width:640px){
   .avail-widget{flex-direction:column;text-align:center;padding:20px;gap:16px;}
   .avail-widget .info{text-align:center;}
-  .avail-widget .info .avail-soldout{justify-content:center;}
 }
 
 /* ===== desktop floating CTA ===== */
@@ -1276,9 +1283,9 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
     </div>
 
     <div class="avail-widget reveal">
+      <span id="soldOutNote" class="avail-ribbon" style="display:none;"></span>
       <div class="avail-tiles" id="availTiles"></div>
       <div class="info">
-        <p id="soldOutNote" class="avail-soldout" style="display:none;"></p>
         <p id="urgencyLead">This Saturday's crawl is filling up</p>
         <p><b id="tilesSpots" class="spot-count-sync">10</b> spots left · <span id="bookedCount">41</span> already booked</p>
       </div>
@@ -2156,8 +2163,8 @@ function updateSoldOutNote(){
   });
   if(!days.length){ note.style.display = 'none'; return; }
   note.textContent = days.length === 1
-    ? days[0] + ' sold out'
-    : days.slice(0, 2).join(' & ') + ' sold out';
+    ? days[0].slice(0, 3) + ' sold out'
+    : 'Sold out';
   note.style.display = '';
 }
 updateSoldOutNote();
