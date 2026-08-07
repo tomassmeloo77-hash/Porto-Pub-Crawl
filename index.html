@@ -918,9 +918,12 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
 .avail-widget .info p:first-child{font-weight:800;font-size:14.5px;color:var(--cream);}
 .avail-widget .info p:last-child{font-size:13px;color:var(--muted);margin-top:2px;}
 .avail-widget .info b{color:var(--pink);font-family:'Space Mono',monospace;}
+.avail-widget .info .avail-soldout{font-size:12px;font-weight:700;color:var(--pink-soft);margin-top:3px;letter-spacing:.01em;display:flex;align-items:center;gap:6px;}
+.avail-widget .info .avail-soldout::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--pink);flex-shrink:0;animation:tile-pulse 3s ease-in-out infinite;}
 @media(max-width:640px){
   .avail-widget{flex-direction:column;text-align:center;padding:20px;gap:16px;}
   .avail-widget .info{text-align:center;}
+  .avail-widget .info .avail-soldout{justify-content:center;}
 }
 
 /* ===== desktop floating CTA ===== */
@@ -1276,6 +1279,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
       <div class="avail-tiles" id="availTiles"></div>
       <div class="info">
         <p id="urgencyLead">This Saturday's crawl is filling up</p>
+        <p id="soldOutNote" class="avail-soldout" style="display:none;"></p>
         <p><b id="tilesSpots" class="spot-count-sync">10</b> spots left · <span id="bookedCount">41</span> already booked</p>
       </div>
     </div>
@@ -2129,6 +2133,34 @@ function updateCrawlDayLabels(){
   if(stickyLabel) stickyLabel.textContent = "This " + day + ", 22:30";
 }
 updateCrawlDayLabels();
+
+// ===== sold-out FOMO note: if a night THIS WEEK is already sold out, say so =====
+// Reads the same SOLD_OUT_DATES list. Shows a small, subtle line in the
+// availability widget naming the sold-out weekday (e.g. "This Friday is already
+// sold out"), so people see at a glance that that night is gone before they
+// even open the picker. Only fires for sold-out nights within the coming week,
+// so "This <day>" stays accurate; hidden automatically once none remain.
+function updateSoldOutNote(){
+  const note = document.getElementById('soldOutNote');
+  if(!note) return;
+  const now = new Date();
+  const weekAhead = now.getTime() + 7 * 24 * 60 * 60 * 1000;
+  const days = [];
+  SOLD_OUT_DATES.slice().sort().forEach(function(iso){
+    const t = new Date(iso + 'T00:00:00').getTime();
+    // still upcoming (same ~27h-after-midnight grace used elsewhere) AND within a week
+    if(now.getTime() > t + 27 * 60 * 60 * 1000) return;
+    if(t > weekAhead) return;
+    const name = CRAWL_DAY_NAMES[new Date(iso + 'T00:00:00').getDay()];
+    if(days.indexOf(name) === -1) days.push(name);
+  });
+  if(!days.length){ note.style.display = 'none'; return; }
+  note.textContent = days.length === 1
+    ? 'This ' + days[0] + ' is already sold out'
+    : days.slice(0, 2).join(' & ') + ' are already sold out';
+  note.style.display = '';
+}
+updateSoldOutNote();
 
 // ===== scarcity ticker (subtle variance, believable) — all driven by SITE.spotsLeft =====
 syncSpotsEverywhere(); // initial paint
