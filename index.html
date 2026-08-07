@@ -744,6 +744,8 @@ section{position:relative;padding:130px 0;}
   .verified-row{grid-template-columns:1fr;}
   .partners-logos{gap:22px;}
   .partner-word{font-size:16px;}
+  /* drop the last platform on mobile so the row stays on a single line */
+  .partner-word--mobile-hide{display:none;}
 }
 
 /* ===== testimonials ===== */
@@ -1438,7 +1440,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
         <span class="partner-word">Viator</span>
         <span class="partner-word">TripAdvisor</span>
         <span class="partner-word">Eventbrite</span>
-        <span class="partner-word">Booking</span>
+        <span class="partner-word partner-word--mobile-hide">Booking</span>
       </div>
     </div>
   </div>
@@ -1714,14 +1716,25 @@ function onIdle(fn){
 // scarcity reset, urgency line, buttons) points at the right night automatically.
 const CRAWL_DAYS = [5, 6]; // Friday = 5, Saturday = 6
 const CRAWL_DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+// Crawl nights that are fully booked. This is the SINGLE SOURCE OF TRUTH for
+// sold-out dates: the booking date picker reads it to badge dates "SOLD OUT",
+// and nextCrawlDeparture() below skips them so no dynamic copy (countdown,
+// urgency/FOMO line, sticky bar) ever fronts a sold-out night. When 7 Aug 2026
+// is sold out, "next crawl" automatically becomes the following Saturday.
+// Keep in sync with SOLD_OUT_DATES in /api/create-checkout-session.js.
+const SOLD_OUT_DATES = ['2026-08-07'];
+function toLocalISODateStr(dt){
+  return dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+}
 function nextCrawlDeparture(from){
   const now = from || new Date();
-  // today counts if it's a crawl day and still before 22:30, else roll forward
-  for(let add = 0; add <= 7; add++){
+  // today counts if it's a crawl day and still before 22:30, else roll forward.
+  // Look two weeks ahead so back-to-back sold-out nights are still skipped over.
+  for(let add = 0; add <= 14; add++){
     const dep = new Date(now.getFullYear(), now.getMonth(), now.getDate() + add, 22, 30, 0, 0);
-    if(CRAWL_DAYS.indexOf(dep.getDay()) !== -1 && dep > now){ return dep; }
+    if(CRAWL_DAYS.indexOf(dep.getDay()) !== -1 && dep > now && SOLD_OUT_DATES.indexOf(toLocalISODateStr(dep)) === -1){ return dep; }
   }
-  return null; // unreachable — every week has a Friday and a Saturday
+  return null; // unreachable in practice — a non-sold-out Fri/Sat always exists within 2 weeks
 }
 function nextCrawlDayName(){
   const dep = nextCrawlDeparture();
@@ -2332,12 +2345,9 @@ try{
   // reject these dates as "Fridays and Saturdays only".
   const EXTRA_DATES = ['2026-07-31'];
 
-  // Crawl nights that are fully booked. Dates listed here still appear in the
-  // picker (so people can see the night exists) but show a "SOLD OUT" badge,
-  // can't be selected, and are never auto-selected. Keep this in sync with the
-  // same list in /api/create-checkout-session.js so a sold-out night can't be
-  // booked by posting the date directly to the checkout endpoint.
-  const SOLD_OUT_DATES = ['2026-08-07'];
+  // Sold-out nights are defined once at the top of this script (SOLD_OUT_DATES)
+  // and reused here — the picker badges them "SOLD OUT", makes them
+  // non-selectable, and never auto-selects them.
 
   const overlay = document.getElementById('bookOverlay');
   const panel = document.getElementById('bookPanel');
