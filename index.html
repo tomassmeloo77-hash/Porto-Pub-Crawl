@@ -3,6 +3,37 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<script>
+/* Origin guard: if this page is served from a host that isn't ours, it's an
+   unauthorized copy — hide the content and send visitors to the real site.
+   Fail-safe: any of our own domains (incl. Vercel previews) and local dev pass
+   through untouched. */
+(function(){
+  try{
+    var h=(location.hostname||'').toLowerCase();
+    var mine =
+        !h || h==='localhost' || h==='127.0.0.1' || h==='0.0.0.0' || location.protocol==='file:'
+        || /(^|\.)porto-pubcrawl\.com$/.test(h)
+        || h==='porto-pub-crawl.vercel.app'
+        || /tomasmelo002-4705s-projects\.vercel\.app$/.test(h);
+    if(mine) return;
+    var real='https://www.porto-pubcrawl.com/';
+    var de=document.documentElement;
+    de.style.visibility='hidden';
+    var show=function(){
+      de.style.visibility='';
+      try{ if(document.body) document.body.innerHTML=''; }catch(e){}
+      var o=document.createElement('div');
+      o.style.cssText='position:fixed;inset:0;z-index:2147483647;background:#08070a;color:#fff;display:flex;align-items:center;justify-content:center;text-align:center;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:24px;';
+      o.innerHTML='<div style="max-width:420px"><div style="font-size:22px;font-weight:800;margin-bottom:10px">This is not the official site</div><div style="opacity:.82;font-size:15px;line-height:1.55;margin-bottom:22px">This page is an unauthorized copy. Taking you to the real Porto Pub Crawl…</div><a href="'+real+'" style="display:inline-block;background:#ff173f;color:#fff;text-decoration:none;font-weight:700;padding:12px 22px;border-radius:999px">Go to porto-pubcrawl.com</a></div>';
+      (document.body||de).appendChild(o);
+      setTimeout(function(){ location.replace(real); },3500);
+    };
+    if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded',show); } else { show(); }
+    setTimeout(function(){ if(de.style.visibility==='hidden') show(); },2500);
+  }catch(e){}
+})();
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201021%20838'%3E%3Cg%20transform='translate%2845,768%29%20scale%281,-1%29'%3E%3Cpath%20d='M25%200Q48%2014%2062.0%2040.0Q76%2066%2076%2096V605Q76%20634%2062.5%20659.0Q49%20684%2025%20698H611Q694%20698%20761.0%20676.5Q828%20655%20867.0%20605.0Q906%20555%20906%20471Q906%20395%20869.0%20337.5Q832%20280%20766.5%20247.5Q701%20215%20615%20215H358V90Q358%2063%20371.5%2038.5Q385%2014%20409%200ZM358%20358H505Q549%20358%20574.0%20373.0Q599%20388%20609.0%20411.5Q619%20435%20619%20459Q619%20513%20584.5%20532.5Q550%20552%20500%20552H358Z'%20fill='%23ff173f'/%3E%3C/g%3E%3C/svg%3E">
 <title>Project P — Porto's #1 Rated Pub Crawl | Book from €17</title>
 <meta name="description" content="Porto's highest-rated pub crawl: 9 drinks, VIP entry to 4 bars + a nightclub, pro photos. 4.8★ from 1,327+ reviews. Every Friday & Saturday, from €17.">
@@ -11,6 +42,9 @@
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="theme-color" content="#08070a">
 <meta name="author" content="Project P">
+<meta name="copyright" content="© Project P — porto-pubcrawl.com. All rights reserved. Original work; unauthorized copying prohibited.">
+<link rel="license" href="https://www.porto-pubcrawl.com/terms.html">
+<!-- ppc-origin | canonical author: Project P · porto-pubcrawl.com | canary: ppc-8f2a4d7e9c1b-original-do-not-copy | built from scratch, not a template -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=AW-18071337739"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -1566,6 +1600,7 @@ footer{border-top:1px solid var(--line);padding:64px 0 30px;position:relative;z-
     </div>
     <div class="footer-bottom">
       <span>© 2026 Project P — All rights reserved.</span>
+      <span aria-hidden="true" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;" data-ppc-origin="ppc-8f2a4d7e9c1b-original-porto-pubcrawl.com">porto-pubcrawl.com · original</span>
     </div>
   </div>
 </footer>
